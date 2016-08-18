@@ -132,6 +132,7 @@ export class DataTree {
 
         return this.rootNode.displayCount;
     }
+	// reset the displayCount on each node based on the current status of IsOpen on each node. Useful if we have an operation to open all nodes or close all 
     private mapReduceDisplayCount(node: DataNode): number {
         node.childNodes.forEach(c => this.mapReduceDisplayCount(c));
         let sum: number = 0;

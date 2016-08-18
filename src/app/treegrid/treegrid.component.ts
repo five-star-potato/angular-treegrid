@@ -6,9 +6,6 @@ import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementR
 import { SafeHtml } from  '@angular/platform-browser';
 import { DataTree, DataNode, SortDirection } from './datatree';
 
-class TreeNodeState {
-    state: string = "CLOSED";
-}
 interface PageNumber {
     num: number;
 }
@@ -169,7 +166,7 @@ export class SortableHeader {
 @Component({
     selector: 'tg-treegrid',
     template: `
-			<table class="treegrid-table table table-striped table-hover" data-resizable-columns-id="resizable-table">
+			<table class="treegrid-table table table-striped table-hover table-bordered" data-resizable-columns-id="resizable-table">
 			    <thead>
 				    <tr>
 					    <th (onSort)="sortColumn($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" 
@@ -182,7 +179,7 @@ export class SortableHeader {
 			    </thead>
 				<tbody>
 					<tr class='treegrid-tr' *ngFor="let dr of dataView; let x = index">
-						<td class='treegrid-td' *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''" [class]="dc.className">
+						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''" [class]="dc.className">
                             <span class="tg-opened" *ngIf="y == 0 &&  dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
                             <span class="tg-closed" *ngIf="y == 0 && !dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
                             <span *ngIf="dc.render == null">{{ dr[dc.dataField] }}</span>
@@ -192,7 +189,7 @@ export class SortableHeader {
 					</tr>
 				</tbody>
 			</table>
-            <tg-page-nav [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav>
+            <tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav>
 		    `,
     styles: [`
         th {
@@ -225,6 +222,9 @@ export class SortableHeader {
         span.tg-closed:after {
             font-family: "FontAwesome";
             content: "\\f054";
+        }
+        .td-right { 
+            text-align: right;
         }
     `],
     directives: [SortableHeader, PageNavigator]

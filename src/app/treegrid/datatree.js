@@ -126,6 +126,7 @@ var DataTree = (function () {
             this.subtractDisplayCount(node);
         return this.rootNode.displayCount;
     };
+    // reset the displayCount on each node based on the current status of IsOpen on each node. Useful if we have an operation to open all nodes or close all 
     DataTree.prototype.mapReduceDisplayCount = function (node) {
         var _this = this;
         node.childNodes.forEach(function (c) { return _this.mapReduceDisplayCount(c); });
