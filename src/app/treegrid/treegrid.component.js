@@ -50,8 +50,7 @@ var PageNavigator = (function () {
         this.onResetCurrent = new core_2.EventEmitter();
     }
     PageNavigator.prototype.refresh = function () {
-        var numEntries = 0; //this.entries.filter(r => r.__STATE__.visible).length;
-        this.numPages = Math.ceil(numEntries / this.pageSize);
+        this.numPages = Math.ceil(this.numRows / this.pageSize);
         if (this.numPages > 0)
             if (this.currentPage.num >= this.numPages) {
                 this.currentPage.num = this.numPages = -1;
@@ -59,14 +58,12 @@ var PageNavigator = (function () {
     };
     PageNavigator.prototype.ngOnChanges = function (changes) {
         this.refresh();
-        /*
-        let chng = changes["numEntries"];
-        let cur = JSON.stringify(chng.currentValue);
-        let prev = JSON.stringify(chng.previousValue);
+        var chng = changes["numRows"];
+        var cur = JSON.stringify(chng.currentValue);
+        var prev = JSON.stringify(chng.previousValue);
         if (cur !== prev) {
             this.refresh();
         }
-        */
     };
     PageNavigator.prototype.goPage = function (pn) {
         this.currentPage.num = pn;
@@ -88,8 +85,8 @@ var PageNavigator = (function () {
     ], PageNavigator.prototype, "pageSize", void 0);
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', Array)
-    ], PageNavigator.prototype, "entries", void 0);
+        __metadata('design:type', Number)
+    ], PageNavigator.prototype, "numRows", void 0);
     __decorate([
         core_1.Input(), 
         __metadata('design:type', Object)
@@ -105,7 +102,7 @@ var PageNavigator = (function () {
     PageNavigator = __decorate([
         core_1.Component({
             selector: 'tg-page-nav',
-            template: "\n\t\t<ul class=\"pagination\">\n\t\t\t<li [class.disabled]=\"currentPage <= 0\">\n\t\t\t\t<a href=\"#\" (click)=\"goPage(0)\" aria-label=\"First\">\n\t\t\t\t<span aria-hidden=\"true\">&laquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage <= 0\">\n\t\t\t\t<a href=\"#\" (click)=\"goPrev()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&lsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li [class.disabled]=\"true\">\n\t\t\t\t<a href=\"#\" aria-label=\"\">\n\t\t\t\t<span aria-hidden=\"true\">Page {{currentPage + 1}} of {{numPages}}</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li></li>\n\n\t\t\t<li [class.disabled]=\"currentPage >= numPages - 1\">\n\t\t\t\t<a href=\"#\" (click)=\"goNext()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&rsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage >= numPages - 1\">\n\t\t\t\t<a href=\"#\" (click)=\"goPage(numPages - 1)\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&raquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t</ul>\n    "
+            template: "\n\t\t<ul class=\"pagination\">\n\t\t\t<li [class.disabled]=\"currentPage.num <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"goPage(0)\" aria-label=\"First\">\n\t\t\t\t<span aria-hidden=\"true\">&laquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage.num <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"goPrev()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&lsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li [class.disabled]=\"true\">\n\t\t\t\t<a href=\"javascript:void(0)\" aria-label=\"\">\n\t\t\t\t<span aria-hidden=\"true\">Page {{currentPage.num + 1}} of {{numPages}}</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li></li>\n\n\t\t\t<li [class.disabled]=\"currentPage.num >= numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"goNext()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&rsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage.num >= numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"goPage(numPages - 1)\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&raquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t</ul>\n    "
         }), 
         __metadata('design:paramtypes', [])
     ], PageNavigator);
@@ -205,6 +202,7 @@ var TreeGrid = (function () {
     TreeGrid.prototype.refresh = function () {
         if (!this.initalProcessed) {
             this.dataTree = new datatree_1.DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+            this.numVisibleRows = this.dataTree.recountDisplayCount();
             this.initalProcessed = true;
         }
         this.goPage(this.currentPage.num);
@@ -239,7 +237,7 @@ var TreeGrid = (function () {
         rows.forEach(function (r) { return _this.dataView.push(_this.treeGridDef.data[r]); });
     };
     TreeGrid.prototype.toggleTree = function (node) {
-        node.isOpen = !(node.isOpen);
+        this.numVisibleRows = this.dataTree.toggleNode(node);
         this.goPage(this.currentPage.num);
     };
     __decorate([
@@ -253,7 +251,7 @@ var TreeGrid = (function () {
     TreeGrid = __decorate([
         core_1.Component({
             selector: 'tg-treegrid',
-            template: "\n\t\t\t<table class=\"treegrid-table table table-striped table-hover\" data-resizable-columns-id=\"resizable-table\">\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumn($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" \n                            tg-sortable-header [colIndex]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr class='treegrid-tr' *ngFor=\"let dr of dataView; let x = index\">\n\t\t\t\t\t\t<td class='treegrid-td' *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 &&  dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && !dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"dc.render == null\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <tg-page-nav [entries]=\"treeGridDef.data\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav>\n\t\t    ",
+            template: "\n\t\t\t<table class=\"treegrid-table table table-striped table-hover\" data-resizable-columns-id=\"resizable-table\">\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumn($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" \n                            tg-sortable-header [colIndex]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr class='treegrid-tr' *ngFor=\"let dr of dataView; let x = index\">\n\t\t\t\t\t\t<td class='treegrid-td' *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 &&  dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && !dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"dc.render == null\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <tg-page-nav [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav>\n\t\t    ",
             styles: ["\n        th {\n            color: brown;\n        }\n        th.tg-sortable:after { \n            font-family: \"FontAwesome\"; \n            opacity: .3;\n            float: right;\n            content: \"\\f0dc\";\n        }\n        th.tg-sort-asc:after { \n            font-family: \"FontAwesome\";\n            content: \"\\f0de\";\n            float: right;\n        }\n        th.tg-sort-desc:after { \n            font-family: \"FontAwesome\";\n            content: \"\\f0dd\";\n            float: right;\n        }\n        span.tg-opened, span.tg-closed {\n            margin-right: 0px;\n            cursor: pointer;\n        }\n        span.tg-opened:after {\n            font-family: \"FontAwesome\";\n            content: \"\\f078\";\n        }\n        span.tg-closed:after {\n            font-family: \"FontAwesome\";\n            content: \"\\f054\";\n        }\n    "],
             directives: [SortableHeader, PageNavigator]
         }), 

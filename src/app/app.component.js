@@ -29,7 +29,7 @@ var AppComponent = (function () {
         var _this = this;
         this.treeDef.hierachy.foreignKeyField = "report_to";
         this.treeDef.hierachy.primaryKeyField = "emp_id";
-        this.treeDef.paging = false;
+        //this.treeDef.paging = false;
         //this.treeDef.defaultOrder = [{ columnIndex: 0, sortDirection: SortDirection.DESC }];
         this.dataService.get("http://localhost:7774/api/values")
             .subscribe(function (ret) {

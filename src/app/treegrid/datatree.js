@@ -15,7 +15,7 @@ var DataTree = (function () {
         this.inputData = inputData;
         this.pk = pk;
         this.fk = fk;
-        this.rootNode = { childNodes: [], level: -1, nodeCount: 0 };
+        this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
         for (var i = 0; i < this.cnt; i++) {
             if (inputData[i][fk] == null) {
@@ -23,13 +23,15 @@ var DataTree = (function () {
                     row: inputData[i],
                     index: i,
                     level: 0,
-                    nodeCount: 1,
-                    childNodes: []
+                    displayCount: 0,
+                    childNodes: [],
+                    parent: this.rootNode
                 };
                 this.rootNode.childNodes.push(newNode);
                 inputData[i].__node = newNode;
             }
         }
+        this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         this.rootNode.childNodes.forEach(function (n) { return _this.processNode(n); });
     }
     DataTree.prototype.processNode = function (node) {
@@ -40,8 +42,9 @@ var DataTree = (function () {
                     row: this.inputData[i],
                     index: i,
                     level: node.level + 1,
-                    nodeCount: 0,
-                    childNodes: []
+                    displayCount: 0,
+                    childNodes: [],
+                    parent: node
                 };
                 node.childNodes.push(newNode);
                 this.inputData[i].__node = newNode;
@@ -96,6 +99,48 @@ var DataTree = (function () {
             this.rootNode.childNodes.forEach(function (n) { return _this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1); });
         }
         return this.returnRowsIndices;
+    };
+    DataTree.prototype.applyDeltaUpward = function (node, deltaVal) {
+        if (!node)
+            return;
+        node.displayCount += deltaVal;
+        this.applyDeltaUpward(node.parent, deltaVal);
+    };
+    DataTree.prototype.subtractDisplayCount = function (node) {
+        var oldVal = node.displayCount;
+        node.displayCount = 0;
+        this.applyDeltaUpward(node.parent, -1 * oldVal);
+    };
+    DataTree.prototype.addDisplayCount = function (node) {
+        var sum = 0;
+        node.childNodes.forEach(function (c) { return sum += c.displayCount; });
+        node.displayCount = node.childNodes.length + sum;
+        // since node was closed before (i.e. displayCount = 0), propagate the change upward
+        this.applyDeltaUpward(node.parent, node.displayCount);
+    };
+    DataTree.prototype.toggleNode = function (node) {
+        node.isOpen = !(node.isOpen);
+        if (node.isOpen)
+            this.addDisplayCount(node);
+        else
+            this.subtractDisplayCount(node);
+        return this.rootNode.displayCount;
+    };
+    DataTree.prototype.mapReduceDisplayCount = function (node) {
+        var _this = this;
+        node.childNodes.forEach(function (c) { return _this.mapReduceDisplayCount(c); });
+        var sum = 0;
+        node.childNodes.forEach(function (c) { return sum += c.displayCount; });
+        if (node.isOpen)
+            node.displayCount = node.childNodes.length + sum;
+        else
+            node.displayCount = 0;
+        return node.displayCount;
+    };
+    // recalculate displayCount of each node based on isOpen flag
+    DataTree.prototype.recountDisplayCount = function () {
+        this.cnt = 0;
+        return this.mapReduceDisplayCount(this.rootNode);
     };
     return DataTree;
 }());

@@ -14,17 +14,17 @@ export interface DataNode {
     level: number;		// for indentation
     childNodes: any[];	// children
     isOpen?: boolean;	// is the current node open or closed?
-    parent?: DataNode;	// link to the parent node
-    nodeCount: number;	// how many nodes are visible under this node (including self)? (for calculating page count; some nodes maybe open; some maybe closed)
+    displayCount: number;	// how many nodes are visible under this node (including self)? (for calculating page count; some nodes maybe open; some maybe closed)
+    parent: any;		// pointing parent node; need this to propagate the displayCount changes
 }
 export class DataTree {
     rootNode: DataNode;
-    cnt: number;
-    private rowCounter: number;
-    private returnRowsIndices: number[];
+    private cnt: number;						 // temp var
+    private rowCounter: number;			 // temp var for counting rows
+    private returnRowsIndices: number[]; // store the row indices to the inputData array corresponding to a page
 
     constructor(private inputData: any[], private pk: string, private fk: string) {
-        this.rootNode = { childNodes: [], level: -1, nodeCount: 0 };
+        this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
         for (let i = 0; i < this.cnt; i++) {
             if (inputData[i][fk] == null) {
@@ -32,13 +32,15 @@ export class DataTree {
                     row: inputData[i],
                     index: i,
                     level: 0,
-					nodeCount: 1, // assuming intially all the nodes are closed
-                    childNodes: []
+					displayCount: 0, // assuming intially all the nodes are closed
+                    childNodes: [],
+                    parent: this.rootNode
                 };
                 this.rootNode.childNodes.push(newNode);
                 inputData[i].__node = newNode;
             }
         }
+        this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         this.rootNode.childNodes.forEach(n => this.processNode(n));
     }
     private processNode(node: DataNode) {
@@ -48,8 +50,9 @@ export class DataTree {
                     row: this.inputData[i],
                     index: i,
                     level: node.level + 1,
-                    nodeCount: 0, // assuming intially all the nodes are closed
-                    childNodes: []
+                    displayCount: 0, // assuming intially all the nodes are closed
+                    childNodes: [],
+					parent: node
                 };
                 node.childNodes.push(newNode);
                 this.inputData[i].__node = newNode;
@@ -102,5 +105,46 @@ export class DataTree {
             this.rootNode.childNodes.forEach(n => this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1));
         }
         return this.returnRowsIndices;
+    }
+    private applyDeltaUpward(node: DataNode, deltaVal: number) {
+        if (!node) return;
+        node.displayCount += deltaVal;
+        this.applyDeltaUpward(node.parent, deltaVal);
+    }
+    private subtractDisplayCount(node: DataNode) {
+        let oldVal = node.displayCount;
+        node.displayCount = 0;
+        this.applyDeltaUpward(node.parent, -1 * oldVal);
+    }
+    private addDisplayCount(node: DataNode) {
+        let sum: number = 0;
+        node.childNodes.forEach(c => sum += c.displayCount);
+        node.displayCount = node.childNodes.length + sum;
+		// since node was closed before (i.e. displayCount = 0), propagate the change upward
+        this.applyDeltaUpward(node.parent, node.displayCount);
+    }
+    toggleNode(node: DataNode): number {
+        node.isOpen = !(node.isOpen);
+        if (node.isOpen) 
+            this.addDisplayCount(node);
+        else 
+            this.subtractDisplayCount(node);
+
+        return this.rootNode.displayCount;
+    }
+    private mapReduceDisplayCount(node: DataNode): number {
+        node.childNodes.forEach(c => this.mapReduceDisplayCount(c));
+        let sum: number = 0;
+        node.childNodes.forEach(c => sum += c.displayCount);
+        if (node.isOpen)
+            node.displayCount = node.childNodes.length + sum;
+        else
+            node.displayCount = 0;
+        return node.displayCount;
+    }
+	// recalculate displayCount of each node based on isOpen flag
+    recountDisplayCount(): number {
+        this.cnt = 0;
+        return this.mapReduceDisplayCount(this.rootNode);
     }
 }
