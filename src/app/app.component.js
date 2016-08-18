@@ -42,7 +42,7 @@ var AppComponent = (function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
             { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "td-right" },
+            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-right tg-header-center" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
     AppComponent.prototype.ngAfterViewInit = function () {
