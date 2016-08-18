@@ -1,10 +1,10 @@
 {
-  "name": "angular2-barebones",
-  "author": "Dan Wahlin",
-  "version": "0.8.0",
+  "name": "ng-tree-grid",
+  "author": "Cecil Lew",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/danwahlin/angular2-barebones"
+    "url": "https://github.com/five-star-potato/ng-tree-grid"
   },
   "scripts": {
     "postinstall": "typings install",

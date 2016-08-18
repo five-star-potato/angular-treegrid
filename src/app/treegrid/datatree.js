@@ -1,0 +1,103 @@
+"use strict";
+/***
+The idea is to create a representation of the 2D data array in a tree structure, using pk and fk fields.
+Each node of the tree contains a pointer to the row. Sorting will happen in the childNodes level, without affecting the
+row order in the original 2D array.
+***/
+(function (SortDirection) {
+    SortDirection[SortDirection["ASC"] = 0] = "ASC";
+    SortDirection[SortDirection["DESC"] = 1] = "DESC";
+})(exports.SortDirection || (exports.SortDirection = {}));
+var SortDirection = exports.SortDirection;
+var DataTree = (function () {
+    function DataTree(inputData, pk, fk) {
+        var _this = this;
+        this.inputData = inputData;
+        this.pk = pk;
+        this.fk = fk;
+        this.rootNode = { childNodes: [], level: -1, nodeCount: 0 };
+        this.cnt = inputData.length;
+        for (var i = 0; i < this.cnt; i++) {
+            if (inputData[i][fk] == null) {
+                var newNode = {
+                    row: inputData[i],
+                    index: i,
+                    level: 0,
+                    nodeCount: 1,
+                    childNodes: []
+                };
+                this.rootNode.childNodes.push(newNode);
+                inputData[i].__node = newNode;
+            }
+        }
+        this.rootNode.childNodes.forEach(function (n) { return _this.processNode(n); });
+    }
+    DataTree.prototype.processNode = function (node) {
+        var _this = this;
+        for (var i = 0; i < this.cnt; i++) {
+            if (this.inputData[i][this.fk] == node.row[this.pk]) {
+                var newNode = {
+                    row: this.inputData[i],
+                    index: i,
+                    level: node.level + 1,
+                    nodeCount: 0,
+                    childNodes: []
+                };
+                node.childNodes.push(newNode);
+                this.inputData[i].__node = newNode;
+            }
+        }
+        if (node.childNodes.length > 0) {
+            node.isOpen = false; // only node with children should have such flag
+            node.childNodes.forEach(function (n) { return _this.processNode(n); });
+        }
+    };
+    DataTree.prototype.sort = function (node, field, dir) {
+        var _this = this;
+        if (node.childNodes.length == 0)
+            return;
+        node.childNodes.sort(function (a, b) {
+            if (dir == SortDirection.ASC)
+                return a.row[field] > b.row[field] ? 1 : (a.row[field] < b.row[field] ? -1 : 0);
+            else
+                return a.row[field] < b.row[field] ? 1 : (a.row[field] > b.row[field] ? -1 : 0);
+        });
+        node.childNodes.forEach(function (n) { return _this.sort(n, field, dir); });
+    };
+    DataTree.prototype.sortColumn = function (field, dir) {
+        this.sort(this.rootNode, field, dir);
+    };
+    // This is a depth-first traversal to return all rows
+    DataTree.prototype.traverseAll = function (node) {
+        var _this = this;
+        this.returnRowsIndices.push(node.index);
+        if (node.isOpen)
+            node.childNodes.forEach(function (n) { return _this.traverseAll(n); });
+    };
+    DataTree.prototype.traverse = function (node, startRow, endRow) {
+        var _this = this;
+        if (this.rowCounter > endRow)
+            return;
+        if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
+            this.returnRowsIndices.push(node.index);
+        }
+        this.rowCounter++;
+        if (node.isOpen)
+            node.childNodes.forEach(function (n) { return _this.traverse(n, startRow, endRow); });
+    };
+    DataTree.prototype.getPageData = function (pageNum, pageSize) {
+        var _this = this;
+        this.rowCounter = 0;
+        this.returnRowsIndices = [];
+        if (pageSize < 0) {
+            this.rootNode.childNodes.forEach(function (n) { return _this.traverseAll(n); });
+        }
+        else {
+            this.rootNode.childNodes.forEach(function (n) { return _this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1); });
+        }
+        return this.returnRowsIndices;
+    };
+    return DataTree;
+}());
+exports.DataTree = DataTree;
+//# sourceMappingURL=datatree.js.map

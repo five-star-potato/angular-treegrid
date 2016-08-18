@@ -16,7 +16,7 @@ var HomeComponent = (function () {
         this.dataService = dataService;
     }
     HomeComponent.prototype.ngOnInit = function () {
-        this.projectName = this.dataService.getProjectName();
+        //this.projectName = this.dataService.getProjectName();
     };
     HomeComponent = __decorate([
         core_1.Component({

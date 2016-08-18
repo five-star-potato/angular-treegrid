@@ -1,14 +1,15 @@
 import { Component, Directive, ViewContainerRef, ComponentResolver, Input, ComponentMetadata, SimpleChange, ComponentFactory, ReflectiveInjector, OnInit, OnChanges} from "@angular/core";
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser'
 import { Injectable, Output, EventEmitter, ViewChild, AfterViewInit } from "@angular/core";
-import { TreeGrid, TreeGridDef, ColumnDef, SortableHeader, SortDirection } from "./treegrid/treegrid.component";
+import { TreeGrid, TreeGridDef, ColumnDef, SortableHeader } from "./treegrid/treegrid.component";
 import { SimpleDataService } from './treegrid/simpledata.service';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
     selector: 'my-app',
     template: `
-		<h2>Table Test 97</h2>
+		<h2>Table Test 98</h2>
+        <router-outlet></router-outlet>
 		<button (click)="changeData($event)">Reduce Data</button>
 		<tg-treegrid [treeGridDef]="treeDef">
 		</tg-treegrid>

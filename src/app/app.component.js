@@ -54,7 +54,7 @@ var AppComponent = (function () {
     AppComponent = __decorate([
         core_1.Component({
             selector: 'my-app',
-            template: "\n\t\t<h2>Table Test 97</h2>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
+            template: "\n\t\t<h2>Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
             directives: [treegrid_component_1.TreeGrid, treegrid_component_1.SortableHeader],
             providers: [simpledata_service_1.SimpleDataService, platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
