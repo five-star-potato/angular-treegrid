@@ -6,14 +6,20 @@ import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementR
 import { SafeHtml } from  '@angular/platform-browser';
 import { DataTree, DataNode, SortDirection } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
+import { SimpleDataService } from './simpledata.service';
 
 export interface ColumnOrder {
     columnIndex?: number;
     //dataField?: string; // TODO: to be implemented
     sortDirection: SortDirection;
 }
-
-export class TreeHierarchy {
+export interface AjaxConfig {
+    url: string;
+    method?: string;
+    lazyLoad?: boolean;
+    childrenIndicatorField?: string;
+}
+export interface TreeHierarchy {
     foreignKeyField: string;
     primaryKeyField: string;
 }
@@ -38,9 +44,9 @@ export class TreeGridDef  {
     pageSize: number = 10; /* make it small for debugging */
     //currentPage: number = 0;
     defaultOrder: ColumnOrder[] = [];
-    hierachy: TreeHierarchy = new TreeHierarchy();
+    hierachy: TreeHierarchy = null;
+    ajax: AjaxConfig = null;
 }
-
 
 /**
 * Controls the sorting by clicking the page header
@@ -85,6 +91,8 @@ export class SortableHeader {
     selector: 'tg-treegrid',
     template: `
 			<table class="treegrid-table table table-striped table-hover table-bordered" data-resizable-columns-id="resizable-table">
+                <colgroup>
+                </colgroup>
 			    <thead>
 				    <tr>
 					    <th (onSort)="sortColumn($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
@@ -97,9 +105,9 @@ export class SortableHeader {
 			    </thead>
 				<tbody>
 					<tr class='treegrid-tr' *ngFor="let dr of dataView; let x = index">
-						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''" [class]="dc.className">
-                            <span class="tg-opened" *ngIf="y == 0 &&  dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
-                            <span class="tg-closed" *ngIf="y == 0 && !dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
+						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 20 + 8).toString() + 'px' : ''" [class]="dc.className">
+                            <span class="tg-opened" *ngIf="y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
+                            <span class="tg-closed" *ngIf="y == 0 && testNodeForExpandIcon(dr)" (click)="toggleTree(dr.__node)">&nbsp;</span>
                             <span *ngIf="dc.render == null">{{ dr[dc.dataField] }}</span>
     						<span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
                         </td>
@@ -160,7 +168,8 @@ export class SortableHeader {
             text-align: center;
         }
     `],
-    directives: [SortableHeader, PageNavigator]
+    directives: [SortableHeader, PageNavigator],
+    providers: [ SimpleDataService ]
 })
 export class TreeGrid implements OnInit, AfterViewInit {
     @Input()
@@ -177,7 +186,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
     private initalProcessed: boolean = false;
     public sortDirType = SortDirection; // workaround to NG2 issues #2885
-    constructor(private elementRef: ElementRef) {
+    constructor(private dataService: SimpleDataService, private elementRef: ElementRef) {
         this.currentPage.num = 0;
         console.log(this.elementRef);
     }
@@ -195,6 +204,20 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.dataTree.sortColumn(columnName, event.sortDirection);
         this.refresh();
     }    
+    // test to see if the node should show an icon for opening the subtree
+    testNodeForExpandIcon(row: any): boolean {
+        if (!row.__node.isOpen) {
+            let ajax = this.treeGridDef.ajax;
+            if (ajax && ajax.childrenIndicatorField) {
+                if (row[ajax.childrenIndicatorField])
+                    return true;
+            }
+            else {
+                return (row.__node.childNodes.length > 0)
+            }
+        }
+        return false;
+    } 
 
     refresh() {
         if (!this.initalProcessed) {
@@ -219,8 +242,24 @@ export class TreeGrid implements OnInit, AfterViewInit {
             if (item.sort == undefined)
                 item.sort = true;
         });
-        if (this.treeGridDef.data.length > 0)
-            this.refresh();
+        let ajax = this.treeGridDef.ajax;
+        if (ajax != null) {
+            if (ajax.method == "POST") {
+                this.dataService.post(ajax.url).subscribe((ret: any) => {
+                    this.treeGridDef.data = ret;
+                    this.refresh();
+                }, (err: any) => { console.log(err) });
+            }
+            else {
+                this.dataService.get(ajax.url).subscribe((ret: any) => {
+                        this.treeGridDef.data = ret;
+                        this.refresh();
+                    }, (err: any) => { console.log(err) });
+            }
+        }
+        else if (this.treeGridDef.data.length > 0) {
+                this.refresh();
+        }
     }
 	// Handling Pagination logic
     goPage(pn: number) {
@@ -235,6 +274,15 @@ export class TreeGrid implements OnInit, AfterViewInit {
         rows.forEach(r => this.dataView.push(this.treeGridDef.data[r]));
     }
     toggleTree(node: DataNode) {
+        let ajax = this.treeGridDef.ajax;
+        if (ajax != null) {
+            if (ajax.lazyLoad) {
+                this.dataService.post(ajax.url + "/1").subscribe((ret: any) => {
+                    this.treeGridDef.data = ret;
+                    this.refresh();
+                }, (err: any) => { console.log(err) });
+            }
+        }
         this.numVisibleRows = this.dataTree.toggleNode(node);
         this.goPage(this.currentPage.num);
     }

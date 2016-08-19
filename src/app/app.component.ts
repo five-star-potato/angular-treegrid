@@ -2,7 +2,6 @@ import { Component, Directive, ViewContainerRef, ComponentResolver, Input, Compo
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser'
 import { Injectable, Output, EventEmitter, ViewChild, AfterViewInit } from "@angular/core";
 import { TreeGrid, TreeGridDef, ColumnDef, SortableHeader } from "./treegrid/treegrid.component";
-import { SimpleDataService } from './treegrid/simpledata.service';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
@@ -15,15 +14,14 @@ import { Observable } from 'rxjs/Observable';
 		</tg-treegrid>
     `,
     directives: [TreeGrid, SortableHeader],
-    providers: [SimpleDataService, DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
+    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })
 export class AppComponent implements OnInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    constructor(private dataService: SimpleDataService, private sanitizer: DomSanitizationService) {
-        console.log(this.dataService);
+    constructor(private sanitizer: DomSanitizationService) {
     }
     changeData(event: any) {
 		// to show that databinding does work
@@ -31,24 +29,18 @@ export class AppComponent implements OnInit {
         this.treeGrid.refresh();
     }
     ngOnInit() {
-        this.treeDef.hierachy.foreignKeyField = "report_to";
-        this.treeDef.hierachy.primaryKeyField = "emp_id";
-        //this.treeDef.paging = false;
-        //this.treeDef.defaultOrder = [{ columnIndex: 0, sortDirection: SortDirection.DESC }];
-        this.dataService.get("http://localhost:7774/api/values")
-            .subscribe(ret => {
-                console.log(ret);
-                this.treeDef.data = ret;
-                this.treeGrid.refresh();
-            },
-            err => {
-                console.log(err);
-            });
-
+        this.treeDef.hierachy = {
+            foreignKeyField: "report_to", primaryKeyField: "emp_id"
+        };
+        this.treeDef.ajax = {
+            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            lazyLoad: true,
+            childrenIndicatorField: 'hasChildren'
+        };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
             { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-right tg-header-center"},
+            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center"},
             { labelHtml: "Report To", dataField: "report_to" }];
     }
     ngAfterViewInit() {

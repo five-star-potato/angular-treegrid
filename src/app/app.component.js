@@ -12,13 +12,10 @@ var core_1 = require("@angular/core");
 var platform_browser_1 = require('@angular/platform-browser');
 var core_2 = require("@angular/core");
 var treegrid_component_1 = require("./treegrid/treegrid.component");
-var simpledata_service_1 = require('./treegrid/simpledata.service');
 var AppComponent = (function () {
-    function AppComponent(dataService, sanitizer) {
-        this.dataService = dataService;
+    function AppComponent(sanitizer) {
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
-        console.log(this.dataService);
     }
     AppComponent.prototype.changeData = function (event) {
         // to show that databinding does work
@@ -27,22 +24,18 @@ var AppComponent = (function () {
     };
     AppComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.treeDef.hierachy.foreignKeyField = "report_to";
-        this.treeDef.hierachy.primaryKeyField = "emp_id";
-        //this.treeDef.paging = false;
-        //this.treeDef.defaultOrder = [{ columnIndex: 0, sortDirection: SortDirection.DESC }];
-        this.dataService.get("http://localhost:7774/api/values")
-            .subscribe(function (ret) {
-            console.log(ret);
-            _this.treeDef.data = ret;
-            _this.treeGrid.refresh();
-        }, function (err) {
-            console.log(err);
-        });
+        this.treeDef.hierachy = {
+            foreignKeyField: "report_to", primaryKeyField: "emp_id"
+        };
+        this.treeDef.ajax = {
+            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            lazyLoad: true,
+            childrenIndicatorField: 'hasChildren'
+        };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
             { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-right tg-header-center" },
+            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
     AppComponent.prototype.ngAfterViewInit = function () {
@@ -56,9 +49,9 @@ var AppComponent = (function () {
             selector: 'my-app',
             template: "\n\t\t<h2>Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
             directives: [treegrid_component_1.TreeGrid, treegrid_component_1.SortableHeader],
-            providers: [simpledata_service_1.SimpleDataService, platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
+            providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
-        __metadata('design:paramtypes', [simpledata_service_1.SimpleDataService, platform_browser_1.DomSanitizationService])
+        __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
     ], AppComponent);
     return AppComponent;
 }());

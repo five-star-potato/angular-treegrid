@@ -15,12 +15,7 @@ var core_1 = require("@angular/core");
 var core_2 = require("@angular/core");
 var datatree_1 = require('./datatree');
 var pagenav_component_1 = require('./pagenav.component');
-var TreeHierarchy = (function () {
-    function TreeHierarchy() {
-    }
-    return TreeHierarchy;
-}());
-exports.TreeHierarchy = TreeHierarchy;
+var simpledata_service_1 = require('./simpledata.service');
 var TreeGridDef = (function () {
     function TreeGridDef() {
         this.columns = [];
@@ -30,7 +25,8 @@ var TreeGridDef = (function () {
         this.pageSize = 10; /* make it small for debugging */
         //currentPage: number = 0;
         this.defaultOrder = [];
-        this.hierachy = new TreeHierarchy();
+        this.hierachy = null;
+        this.ajax = null;
     }
     return TreeGridDef;
 }());
@@ -105,7 +101,8 @@ var SortableHeader = (function () {
 }());
 exports.SortableHeader = SortableHeader;
 var TreeGrid = (function () {
-    function TreeGrid(elementRef) {
+    function TreeGrid(dataService, elementRef) {
+        this.dataService = dataService;
         this.elementRef = elementRef;
         this.currentPage = { num: 0 };
         this.initalProcessed = false;
@@ -125,6 +122,20 @@ var TreeGrid = (function () {
         this.dataTree.sortColumn(columnName, event.sortDirection);
         this.refresh();
     };
+    // test to see if the node should show an icon for opening the subtree
+    TreeGrid.prototype.testNodeForExpandIcon = function (row) {
+        if (!row.__node.isOpen) {
+            var ajax = this.treeGridDef.ajax;
+            if (ajax && ajax.childrenIndicatorField) {
+                if (row[ajax.childrenIndicatorField])
+                    return true;
+            }
+            else {
+                return (row.__node.childNodes.length > 0);
+            }
+        }
+        return false;
+    };
     TreeGrid.prototype.refresh = function () {
         if (!this.initalProcessed) {
             this.dataTree = new datatree_1.DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
@@ -142,13 +153,30 @@ var TreeGrid = (function () {
         y.resizableColumns();
     };
     TreeGrid.prototype.ngOnInit = function () {
+        var _this = this;
         this.treeGridDef.columns.forEach(function (item) {
             // can't find good ways to initialize interface
             if (item.sort == undefined)
                 item.sort = true;
         });
-        if (this.treeGridDef.data.length > 0)
+        var ajax = this.treeGridDef.ajax;
+        if (ajax != null) {
+            if (ajax.method == "POST") {
+                this.dataService.post(ajax.url).subscribe(function (ret) {
+                    _this.treeGridDef.data = ret;
+                    _this.refresh();
+                }, function (err) { console.log(err); });
+            }
+            else {
+                this.dataService.get(ajax.url).subscribe(function (ret) {
+                    _this.treeGridDef.data = ret;
+                    _this.refresh();
+                }, function (err) { console.log(err); });
+            }
+        }
+        else if (this.treeGridDef.data.length > 0) {
             this.refresh();
+        }
     };
     // Handling Pagination logic
     TreeGrid.prototype.goPage = function (pn) {
@@ -163,6 +191,16 @@ var TreeGrid = (function () {
         rows.forEach(function (r) { return _this.dataView.push(_this.treeGridDef.data[r]); });
     };
     TreeGrid.prototype.toggleTree = function (node) {
+        var _this = this;
+        var ajax = this.treeGridDef.ajax;
+        if (ajax != null) {
+            if (ajax.lazyLoad) {
+                this.dataService.post(ajax.url + "/1").subscribe(function (ret) {
+                    _this.treeGridDef.data = ret;
+                    _this.refresh();
+                }, function (err) { console.log(err); });
+            }
+        }
         this.numVisibleRows = this.dataTree.toggleNode(node);
         this.goPage(this.currentPage.num);
     };
@@ -177,11 +215,12 @@ var TreeGrid = (function () {
     TreeGrid = __decorate([
         core_1.Component({
             selector: 'tg-treegrid',
-            template: "\n\t\t\t<table class=\"treegrid-table table table-striped table-hover table-bordered\" data-resizable-columns-id=\"resizable-table\">\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumn($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                            tg-sortable-header [colIndex]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr class='treegrid-tr' *ngFor=\"let dr of dataView; let x = index\">\n\t\t\t\t\t\t<td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? (dr.__node.level * 22).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 &&  dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && !dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"dc.render == null\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav>\n\t\t    ",
+            template: "\n\t\t\t<table class=\"treegrid-table table table-striped table-hover table-bordered\" data-resizable-columns-id=\"resizable-table\">\n                <colgroup>\n                </colgroup>\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumn($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                            tg-sortable-header [colIndex]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr class='treegrid-tr' *ngFor=\"let dr of dataView; let x = index\">\n\t\t\t\t\t\t<td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? (dr.__node.level * 20 + 8).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && testNodeForExpandIcon(dr)\" (click)=\"toggleTree(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"dc.render == null\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav>\n\t\t    ",
             styles: ["\n        th {\n            color: brown;\n        }\n        th.tg-sortable:after { \n            font-family: \"FontAwesome\"; \n            opacity: .3;\n            float: right;\n            content: \"\\f0dc\";\n        }\n        th.tg-sort-asc:after { \n            font-family: \"FontAwesome\";\n            content: \"\\f0de\";\n            float: right;\n        }\n        th.tg-sort-desc:after { \n            font-family: \"FontAwesome\";\n            content: \"\\f0dd\";\n            float: right;\n        }\n        span.tg-opened, span.tg-closed {\n            margin-right: 0px;\n            cursor: pointer;\n        }\n        span.tg-opened:after {\n            font-family: \"FontAwesome\";\n            content: \"\\f078\";\n        }\n        span.tg-closed:after {\n            font-family: \"FontAwesome\";\n            content: \"\\f054\";\n        }\n        th.tg-header-left { \n            text-align: left;\n        }\n        th.tg-header-right { \n            text-align: right;\n        }\n        th.tg-header-center { \n            text-align: center;\n        }\n        td.tg-body-left { \n            text-align: left;\n        }\n        td.tg-body-right { \n            text-align: right;\n        }\n        td.tg-body-center { \n            text-align: center;\n        }\n    "],
-            directives: [SortableHeader, pagenav_component_1.PageNavigator]
+            directives: [SortableHeader, pagenav_component_1.PageNavigator],
+            providers: [simpledata_service_1.SimpleDataService]
         }), 
-        __metadata('design:paramtypes', [core_2.ElementRef])
+        __metadata('design:paramtypes', [simpledata_service_1.SimpleDataService, core_2.ElementRef])
     ], TreeGrid);
     return TreeGrid;
 }());

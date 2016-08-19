@@ -23,7 +23,12 @@ var SimpleDataService = (function () {
         this.headers.append('Access-Control-Allow-Origin', '*');
     }
     SimpleDataService.prototype.get = function (url) {
-        return this.http.request(url, this.headers)
+        return this.http.get(url, { headers: this.headers })
+            .map(function (res) { return res.json(); });
+        //.catch(this.handleError);
+    };
+    SimpleDataService.prototype.post = function (url) {
+        return this.http.post(url, "", { headers: this.headers })
             .map(function (res) { return res.json(); });
         //.catch(this.handleError);
     };
