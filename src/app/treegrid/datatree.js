@@ -100,6 +100,7 @@ var DataTree = (function () {
         }
         return this.returnRowsIndices;
     };
+    // propagate the increase of decrease of changes (deltaVal) up the ancestors path
     DataTree.prototype.applyDeltaUpward = function (node, deltaVal) {
         if (!node)
             return;
@@ -118,6 +119,7 @@ var DataTree = (function () {
         // since node was closed before (i.e. displayCount = 0), propagate the change upward
         this.applyDeltaUpward(node.parent, node.displayCount);
     };
+    // the displayCount keep track of how many descendants (not just children) are on display. So when a branch is open, displayCount of this node goes up; but so does all the ancestors as well
     DataTree.prototype.toggleNode = function (node) {
         node.isOpen = !(node.isOpen);
         if (node.isOpen)
@@ -142,6 +144,23 @@ var DataTree = (function () {
     DataTree.prototype.recountDisplayCount = function () {
         this.cnt = 0;
         return this.mapReduceDisplayCount(this.rootNode);
+    };
+    // new rows just added to InputData. now construct the branch
+    DataTree.prototype.addRows = function (startIndex, endIndex, parentNode) {
+        // theoretically the parent ID is in rows[fk]. parentNode is just for convenience
+        for (var i = startIndex; i < endIndex; i++) {
+            var r = this.inputData[i];
+            var newNode = {
+                row: r,
+                index: i,
+                level: parentNode.level + 1,
+                displayCount: 0,
+                childNodes: [],
+                parent: parentNode
+            };
+            parentNode.childNodes.push(newNode);
+            r.__node = newNode;
+        }
     };
     return DataTree;
 }());

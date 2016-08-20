@@ -95,7 +95,7 @@ export class SortableHeader {
                 </colgroup>
 			    <thead>
 				    <tr>
-					    <th (onSort)="sortColumn($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
+					    <th (onSort)="sortColumnEvtHandler($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
                             tg-sortable-header [colIndex]="x" [sort]="dc.sort" [innerHTML]="dc.labelHtml" 
                                 [class.tg-sortable]="treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC"
                                 [class.tg-sort-asc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC"
@@ -106,8 +106,8 @@ export class SortableHeader {
 				<tbody>
 					<tr class='treegrid-tr' *ngFor="let dr of dataView; let x = index">
 						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 20 + 8).toString() + 'px' : ''" [class]="dc.className">
-                            <span class="tg-opened" *ngIf="y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTree(dr.__node)">&nbsp;</span>
-                            <span class="tg-closed" *ngIf="y == 0 && testNodeForExpandIcon(dr)" (click)="toggleTree(dr.__node)">&nbsp;</span>
+                            <span class="tg-opened" *ngIf="y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
+                            <span class="tg-closed" *ngIf="y == 0 && testNodeForExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                             <span *ngIf="dc.render == null">{{ dr[dc.dataField] }}</span>
     						<span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
                         </td>
@@ -191,7 +191,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         console.log(this.elementRef);
     }
 
-    private sortColumn(event: ColumnOrder) {
+    private sortColumnEvtHandler(event: ColumnOrder) {
         // assuming that we can only sort one column at a time;
         // clear all the sortDirection flags across columns;
         let dir: SortDirection = event.sortDirection;
@@ -208,6 +208,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     testNodeForExpandIcon(row: any): boolean {
         if (!row.__node.isOpen) {
             let ajax = this.treeGridDef.ajax;
+            // the ajax.childrenIndicatorField indicates the column we need to check to see if his node has children (not loaded yet)
             if (ajax && ajax.childrenIndicatorField) {
                 if (row[ajax.childrenIndicatorField])
                     return true;
@@ -273,18 +274,34 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.dataView = [];
         rows.forEach(r => this.dataView.push(this.treeGridDef.data[r]));
     }
-    toggleTree(node: DataNode) {
-        let ajax = this.treeGridDef.ajax;
-        if (ajax != null) {
-            if (ajax.lazyLoad) {
-                this.dataService.post(ajax.url + "/1").subscribe((ret: any) => {
-                    this.treeGridDef.data = ret;
-                    this.refresh();
-                }, (err: any) => { console.log(err) });
-            }
-        }
+    // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
+    private toggleTreeNode(node: DataNode) {
         this.numVisibleRows = this.dataTree.toggleNode(node);
         this.goPage(this.currentPage.num);
+        if (this.treeGridDef.paging)
+            this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
+    }
+
+    toggleTreeEvtHandler(node: DataNode) {
+        let ajax = this.treeGridDef.ajax;
+        if (ajax != null) {
+            if (ajax.lazyLoad && !node.isLoaded) {
+                this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
+                    // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
+                    let startIndex = this.treeGridDef.data.length;
+                    let endIndex = startIndex + ret.length - 1;
+                    ret.forEach((r: any) => this.treeGridDef.data.push(r));
+                    node.isLoaded = true;
+                    this.dataTree.addRows(startIndex, endIndex, node);
+
+                    this.toggleTreeNode(node);
+                }, (err: any) => { console.log(err) });
+            }
+            else
+                this.toggleTreeNode(node);
+        }
+        else 
+            this.toggleTreeNode(node);
     }
 	/* event not fired when treeGridDef was changed programmatically. Is this a bug?
 	http://www.bennadel.com/blog/3053-changing-directive-inputs-programmatically-won-t-trigger-ngonchanges-in-angularjs-2-beta-9.htm

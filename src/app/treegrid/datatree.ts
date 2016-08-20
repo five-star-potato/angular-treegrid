@@ -15,7 +15,8 @@ export interface DataNode {
     childNodes: any[];	// children
     isOpen?: boolean;	// is the current node open or closed?
     displayCount: number;	// how many nodes are visible under this node (including self)? (for calculating page count; some nodes maybe open; some maybe closed)
-    parent: any;		// pointing parent node; need this to propagate the displayCount changes
+    parent: any;		// pointing parent node; need this to propagate the displayCount changes,
+    isLoaded?: boolean;  // if lazyLoad is true, I need to know if the node is loaded or not
 }
 export class DataTree {
     rootNode: DataNode;
@@ -106,6 +107,7 @@ export class DataTree {
         }
         return this.returnRowsIndices;
     }
+    // propagate the increase of decrease of changes (deltaVal) up the ancestors path
     private applyDeltaUpward(node: DataNode, deltaVal: number) {
         if (!node) return;
         node.displayCount += deltaVal;
@@ -123,6 +125,7 @@ export class DataTree {
 		// since node was closed before (i.e. displayCount = 0), propagate the change upward
         this.applyDeltaUpward(node.parent, node.displayCount);
     }
+    // the displayCount keep track of how many descendants (not just children) are on display. So when a branch is open, displayCount of this node goes up; but so does all the ancestors as well
     toggleNode(node: DataNode): number {
         node.isOpen = !(node.isOpen);
         if (node.isOpen) 
@@ -147,5 +150,22 @@ export class DataTree {
     recountDisplayCount(): number {
         this.cnt = 0;
         return this.mapReduceDisplayCount(this.rootNode);
+    }
+    // new rows just added to InputData. now construct the branch
+    addRows(startIndex: number, endIndex: number, parentNode: DataNode) {
+        // theoretically the parent ID is in rows[fk]. parentNode is just for convenience
+        for (let i = startIndex; i < endIndex; i++) {
+            let r = this.inputData[i];
+            let newNode: DataNode = {
+                row: r,
+                index: i,
+                level: parentNode.level + 1,
+                displayCount: 0, // assuming intially all the nodes are closed
+                childNodes: [],
+                parent: parentNode
+            };
+            parentNode.childNodes.push(newNode);
+            r.__node = newNode;
+        }
     }
 }
