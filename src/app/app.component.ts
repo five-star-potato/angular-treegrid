@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 @Component({
     selector: 'my-app',
     template: `
-		<h2>Table Test 98</h2>
+		<h2 id="testTitle">Table Test 98</h2>
         <router-outlet></router-outlet>
 		<button (click)="changeData($event)">Reduce Data</button>
 		<tg-treegrid [treeGridDef]="treeDef">
@@ -33,8 +33,8 @@ export class AppComponent implements OnInit {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
-            lazyLoad: true,
+            url: 'http://localhost:7774/api/values/GetAll', method: "POST",
+            lazyLoad: false,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [

@@ -145,10 +145,10 @@ var DataTree = (function () {
         this.cnt = 0;
         return this.mapReduceDisplayCount(this.rootNode);
     };
-    // new rows just added to InputData. now construct the branch
+    // If lazyLoad is enabled, then new rows are fetched from the backend and appended into the data array. We use the start index and end index of this new segment to construct a branch
     DataTree.prototype.addRows = function (startIndex, endIndex, parentNode) {
         // theoretically the parent ID is in rows[fk]. parentNode is just for convenience
-        for (var i = startIndex; i < endIndex; i++) {
+        for (var i = startIndex; i <= endIndex; i++) {
             var r = this.inputData[i];
             var newNode = {
                 row: r,

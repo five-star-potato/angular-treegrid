@@ -28,8 +28,8 @@ var AppComponent = (function () {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
-            lazyLoad: true,
+            url: 'http://localhost:7774/api/values/GetAll', method: "POST",
+            lazyLoad: false,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
@@ -47,7 +47,7 @@ var AppComponent = (function () {
     AppComponent = __decorate([
         core_1.Component({
             selector: 'my-app',
-            template: "\n\t\t<h2>Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
+            template: "\n\t\t<h2 id=\"testTitle\">Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
             directives: [treegrid_component_1.TreeGrid, treegrid_component_1.SortableHeader],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 

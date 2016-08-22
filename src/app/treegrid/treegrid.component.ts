@@ -13,12 +13,19 @@ export interface ColumnOrder {
     //dataField?: string; // TODO: to be implemented
     sortDirection: SortDirection;
 }
+
+/****************************
+* Some settings related to AJAX. 
+*****************************/
 export interface AjaxConfig {
-    url: string;
-    method?: string;
-    lazyLoad?: boolean;
-    childrenIndicatorField?: string;
+    url: string;        
+    method?: string;        // POST or GET
+    lazyLoad?: boolean;     // Lazy Loading means initially only the top level data rows are loaded. When the user clicks the expand button beside the rows, the corresponding children rows will then be fetched and inserted into the existing arrays of data rows
+    childrenIndicatorField?: string;    // This is the data field (returned from the ajax called) to indicate whether this row has children rows that can be fetched. So that the UI knows whether to place an "expand" icon beside the row
 }
+/****************************
+* To match children rows with parent rows, I used the metaphor like database FK and PK
+****************************/
 export interface TreeHierarchy {
     foreignKeyField: string;
     primaryKeyField: string;
@@ -50,6 +57,8 @@ export class TreeGridDef  {
 
 /**
 * Controls the sorting by clicking the page header
+* The actual sorting the data is not done by this control. This control will fire the event to let the hosting component to handle the actual sorting.
+* This component mainly handles the UI state (like updown arrows) on each column header
 */
 @Directive({
     selector: '[tg-sortable-header]'
@@ -185,7 +194,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     currentPage: PageNumber = { num: 0 };
 
     private initalProcessed: boolean = false;
-    public sortDirType = SortDirection; // workaround to NG2 issues #2885
+    public sortDirType = SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
     constructor(private dataService: SimpleDataService, private elementRef: ElementRef) {
         this.currentPage.num = 0;
         console.log(this.elementRef);
@@ -281,19 +290,19 @@ export class TreeGrid implements OnInit, AfterViewInit {
         if (this.treeGridDef.paging)
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
-
     toggleTreeEvtHandler(node: DataNode) {
         let ajax = this.treeGridDef.ajax;
         if (ajax != null) {
             if (ajax.lazyLoad && !node.isLoaded) {
                 this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
                     // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
-                    let startIndex = this.treeGridDef.data.length;
-                    let endIndex = startIndex + ret.length - 1;
-                    ret.forEach((r: any) => this.treeGridDef.data.push(r));
                     node.isLoaded = true;
-                    this.dataTree.addRows(startIndex, endIndex, node);
-
+                    if (ret.length > 0) {
+                        let startIndex = this.treeGridDef.data.length;
+                        let endIndex = startIndex + ret.length - 1;
+                        ret.forEach((r: any) => this.treeGridDef.data.push(r));
+                        this.dataTree.addRows(startIndex, endIndex, node);
+                    }
                     this.toggleTreeNode(node);
                 }, (err: any) => { console.log(err) });
             }

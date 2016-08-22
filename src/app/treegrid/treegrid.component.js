@@ -33,6 +33,8 @@ var TreeGridDef = (function () {
 exports.TreeGridDef = TreeGridDef;
 /**
 * Controls the sorting by clicking the page header
+* The actual sorting the data is not done by this control. This control will fire the event to let the hosting component to handle the actual sorting.
+* This component mainly handles the UI state (like updown arrows) on each column header
 */
 var SortableHeader = (function () {
     function SortableHeader(e, vr) {
@@ -106,7 +108,7 @@ var TreeGrid = (function () {
         this.elementRef = elementRef;
         this.currentPage = { num: 0 };
         this.initalProcessed = false;
-        this.sortDirType = datatree_1.SortDirection; // workaround to NG2 issues #2885
+        this.sortDirType = datatree_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
         this.currentPage.num = 0;
         console.log(this.elementRef);
     }
@@ -205,11 +207,13 @@ var TreeGrid = (function () {
             if (ajax.lazyLoad && !node.isLoaded) {
                 this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function (ret) {
                     // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
-                    var startIndex = _this.treeGridDef.data.length;
-                    var endIndex = startIndex + ret.length - 1;
-                    ret.forEach(function (r) { return _this.treeGridDef.data.push(r); });
                     node.isLoaded = true;
-                    _this.dataTree.addRows(startIndex, endIndex, node);
+                    if (ret.length > 0) {
+                        var startIndex = _this.treeGridDef.data.length;
+                        var endIndex = startIndex + ret.length - 1;
+                        ret.forEach(function (r) { return _this.treeGridDef.data.push(r); });
+                        _this.dataTree.addRows(startIndex, endIndex, node);
+                    }
                     _this.toggleTreeNode(node);
                 }, function (err) { console.log(err); });
             }
