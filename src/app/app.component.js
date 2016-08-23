@@ -10,26 +10,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require("@angular/core");
 var platform_browser_1 = require('@angular/platform-browser');
-var core_2 = require("@angular/core");
 var treegrid_component_1 = require("./treegrid/treegrid.component");
 var AppComponent = (function () {
     function AppComponent(sanitizer) {
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
-    AppComponent.prototype.changeData = function (event) {
-        // to show that databinding does work
-        this.treeDef.data.splice(0, 5);
-        this.treeGrid.refresh();
-    };
     AppComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://localhost:7774/api/values/GetAll', method: "POST",
-            lazyLoad: false,
+            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
@@ -38,17 +32,15 @@ var AppComponent = (function () {
             { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
-    AppComponent.prototype.ngAfterViewInit = function () {
-    };
     __decorate([
-        core_2.ViewChild(treegrid_component_1.TreeGrid), 
+        core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], AppComponent.prototype, "treeGrid", void 0);
     AppComponent = __decorate([
         core_1.Component({
             selector: 'my-app',
-            template: "\n\t\t<h2 id=\"testTitle\">Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<button (click)=\"changeData($event)\">Reduce Data</button>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
-            directives: [treegrid_component_1.TreeGrid, treegrid_component_1.SortableHeader],
+            template: "\n\t\t<h2 id=\"testTitle\">Table Test 98</h2>\n        <router-outlet></router-outlet>\n\t\t<tg-treegrid [treeGridDef]=\"treeDef\">\n\t\t</tg-treegrid>\n    ",
+            directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
         __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])

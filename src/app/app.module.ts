@@ -10,7 +10,7 @@ import { routing } from './app.routing';
 import { DataService } from './shared/data.service';
 
 @NgModule({
-  imports:      [ BrowserModule, FormsModule, HttpModule, routing ],
+  imports: [BrowserModule, FormsModule, HttpModule, routing ],
   declarations: [ AppComponent, HomeComponent, FeatureComponent ],
   providers:    [ DataService ],
   bootstrap:    [ AppComponent ]
