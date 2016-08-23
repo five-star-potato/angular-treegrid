@@ -97,6 +97,7 @@ export class SortableHeader {
 }
 
 @Component({
+    moduleId: module.id,
     selector: 'tg-treegrid',
     template: `
 			<table class="treegrid-table table table-striped table-hover table-bordered" data-resizable-columns-id="resizable-table">
@@ -126,57 +127,7 @@ export class SortableHeader {
 			</table>
             <tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav>
 		    `,
-    styles: [`
-        th {
-            color: brown;
-        }
-        th.tg-sortable:after { 
-            font-family: "FontAwesome"; 
-            opacity: .3;
-            float: right;
-            content: "\\f0dc";
-        }
-        th.tg-sort-asc:after { 
-            font-family: "FontAwesome";
-            content: "\\f0de";
-            float: right;
-        }
-        th.tg-sort-desc:after { 
-            font-family: "FontAwesome";
-            content: "\\f0dd";
-            float: right;
-        }
-        span.tg-opened, span.tg-closed {
-            margin-right: 0px;
-            cursor: pointer;
-        }
-        span.tg-opened:after {
-            font-family: "FontAwesome";
-            content: "\\f078";
-        }
-        span.tg-closed:after {
-            font-family: "FontAwesome";
-            content: "\\f054";
-        }
-        th.tg-header-left { 
-            text-align: left;
-        }
-        th.tg-header-right { 
-            text-align: right;
-        }
-        th.tg-header-center { 
-            text-align: center;
-        }
-        td.tg-body-left { 
-            text-align: left;
-        }
-        td.tg-body-right { 
-            text-align: right;
-        }
-        td.tg-body-center { 
-            text-align: center;
-        }
-    `],
+    styleUrls: ['treegrid.component.css'],
     directives: [SortableHeader, PageNavigator],
     providers: [ SimpleDataService ]
 })
