@@ -26,9 +26,29 @@ TreeGrid is written in Typscript. It is an Angular 2 component which you can emb
 
 - Angular 2 RC 5
 
-## Usage
+## Quick start
 
 The project comes with an application that showcases all the features of the TreeGrid control.
+
+**Make sure you have Node version >= 5.0 and NPM >= 3**
+> Clone/Download the repo then edit `app.ts` inside [`/src/app/app.ts`](/src/app/app.ts)
+
+```bash
+# clone our repo
+# --depth 1 removes all but one .git commit history
+git clone https://github.com/five-star-potato/angular-treegrid.git
+
+# change directory to our repo
+cd angular-treegrid
+
+# install the repo with npm
+npm install
+
+# start the server
+npm start
+
+```
+go to [http://0.0.0.0:3000](http://0.0.0.0:3000) or [http://localhost:3000](http://localhost:3000) in your browser
 
 #### License
 
