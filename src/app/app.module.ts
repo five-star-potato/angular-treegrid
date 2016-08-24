@@ -5,13 +5,14 @@ import { HttpModule} from '@angular/http';
 
 import { AppComponent }  from './app.component';
 import { HomeComponent } from './home/home.component';
-import { FeatureComponent } from './feature/feature.component';
+import { Demo1Component } from './demo1/demo1.component';
+import { Demo2Component } from './demo2/demo2.component';
 import { routing } from './app.routing';
 import { DataService } from './shared/data.service';
 
 @NgModule({
   imports: [BrowserModule, FormsModule, HttpModule, routing ],
-  declarations: [ AppComponent, HomeComponent, FeatureComponent ],
+  declarations: [ AppComponent, HomeComponent, Demo1Component, Demo2Component ],
   providers:    [ DataService ],
   bootstrap:    [ AppComponent ]
 })

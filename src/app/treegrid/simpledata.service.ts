@@ -15,13 +15,13 @@ export class SimpleDataService {
 
     get(url: string): Observable<any[]> {
         return this.http.get(url, { headers: this.headers })
-            .map((res: Response) => res.json());
+            .map((res: Response) => res.json())
             //.catch(this.handleError);
     }
     post(url: string): Observable<any[]> {
         return this.http.post(url, "", { headers: this.headers })
-            .map((res: Response) => res.json());
-        //.catch(this.handleError);
+            .map((res: Response) => res.json())
+            //.catch(this.handleError);
     }
     private handleError(error: any) {
         // In a real world app, we might use a remote logging infrastructure

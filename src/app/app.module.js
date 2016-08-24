@@ -14,7 +14,8 @@ var forms_1 = require('@angular/forms');
 var http_1 = require('@angular/http');
 var app_component_1 = require('./app.component');
 var home_component_1 = require('./home/home.component');
-var feature_component_1 = require('./feature/feature.component');
+var demo1_component_1 = require('./demo1/demo1.component');
+var demo2_component_1 = require('./demo2/demo2.component');
 var app_routing_1 = require('./app.routing');
 var data_service_1 = require('./shared/data.service');
 var AppModule = (function () {
@@ -23,7 +24,7 @@ var AppModule = (function () {
     AppModule = __decorate([
         core_1.NgModule({
             imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing],
-            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, feature_component_1.FeatureComponent],
+            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, demo1_component_1.Demo1Component, demo2_component_1.Demo2Component],
             providers: [data_service_1.DataService],
             bootstrap: [app_component_1.AppComponent]
         }), 

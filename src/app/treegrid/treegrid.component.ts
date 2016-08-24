@@ -48,7 +48,7 @@ export class TreeGridDef  {
     data: any[] = [];
     paging: boolean = true;
     sort: boolean = true;
-    pageSize: number = 10; /* make it small for debugging */
+    pageSize: number = 25; /* make it small for debugging */
     //currentPage: number = 0;
     defaultOrder: ColumnOrder[] = [];
     hierachy: TreeHierarchy = null;

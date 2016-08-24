@@ -1,4 +1,4 @@
-# A Tree Grid control for Angular 2 
+# TreeGrid Control for Angular 2 
 
 ## Introduction
 
