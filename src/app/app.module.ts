@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule} from '@angular/http';
 
 import { AppComponent }  from './app.component';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './demo/home/home.component';
 import { BasicDemoComponent }   	from './demo/basic/basic-demo.component';
 import { AjaxLoadDemoComponent }   	from './demo/ajax-load/ajax-load-demo.component';
 import { LazyLoadDemoComponent }   	from './demo/lazy-load/lazy-load-demo.component';

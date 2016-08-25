@@ -1,6 +1,6 @@
 "use strict";
 var router_1 = require('@angular/router');
-var home_component_1 = require('./home/home.component');
+var home_component_1 = require('./demo/home/home.component');
 var basic_demo_component_1 = require('./demo/basic/basic-demo.component');
 var ajax_load_demo_component_1 = require('./demo/ajax-load/ajax-load-demo.component');
 var lazy_load_demo_component_1 = require('./demo/lazy-load/lazy-load-demo.component');

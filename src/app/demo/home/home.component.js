@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var router_1 = require('@angular/router');
-var data_service_1 = require('../shared/data.service');
+var data_service_1 = require('../../shared/data.service');
 var HomeComponent = (function () {
     function HomeComponent(dataService) {
         this.dataService = dataService;

@@ -1,6 +1,6 @@
 import { RouterModule, Routes } from '@angular/router';
 
-import { HomeComponent }     		from './home/home.component';
+import { HomeComponent }     		from './demo/home/home.component';
 import { BasicDemoComponent }   	from './demo/basic/basic-demo.component';
 import { AjaxLoadDemoComponent }   	from './demo/ajax-load/ajax-load-demo.component';
 import { LazyLoadDemoComponent }   	from './demo/lazy-load/lazy-load-demo.component';
