@@ -14,10 +14,11 @@ var forms_1 = require('@angular/forms');
 var http_1 = require('@angular/http');
 var app_component_1 = require('./app.component');
 var home_component_1 = require('./home/home.component');
-var demo1_component_1 = require('./demo1/demo1.component');
-var demo2_component_1 = require('./demo2/demo2.component');
-var demo3_component_1 = require('./demo3/demo3.component');
-var demo4_component_1 = require('./demo4/demo4.component');
+var basic_demo_component_1 = require('./demo/basic/basic-demo.component');
+var ajax_load_demo_component_1 = require('./demo/ajax-load/ajax-load-demo.component');
+var lazy_load_demo_component_1 = require('./demo/lazy-load/lazy-load-demo.component');
+var pipes_demo_component_1 = require('./demo/pipes/pipes-demo.component');
+var custom_render_demo_component_1 = require('./demo/custom-render/custom-render-demo.component');
 var app_routing_1 = require('./app.routing');
 var data_service_1 = require('./shared/data.service');
 var AppModule = (function () {
@@ -26,7 +27,7 @@ var AppModule = (function () {
     AppModule = __decorate([
         core_1.NgModule({
             imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing],
-            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, demo1_component_1.Demo1Component, demo2_component_1.Demo2Component, demo3_component_1.Demo3Component, demo4_component_1.Demo4Component],
+            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent],
             providers: [data_service_1.DataService],
             bootstrap: [app_component_1.AppComponent]
         }), 

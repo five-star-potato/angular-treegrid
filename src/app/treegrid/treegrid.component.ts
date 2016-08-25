@@ -209,12 +209,12 @@ export class TreeGrid implements OnInit, AfterViewInit {
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
 
-    loadAjaxData() {
+    loadAjaxData(url?: string) { // user can provide a different url to override the url in AjaxConfig
         let ajax = this.treeGridDef.ajax;
-        if (ajax && ajax.url) {
+        if (ajax && (url || ajax.url)) {
             this.isLoading = true;
             if (ajax.method == "POST") {
-                this.dataService.post(ajax.url).subscribe((ret: any) => {
+                this.dataService.post(url ? url : ajax.url).subscribe((ret: any) => {
                     this.treeGridDef.data = ret;
                     this.refresh();
                     this.isLoading = false;

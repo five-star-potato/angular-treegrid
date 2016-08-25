@@ -154,13 +154,13 @@ var TreeGrid = (function () {
         if (this.treeGridDef.paging && this.pageNav)
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     };
-    TreeGrid.prototype.loadAjaxData = function () {
+    TreeGrid.prototype.loadAjaxData = function (url) {
         var _this = this;
         var ajax = this.treeGridDef.ajax;
-        if (ajax && ajax.url) {
+        if (ajax && (url || ajax.url)) {
             this.isLoading = true;
             if (ajax.method == "POST") {
-                this.dataService.post(ajax.url).subscribe(function (ret) {
+                this.dataService.post(url ? url : ajax.url).subscribe(function (ret) {
                     _this.treeGridDef.data = ret;
                     _this.refresh();
                     _this.isLoading = false;
