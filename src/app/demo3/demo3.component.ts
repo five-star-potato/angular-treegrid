@@ -27,8 +27,8 @@ export class Demo3Component implements OnInit {
         };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
-            { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
+            { labelHtml: "Given name", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
+            { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Date of Birth", dataField: "dob", className: "" },
             { labelHtml: "Report To", dataField: "report_to" }];
     }

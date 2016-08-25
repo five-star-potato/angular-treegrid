@@ -23,12 +23,12 @@ export class Demo2Component implements OnInit {
             url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: false,
-            childrenIndicatorField: 'hasChildren'
+                childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
-            { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
+            { labelHtml: "Given<br/>name", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
+            { labelHtml: "Family<br/>name", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Report To", dataField: "report_to" }];
     }
 }
