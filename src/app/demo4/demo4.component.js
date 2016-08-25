@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require("@angular/core");
+var common_1 = require('@angular/common');
 var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../treegrid/treegrid.component");
 var Demo4Component = (function () {
@@ -17,22 +18,16 @@ var Demo4Component = (function () {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
     Demo4Component.prototype.ngOnInit = function () {
-        var _this = this;
-        this.treeDef.hierachy = {
-            foreignKeyField: "report_to", primaryKeyField: "emp_id"
-        };
-        this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
-            //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
-            lazyLoad: true,
-            childrenIndicatorField: 'hasChildren'
-        };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
-            { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
-            { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
-            { labelHtml: "Date of Birth", dataField: "dob", className: "" },
-            { labelHtml: "Report To", dataField: "report_to" }];
+            { labelHtml: "Employee ID", dataField: "emp_id" },
+            { labelHtml: "Given name", dataField: "firstname" },
+            { labelHtml: "Family name", dataField: "lastname" },
+            { labelHtml: "Birthdate", dataField: "dob", transform: { pipe: new common_1.DatePipe() } }
+        ];
+        this.treeDef.data = [
+            { emp_id: 101, firstname: "Tommen", lastname: "Baratheon", dob: "1970-01-12T00:00:00" },
+            { emp_id: 67, firstname: "Ramsay", lastname: "Bolton", dob: "1995-02-23T00:00:00" }
+        ];
     };
     __decorate([
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
