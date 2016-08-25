@@ -4,11 +4,11 @@ import { TreeGrid, TreeGridDef } from "../treegrid/treegrid.component";
 
 @Component({
     moduleId: module.id,
-    templateUrl: 'demo2.component.html',
+    templateUrl: 'demo4.component.html',
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })
-export class Demo2Component implements OnInit {
+export class Demo4Component implements OnInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
@@ -20,15 +20,16 @@ export class Demo2Component implements OnInit {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
-            lazyLoad: false,
+            lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
+            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
             { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: (data, row, index) => { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
             { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
+            { labelHtml: "Date of Birth", dataField: "dob", className: "" },
             { labelHtml: "Report To", dataField: "report_to" }];
     }
 }

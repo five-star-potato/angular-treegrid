@@ -22,6 +22,7 @@ export interface AjaxConfig {
     method?: string;        // POST or GET
     lazyLoad?: boolean;     // Lazy Loading means initially only the top level data rows are loaded. When the user clicks the expand button beside the rows, the corresponding children rows will then be fetched and inserted into the existing arrays of data rows
     childrenIndicatorField?: string;    // This is the data field (returned from the ajax called) to indicate whether this row has children rows that can be fetched. So that the UI knows whether to place an "expand" icon beside the row
+    doNotLoad?: boolean;    // if set to true, the treeGrid will not $http intiallay. You need to call loadData() explicitly
 }
 /****************************
 * To match children rows with parent rows, I used the metaphor like database FK and PK
@@ -109,12 +110,13 @@ export class SortableHeader {
                             tg-sortable-header [colIndex]="x" [sort]="dc.sort" [innerHTML]="dc.labelHtml" 
                                 [class.tg-sortable]="treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC"
                                 [class.tg-sort-asc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC"
-                                [class.tg-sort-desc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC" >
+                                [class.tg-sort-desc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC" 
+                                >
                         </th>
 				    </tr>
 			    </thead>
 				<tbody>
-					<tr class='treegrid-tr' *ngFor="let dr of dataView; let x = index">
+					<tr *ngFor="let dr of dataView; let x = index">
 						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 20 + 8).toString() + 'px' : ''" [class]="dc.className">
                             <span class="tg-opened" *ngIf="y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                             <span class="tg-closed" *ngIf="y == 0 && testNodeForExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
@@ -125,7 +127,11 @@ export class SortableHeader {
 					</tr>
 				</tbody>
 			</table>
-            <tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav>
+            <div class="row">
+                <div class="loading-icon col-md-10" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
+                <div class="col-md-2"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
+            </div>
+            
 		    `,
     styleUrls: ['treegrid.component.css'],
     directives: [SortableHeader, PageNavigator],
@@ -139,10 +145,11 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private pageNav: PageNavigator;
 
 	// dataView is what the user is seeing on the screen; one page of data if paging is enabled
-    dataView: any[];
-    dataTree: DataTree;
-    numVisibleRows: number;
-    currentPage: PageNumber = { num: 0 };
+    private dataView: any[];
+    private dataTree: DataTree;
+    private numVisibleRows: number;
+    private currentPage: PageNumber = { num: 0 };
+    private isLoading: boolean = false;
 
     private initalProcessed: boolean = false;
     public sortDirType = SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
@@ -182,19 +189,45 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
     refresh() {
         if (!this.initalProcessed) {
-            this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+            if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
+                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+            else // data is just flat 2d table
+                this.dataTree = new DataTree(this.treeGridDef.data);
             this.numVisibleRows = this.dataTree.recountDisplayCount();
             this.initalProcessed = true;
         }
         this.goPage(this.currentPage.num);
-        if (this.treeGridDef.paging) 
+        if (this.treeGridDef.paging && this.pageNav) 
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
+    }
+
+    loadAjaxData() {
+        let ajax = this.treeGridDef.ajax;
+        if (ajax && ajax.url) {
+            this.isLoading = true;
+            if (ajax.method == "POST") {
+                this.dataService.post(ajax.url).subscribe((ret: any) => {
+                    this.treeGridDef.data = ret;
+                    this.refresh();
+                    this.isLoading = false;
+                }, (err: any) => { console.log(err) });
+            }
+            else {
+                this.dataService.get(ajax.url).subscribe((ret: any) => {
+                        this.treeGridDef.data = ret;
+                        this.refresh();
+                    }, (err: any) => { console.log(err) });
+            }
+        }
     }
     ngAfterViewInit() {
         // Initialize resizable columns after everything is rendered
         let y: any;
         y = jQuery(this.elementRef.nativeElement).find('table');
         y.resizableColumns();
+
+        if (this.treeGridDef.paging) 
+            this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
 
     ngOnInit() {
@@ -203,19 +236,11 @@ export class TreeGrid implements OnInit, AfterViewInit {
             if (item.sort == undefined)
                 item.sort = true;
         });
+
         let ajax = this.treeGridDef.ajax;
         if (ajax != null) {
-            if (ajax.method == "POST") {
-                this.dataService.post(ajax.url).subscribe((ret: any) => {
-                    this.treeGridDef.data = ret;
-                    this.refresh();
-                }, (err: any) => { console.log(err) });
-            }
-            else {
-                this.dataService.get(ajax.url).subscribe((ret: any) => {
-                        this.treeGridDef.data = ret;
-                        this.refresh();
-                    }, (err: any) => { console.log(err) });
+            if (!ajax.doNotLoad) {
+                this.loadAjaxData();
             }
         }
         else if (this.treeGridDef.data.length > 0) {
@@ -245,6 +270,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         let ajax = this.treeGridDef.ajax;
         if (ajax != null) {
             if (ajax.lazyLoad && !node.isLoaded) {
+                this.isLoading = true;
                 this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
                     // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
                     node.isLoaded = true;
@@ -255,6 +281,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         this.dataTree.addRows(startIndex, endIndex, node);
                     }
                     this.toggleTreeNode(node);
+                    this.isLoading = false;
                 }, (err: any) => { console.log(err) });
             }
             else

@@ -47,3 +47,13 @@ td.tg-body-right {
 td.tg-body-center { 
     text-align: center;
 }
+
+div.loading-icon  {
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+div.loading-icon.active {
+    opacity: 100;
+    transition: opacity 0.1s;
+}

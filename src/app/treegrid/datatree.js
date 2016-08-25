@@ -17,8 +17,26 @@ var DataTree = (function () {
         this.fk = fk;
         this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
-        for (var i = 0; i < this.cnt; i++) {
-            if (inputData[i][fk] == null) {
+        if (pk && fk) {
+            for (var i = 0; i < this.cnt; i++) {
+                if (inputData[i][fk] == null) {
+                    var newNode = {
+                        row: inputData[i],
+                        index: i,
+                        level: 0,
+                        displayCount: 0,
+                        childNodes: [],
+                        parent: this.rootNode
+                    };
+                    this.rootNode.childNodes.push(newNode);
+                    inputData[i].__node = newNode;
+                }
+            }
+            this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
+            this.rootNode.childNodes.forEach(function (n) { return _this.processNode(n); });
+        }
+        else {
+            for (var i = 0; i < this.cnt; i++) {
                 var newNode = {
                     row: inputData[i],
                     index: i,
@@ -30,9 +48,8 @@ var DataTree = (function () {
                 this.rootNode.childNodes.push(newNode);
                 inputData[i].__node = newNode;
             }
+            this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         }
-        this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
-        this.rootNode.childNodes.forEach(function (n) { return _this.processNode(n); });
     }
     DataTree.prototype.processNode = function (node) {
         var _this = this;

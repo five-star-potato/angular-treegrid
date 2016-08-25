@@ -24,26 +24,44 @@ export class DataTree {
     private rowCounter: number;			 // temp var for counting rows
     private returnRowsIndices: number[]; // store the row indices to the inputData array corresponding to a page
 
-    constructor(private inputData: any[], private pk: string, private fk: string) {
+    constructor(private inputData: any[], private pk?: string, private fk?: string) {
         this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
-        for (let i = 0; i < this.cnt; i++) {
-            if (inputData[i][fk] == null) {
+        if (pk && fk) {
+            for (let i = 0; i < this.cnt; i++) {
+                if (inputData[i][fk] == null) {
+                    let newNode: DataNode = {
+                        row: inputData[i],
+                        index: i,
+                        level: 0,
+                        displayCount: 0, // assuming intially all the nodes are closed
+                        childNodes: [],
+                        parent: this.rootNode
+                    };
+                    this.rootNode.childNodes.push(newNode);
+                    inputData[i].__node = newNode;
+                }
+            }
+            this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
+            this.rootNode.childNodes.forEach(n => this.processNode(n));
+        }
+        else {    // no pk and fk, data is flat; just one level
+            for (let i = 0; i < this.cnt; i++) {
                 let newNode: DataNode = {
                     row: inputData[i],
                     index: i,
                     level: 0,
-					displayCount: 0, // assuming intially all the nodes are closed
+                    displayCount: 0, // assuming intially all the nodes are closed
                     childNodes: [],
                     parent: this.rootNode
                 };
                 this.rootNode.childNodes.push(newNode);
                 inputData[i].__node = newNode;
             }
+            this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         }
-        this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
-        this.rootNode.childNodes.forEach(n => this.processNode(n));
     }
+    
     private processNode(node: DataNode) {
         for (let i = 0; i < this.cnt; i++) {
             if (this.inputData[i][this.fk] == node.row[this.pk]) {
@@ -53,7 +71,7 @@ export class DataTree {
                     level: node.level + 1,
                     displayCount: 0, // assuming intially all the nodes are closed
                     childNodes: [],
-					parent: node
+                    parent: node
                 };
                 node.childNodes.push(newNode);
                 this.inputData[i].__node = newNode;
@@ -79,11 +97,11 @@ export class DataTree {
     sortColumn(field: string, dir: SortDirection) {
         this.sort(this.rootNode, field, dir);
     }
-	// This is a depth-first traversal to return all rows
+    // This is a depth-first traversal to return all rows
     private traverseAll(node: DataNode) {
         this.returnRowsIndices.push(node.index);
         if (node.isOpen)
-			node.childNodes.forEach(n => this.traverseAll(n));
+            node.childNodes.forEach(n => this.traverseAll(n));
     }
     private traverse(node: DataNode, startRow: number, endRow: number) {
         if (this.rowCounter > endRow)
@@ -93,14 +111,14 @@ export class DataTree {
         }
         this.rowCounter++;
         if (node.isOpen)
-			node.childNodes.forEach(n => this.traverse(n, startRow, endRow));
+            node.childNodes.forEach(n => this.traverse(n, startRow, endRow));
     }
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;
         this.returnRowsIndices = [];
 
         if (pageSize < 0) {
-			this.rootNode.childNodes.forEach(n => this.traverseAll(n));
+            this.rootNode.childNodes.forEach(n => this.traverseAll(n));
         }
         else {
             this.rootNode.childNodes.forEach(n => this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1));
@@ -122,20 +140,20 @@ export class DataTree {
         let sum: number = 0;
         node.childNodes.forEach(c => sum += c.displayCount);
         node.displayCount = node.childNodes.length + sum;
-		// since node was closed before (i.e. displayCount = 0), propagate the change upward
+        // since node was closed before (i.e. displayCount = 0), propagate the change upward
         this.applyDeltaUpward(node.parent, node.displayCount);
     }
     // the displayCount keep track of how many descendants (not just children) are on display. So when a branch is open, displayCount of this node goes up; but so does all the ancestors as well
     toggleNode(node: DataNode): number {
         node.isOpen = !(node.isOpen);
-        if (node.isOpen) 
+        if (node.isOpen)
             this.addDisplayCount(node);
-        else 
+        else
             this.subtractDisplayCount(node);
 
         return this.rootNode.displayCount;
     }
-	// reset the displayCount on each node based on the current status of IsOpen on each node. Useful if we have an operation to open all nodes or close all 
+    // reset the displayCount on each node based on the current status of IsOpen on each node. Useful if we have an operation to open all nodes or close all 
     private mapReduceDisplayCount(node: DataNode): number {
         node.childNodes.forEach(c => this.mapReduceDisplayCount(c));
         let sum: number = 0;
@@ -146,7 +164,7 @@ export class DataTree {
             node.displayCount = 0;
         return node.displayCount;
     }
-	// recalculate displayCount of each node based on isOpen flag
+    // recalculate displayCount of each node based on isOpen flag
     recountDisplayCount(): number {
         this.cnt = 0;
         return this.mapReduceDisplayCount(this.rootNode);

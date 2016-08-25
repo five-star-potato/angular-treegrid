@@ -11,42 +11,43 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../treegrid/treegrid.component");
-var Demo2Component = (function () {
-    function Demo2Component(sanitizer) {
+var Demo4Component = (function () {
+    function Demo4Component(sanitizer) {
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
-    Demo2Component.prototype.ngOnInit = function () {
+    Demo4Component.prototype.ngOnInit = function () {
         var _this = this;
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
-            lazyLoad: false,
+            lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
+            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
             { labelHtml: "Given<br/>name or sth", dataField: "firstname", render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" value=""/>&nbsp' + data.toUpperCase()); } },
             { labelHtml: "Lastname", dataField: "lastname", className: "tg-body-center tg-header-center" },
+            { labelHtml: "Date of Birth", dataField: "dob", className: "" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
     __decorate([
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
-    ], Demo2Component.prototype, "treeGrid", void 0);
-    Demo2Component = __decorate([
+    ], Demo4Component.prototype, "treeGrid", void 0);
+    Demo4Component = __decorate([
         core_1.Component({
             moduleId: module.id,
-            templateUrl: 'demo2.component.html',
+            templateUrl: 'demo4.component.html',
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
         __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
-    ], Demo2Component);
-    return Demo2Component;
+    ], Demo4Component);
+    return Demo4Component;
 }());
-exports.Demo2Component = Demo2Component;
-//# sourceMappingURL=demo2.component.js.map
+exports.Demo4Component = Demo4Component;
+//# sourceMappingURL=demo4.component.js.map
