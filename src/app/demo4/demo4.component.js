@@ -12,21 +12,23 @@ var core_1 = require("@angular/core");
 var common_1 = require('@angular/common');
 var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../treegrid/treegrid.component");
+/****************************************************************************************************************/
+/* Deomonstrate the use of Pipes in fomatting. You can chain pipes by supplying more than one pips             */
+/****************************************************************************************************************/
 var Demo4Component = (function () {
-    function Demo4Component(sanitizer) {
-        this.sanitizer = sanitizer;
+    function Demo4Component() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
     Demo4Component.prototype.ngOnInit = function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
-            { labelHtml: "Family name", dataField: "lastname" },
-            { labelHtml: "Birthdate", dataField: "dob", transform: { pipe: new common_1.DatePipe() } }
+            { labelHtml: "Family name", dataField: "lastname", transforms: [{ pipe: new common_1.LowerCasePipe() }] },
+            { labelHtml: "Birthdate", dataField: "dob", transforms: [{ pipe: new common_1.DatePipe(), param: "yMMMMd" }, { pipe: new common_1.UpperCasePipe() }] }
         ];
         this.treeDef.data = [
-            { emp_id: 101, firstname: "Tommen", lastname: "Baratheon", dob: "1970-01-12T00:00:00" },
-            { emp_id: 67, firstname: "Ramsay", lastname: "Bolton", dob: "1995-02-23T00:00:00" }
+            { emp_id: "102", firstname: "Tommen", lastname: "Baratheon", dob: "1970-01-12T00:00:00" },
+            { emp_id: "67", firstname: "Ramsay", lastname: "Bolton", dob: "1995-02-23T00:00:00" }
         ];
     };
     __decorate([
@@ -40,7 +42,7 @@ var Demo4Component = (function () {
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
-        __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
+        __metadata('design:paramtypes', [])
     ], Demo4Component);
     return Demo4Component;
 }());

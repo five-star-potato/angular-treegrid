@@ -2,7 +2,10 @@ import { Component, Directive, OnInit, ViewChild } from "@angular/core";
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../treegrid/treegrid.component";
 
-@Component({
+/****************************************************************************************************************/
+/* Calling ajax to retrieve children when the user click open a branch                                          */
+/****************************************************************************************************************/
+@@Component({
     moduleId: module.id,
     templateUrl: 'demo3.component.html',
     directives: [TreeGrid],

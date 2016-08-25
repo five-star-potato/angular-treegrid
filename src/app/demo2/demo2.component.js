@@ -40,6 +40,7 @@ var Demo2Component = (function () {
     Demo2Component = __decorate([
         core_1.Component({
             moduleId: module.id,
+            selector: 'demo2',
             templateUrl: 'demo2.component.html',
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]

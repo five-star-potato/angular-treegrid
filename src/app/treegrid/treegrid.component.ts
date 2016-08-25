@@ -31,7 +31,7 @@ export interface TreeHierarchy {
     foreignKeyField: string;
     primaryKeyField: string;
 }
-
+// Enable the user to use "Pipes" to transform the data
 export interface ColumnTransform {
     pipe: PipeTransform,
     param?: string
@@ -47,7 +47,7 @@ export interface ColumnDef {
     sort?: boolean;
     sortDirection?: SortDirection;
     render?: (data: any, row: any, index: number) => SafeHtml;
-    transform?: ColumnTransform;
+    transforms?: ColumnTransform[];
 }
 
 export class TreeGridDef  {
@@ -126,16 +126,16 @@ export class SortableHeader {
 						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? (dr.__node.level * 20 + 8).toString() + 'px' : ''" [class]="dc.className">
                             <span class="tg-opened" *ngIf="y == 0 && dr.__node.isOpen && dr.__node.childNodes.length > 0" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                             <span class="tg-closed" *ngIf="y == 0 && testNodeForExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
-                            <span *ngIf="!dc.render && !dc.transform">{{ dr[dc.dataField] }}</span>
+                            <span *ngIf="!dc.render && !dc.transforms">{{ dr[dc.dataField] }}</span>
     						<span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
-                            <span *ngIf="dc.transform" [innerHTML]="transformWithPipe(dr[dc.dataField], dc.transform)"></span>
+                            <span *ngIf="dc.transforms" [innerHTML]="transformWithPipe(dr[dc.dataField], dc.transforms)"></span>
                         </td>
 
 					</tr>
 				</tbody>
 			</table>
             <div class="row">
-                <div class="loading-icon col-md-8" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
+                <div class="loading-icon col-md-offset-4 col-md-4" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
                 <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
             </div>
             
@@ -145,6 +145,7 @@ export class SortableHeader {
     providers: [ SimpleDataService ]
 })
 export class TreeGrid implements OnInit, AfterViewInit {
+    private debugVar:number = 0;
     @Input()
     treeGridDef: TreeGridDef;
 
@@ -297,10 +298,17 @@ export class TreeGrid implements OnInit, AfterViewInit {
         else 
             this.toggleTreeNode(node);
     }
-    transformWithPipe(value:any, trans:ColumnTransform) {
-        return trans.pipe.transform(value);
+    transformWithPipe(value:any, trans:ColumnTransform[]) {
+        let v:any = value;
+        trans.forEach(function(t:ColumnTransform) {
+            v = t.pipe.transform(v, t.param);
+        })
+        return v;
     }
-
+    debugFunc() {
+        this.debugVar++;
+        console.log(this.debugVar);
+    }
 	/* event not fired when treeGridDef was changed programmatically. Is this a bug?
 	http://www.bennadel.com/blog/3053-changing-directive-inputs-programmatically-won-t-trigger-ngonchanges-in-angularjs-2-beta-9.htm
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {

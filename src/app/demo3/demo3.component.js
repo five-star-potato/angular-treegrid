@@ -11,6 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../treegrid/treegrid.component");
+/****************************************************************************************************************/
+/* Calling ajax to retrieve children when the user click open a branch                                          */
+/****************************************************************************************************************/
 var Demo3Component = (function () {
     function Demo3Component(sanitizer) {
         this.sanitizer = sanitizer;
@@ -39,6 +42,7 @@ var Demo3Component = (function () {
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], Demo3Component.prototype, "treeGrid", void 0);
     Demo3Component = __decorate([
+        ,
         core_1.Component({
             moduleId: module.id,
             templateUrl: 'demo3.component.html',

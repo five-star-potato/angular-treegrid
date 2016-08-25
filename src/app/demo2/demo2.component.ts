@@ -4,6 +4,7 @@ import { TreeGrid, TreeGridDef } from "../treegrid/treegrid.component";
 
 @Component({
     moduleId: module.id,
+    selector: 'demo2',
     templateUrl: 'demo2.component.html',
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
