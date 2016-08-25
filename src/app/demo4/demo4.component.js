@@ -15,6 +15,19 @@ var treegrid_component_1 = require("../treegrid/treegrid.component");
 /****************************************************************************************************************/
 /* Deomonstrate the use of Pipes in fomatting. You can chain pipes by supplying more than one pips             */
 /****************************************************************************************************************/
+var MyPipe = (function () {
+    function MyPipe() {
+    }
+    MyPipe.prototype.transform = function (value, param) {
+        return value + " " + param;
+    };
+    MyPipe = __decorate([
+        core_1.Pipe({ name: 'MyPipe' }), 
+        __metadata('design:paramtypes', [])
+    ], MyPipe);
+    return MyPipe;
+}());
+exports.MyPipe = MyPipe;
 var Demo4Component = (function () {
     function Demo4Component() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
@@ -23,7 +36,7 @@ var Demo4Component = (function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
-            { labelHtml: "Family name", dataField: "lastname", transforms: [{ pipe: new common_1.LowerCasePipe() }] },
+            { labelHtml: "Family name", dataField: "lastname", transforms: [{ pipe: new common_1.LowerCasePipe() }, { pipe: new MyPipe(), param: " - eh" }] },
             { labelHtml: "Birthdate", dataField: "dob", transforms: [{ pipe: new common_1.DatePipe(), param: "yMMMMd" }, { pipe: new common_1.UpperCasePipe() }] }
         ];
         this.treeDef.data = [

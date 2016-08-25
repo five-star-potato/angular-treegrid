@@ -5,7 +5,7 @@ import { TreeGrid, TreeGridDef } from "../treegrid/treegrid.component";
 /****************************************************************************************************************/
 /* Calling ajax to retrieve children when the user click open a branch                                          */
 /****************************************************************************************************************/
-@@Component({
+@Component({
     moduleId: module.id,
     templateUrl: 'demo3.component.html',
     directives: [TreeGrid],

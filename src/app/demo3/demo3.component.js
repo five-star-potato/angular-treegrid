@@ -42,7 +42,6 @@ var Demo3Component = (function () {
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], Demo3Component.prototype, "treeGrid", void 0);
     Demo3Component = __decorate([
-        ,
         core_1.Component({
             moduleId: module.id,
             templateUrl: 'demo3.component.html',
