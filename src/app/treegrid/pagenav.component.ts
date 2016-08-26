@@ -9,7 +9,7 @@ export interface PageNumber {
 @Component({
     selector: 'tg-page-nav',
     template: `
-		<ul class="pagination" style="margin:0">
+		<ul *ngIf="numPages > 0" class="pagination" style="margin:0">
 			<li [class.disabled]="currentPage.num <= 0">
 				<a href="javascript:void(0)" (click)="goPage(0)" aria-label="First">
 				<span aria-hidden="true">&laquo;</span>
@@ -52,11 +52,13 @@ export class PageNavigator implements OnChanges {
     @Output() onResetCurrent = new EventEmitter<number>();
 
     refresh() {
-        this.numPages = Math.ceil(this.numRows / this.pageSize);
-        if (this.numPages > 0)
-            if (this.currentPage.num >= this.numPages) { // is somehow current page is no longer valid, move the pointer the last page
-                this.currentPage.num = this.numPages = -1;
-            }
+        if (this.numRows > 0 && this.pageSize > 0) {
+            this.numPages = Math.ceil(this.numRows / this.pageSize);
+            if (this.numPages > 0)
+                if (this.currentPage.num >= this.numPages) { // is somehow current page is no longer valid, move the pointer the last page
+                    this.currentPage.num = this.numPages = -1;
+                }
+        }
     }
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {
         this.refresh();

@@ -23,7 +23,8 @@ export class AjaxLoadDemoComponent implements OnInit {
             url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: false,
-                childrenIndicatorField: 'hasChildren'
+            doNotLoad: true,
+            childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "column_sample_style" },
