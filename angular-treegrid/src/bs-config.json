@@ -1,0 +1,9 @@
+{
+  "browser":  "chrome",
+  "server": {
+    "baseDir": [
+      "./src/",
+      "./"
+    ]
+  }
+}
