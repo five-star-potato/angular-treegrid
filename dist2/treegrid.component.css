@@ -1,0 +1,59 @@
+th {
+    color: brown;
+}
+th.tg-sortable:after { 
+    font-family: "FontAwesome"; 
+    opacity: .3;
+    float: right;
+    content: "\f0dc";
+}
+th.tg-sort-asc:after { 
+    font-family: "FontAwesome";
+    content: "\f0de";
+    float: right;
+}
+th.tg-sort-desc:after { 
+    font-family: "FontAwesome";
+    content: "\f0dd";
+    float: right;
+}
+span.tg-opened, span.tg-closed {
+    margin-right: 0px;
+    cursor: pointer;
+}
+span.tg-opened:after {
+    font-family: "FontAwesome";
+    content: "\f078";
+}
+span.tg-closed:after {
+    font-family: "FontAwesome";
+    content: "\f054";
+}
+th.tg-header-left { 
+    text-align: left;
+}
+th.tg-header-right { 
+    text-align: right;
+}
+th.tg-header-center { 
+    text-align: center;
+}
+td.tg-body-left { 
+    text-align: left;
+}
+td.tg-body-right { 
+    text-align: right;
+}
+td.tg-body-center { 
+    text-align: center;
+}
+
+div.loading-icon  {
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+div.loading-icon.active {
+    opacity: 100;
+    transition: opacity 0.1s;
+}

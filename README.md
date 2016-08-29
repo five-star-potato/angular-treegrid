@@ -1,5 +1,7 @@
 # TreeGrid Control for Angular 2 
 
+**[Live Demo](http://treegriddemo2016.azurewebsites.net/home)**
+
 ## Introduction
 
 TreeGrid is written in Typscript. It is an Angular 2 component which you can embed in your own AppComponent. The project is in perpetual beta stage. Currently, it provides the following list of features:
