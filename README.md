@@ -1,6 +1,6 @@
 # TreeGrid Control for Angular 2 
 
-**[Live Demo](http://treegriddemo2016.azurewebsites.net/home)**
+**[Live Demo](http://treegriddemo2016.azurewebsites.net)**
 
 ## Introduction
 
