@@ -26,6 +26,8 @@ TreeGrid is written in Typscript. It is an Angular 2 component which you can emb
 
 - Bootstrap (currently using 3.3.7)
 
+- Fontawesome
+
 - Angular 2 RC 5
 
 ## Quick start
