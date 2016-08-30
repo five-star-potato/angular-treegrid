@@ -24,7 +24,7 @@ var AjaxLoadDemoComponent = (function () {
             url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: false,
-            doNotLoad: true,
+            doNotLoad: false,
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
