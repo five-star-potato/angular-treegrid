@@ -11,11 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require("@angular/core");
 var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../../treegrid/treegrid.component");
+var componentOutlet_component_1 = require("../../treegrid/componentOutlet.component");
 var BasicDemoComponent = (function () {
     function BasicDemoComponent(sanitizer) {
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
+        this.message = 'static component';
+        this.self = this; // copy of context
+        this.html = "  <div>\n                <button (click)=\"self.setMessage('dynamic component')\">Click</button>\n              </div>";
     }
+    BasicDemoComponent.prototype.setMessage = function (message) {
+        this.message = message;
+    };
     BasicDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
@@ -47,8 +54,8 @@ var BasicDemoComponent = (function () {
         core_1.Component({
             moduleId: module.id,
             templateUrl: 'basic-demo.component.html',
-            directives: [treegrid_component_1.TreeGrid],
-            providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
+            directives: [treegrid_component_1.TreeGrid, componentOutlet_component_1.ComponentOutlet],
+            providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS],
         }), 
         __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
     ], BasicDemoComponent);

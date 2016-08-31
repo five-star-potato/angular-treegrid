@@ -1,4 +1,5 @@
-import { Component, Directive, OnInit, ViewChild } from "@angular/core";
+/// <reference path="../../../../typings/jquery/jquery.d.ts" />
+import { Component, Directive, OnInit,  AfterViewInit, ViewChild } from "@angular/core";
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 
@@ -11,7 +12,7 @@ import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })
-export class CustomRenderDemoComponent implements OnInit {
+export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
@@ -19,14 +20,23 @@ export class CustomRenderDemoComponent implements OnInit {
     constructor(private sanitizer: DomSanitizationService) {
     }
 
+    ngAfterViewInit() {
+        // Initialize resizable columns after everything is rendered
+        // jQuery('body').on('input', 'input:checkbox', function() {
+        //     jQuery('#debugMessage').text(this.id + " is clicked");
+        // });
+        
+    }
     ngOnInit() {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Select", dataField: "lastname", 
-                render: (data, row, index) => 
-                    { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" id="chk' + index.toString() + '"/>&nbsp' + data.toUpperCase()); }}
+                componentHtml: "<p>Hello World! = {{row['emp_id']}} </p>"
+            }
+                //render: (data, row, index) => 
+                //    { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" id="chk' + index.toString() + '"/>&nbsp' + data.toUpperCase()); }}
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },

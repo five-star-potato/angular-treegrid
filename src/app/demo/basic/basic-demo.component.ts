@@ -1,17 +1,28 @@
 import { Component, Directive, OnInit, ViewChild } from "@angular/core";
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
+import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
 
 @Component({
     moduleId: module.id,
     templateUrl: 'basic-demo.component.html',
-    directives: [TreeGrid],
-    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
+    directives: [TreeGrid, ComponentOutlet],
+    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS],
 })
 export class BasicDemoComponent implements OnInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
+
+    message = 'static component';
+    self = this; // copy of context
+    html = `  <div>
+                <button (click)="self.setMessage('dynamic component')">Click</button>
+              </div>`;
+  
+    setMessage(message: string) {
+        this.message = message;
+    }
 
     constructor(private sanitizer: DomSanitizationService) {
     }
