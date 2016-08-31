@@ -7,7 +7,6 @@ import { SafeHtml } from  '@angular/platform-browser';
 import { DataTree, DataNode, SortDirection } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
 import { SimpleDataService } from './simpledata.service';
-import { ComponentOutlet } from "./componentOutlet.component";
 
 
 export interface ColumnOrder {
@@ -50,7 +49,6 @@ export interface ColumnDef {
     sortDirection?: SortDirection;
     render?: (data: any, row: any, index: number) => SafeHtml;
     transforms?: ColumnTransform[];
-    componentHtml?: string;
 }
 
 export class TreeGridDef  {
@@ -129,10 +127,9 @@ export class SortableHeader {
 						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? calcIndent(dr).toString() + 'px' : ''" [class]="dc.className">
                             <span class="tg-opened" *ngIf="y == 0 && showCollapseIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                             <span class="tg-closed" *ngIf="y == 0 && showExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
-                            <span *ngIf="!dc.render && !dc.componentHtml && !dc.transforms">{{ dr[dc.dataField] }}</span>
+                            <span *ngIf="!dc.render && !dc.transforms">{{ dr[dc.dataField] }}</span>
     						<span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
                             <span *ngIf="dc.transforms" [innerHTML]="transformWithPipe(dr[dc.dataField], dc.transforms)"></span>
-                            <span *ngIf="dc.componentHtml"> <div *componentOutlet="dc.componentHtml; context:self; selector:'my-dynamic-component'"></div> </span>
                         </td>
 
 					</tr>
@@ -145,7 +142,7 @@ export class SortableHeader {
             
 		    `,
     styleUrls: ['treegrid.component.css'],
-    directives: [SortableHeader, PageNavigator, ComponentOutlet],
+    directives: [SortableHeader, PageNavigator ],
     providers: [ SimpleDataService ]
 })
 export class TreeGrid implements OnInit, AfterViewInit {

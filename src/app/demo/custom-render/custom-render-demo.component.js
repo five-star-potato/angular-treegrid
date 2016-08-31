@@ -27,13 +27,13 @@ var CustomRenderDemoComponent = (function () {
         // });
     };
     CustomRenderDemoComponent.prototype.ngOnInit = function () {
+        var _this = this;
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Select", dataField: "lastname",
-                componentHtml: "<p>Hello World! = {{row['emp_id']}} </p>"
-            }
+                render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" id="chk' + index.toString() + '"/>&nbsp' + data.toUpperCase()); } }
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },
