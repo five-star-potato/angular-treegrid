@@ -8,7 +8,15 @@ import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 /****************************************************************************************************************/
 @Component({
     moduleId: module.id,
-    templateUrl: 'custom-render-demo.component.html',
+    template: `
+    <h2>Custom Column Rendering</h2>
+    <tg-treegrid [treeGridDef]="treeDef">
+    </tg-treegrid>
+
+    <div id="debugMessage" style="width:500px; height:200px; border: 1px solid #ddd">
+    Debug Message
+    </div>
+    `,
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })

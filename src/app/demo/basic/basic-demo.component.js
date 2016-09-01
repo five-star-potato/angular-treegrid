@@ -16,18 +16,12 @@ var BasicDemoComponent = (function () {
     function BasicDemoComponent(sanitizer) {
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
-        this.message = 'static component';
-        this.self = this; // copy of context
-        this.html = "  <div>\n                <button (click)=\"self.setMessage('dynamic component')\">Click</button>\n              </div>";
     }
-    BasicDemoComponent.prototype.setMessage = function (message) {
-        this.message = message;
-    };
     BasicDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
-            { labelHtml: "Family name", dataField: "lastname" }
+            { labelHtml: "Family name", dataField: "lastname", className: "sample-column-class" }
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },
@@ -53,7 +47,7 @@ var BasicDemoComponent = (function () {
     BasicDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            templateUrl: 'basic-demo.component.html',
+            template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n    <div *componentOutlet=\"html; context:self; selector:'my-dynamic-component'\"></div>\n\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
             directives: [treegrid_component_1.TreeGrid, componentOutlet_component_1.ComponentOutlet],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS],
         }), 

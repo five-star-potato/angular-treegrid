@@ -65,7 +65,7 @@ var CustomRenderDemoComponent = (function () {
     CustomRenderDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            templateUrl: 'custom-render-demo.component.html',
+            template: "\n    <h2>Custom Column Rendering</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n\n    <div id=\"debugMessage\" style=\"width:500px; height:200px; border: 1px solid #ddd\">\n    Debug Message\n    </div>\n    ",
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 

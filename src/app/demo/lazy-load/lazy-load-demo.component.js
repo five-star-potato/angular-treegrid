@@ -43,7 +43,7 @@ var LazyLoadDemoComponent = (function () {
     LazyLoadDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            templateUrl: 'lazy-load-demo.component.html',
+            template: "\n    <h2>Lazy Loading with Ajax</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 

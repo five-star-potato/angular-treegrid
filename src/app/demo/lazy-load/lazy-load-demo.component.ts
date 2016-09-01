@@ -7,7 +7,11 @@ import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 /****************************************************************************************************************/
 @Component({
     moduleId: module.id,
-    templateUrl: 'lazy-load-demo.component.html',
+    template: `
+    <h2>Lazy Loading with Ajax</h2>
+    <tg-treegrid [treeGridDef]="treeDef">
+    </tg-treegrid>
+    `,
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })

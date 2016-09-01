@@ -15,7 +15,11 @@ export class MyPipe implements PipeTransform {
 
 @Component({
     moduleId: module.id,
-    templateUrl: 'pipes-demo.component.html',
+    template: `
+    <h2>Formatting with Pipes</h2>
+    <tg-treegrid [treeGridDef]="treeDef">
+    </tg-treegrid>
+    `,
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
 })

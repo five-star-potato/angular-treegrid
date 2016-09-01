@@ -5,7 +5,15 @@ import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
 
 @Component({
     moduleId: module.id,
-    templateUrl: 'basic-demo.component.html',
+    template: `
+    <h2>Simple Table Data</h2>
+
+    <p>{{message}}</p>
+    <div *componentOutlet="html; context:self; selector:'my-dynamic-component'"></div>
+
+    <tg-treegrid [treeGridDef]="treeDef">
+    </tg-treegrid>
+    `,
     directives: [TreeGrid, ComponentOutlet],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS],
 })
@@ -14,16 +22,6 @@ export class BasicDemoComponent implements OnInit {
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    message = 'static component';
-    self = this; // copy of context
-    html = `  <div>
-                <button (click)="self.setMessage('dynamic component')">Click</button>
-              </div>`;
-  
-    setMessage(message: string) {
-        this.message = message;
-    }
-
     constructor(private sanitizer: DomSanitizationService) {
     }
 
@@ -31,7 +29,7 @@ export class BasicDemoComponent implements OnInit {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },
-            { labelHtml: "Family name", dataField: "lastname" }
+            { labelHtml: "Family name", dataField: "lastname", className: "sample-column-class" }
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },
