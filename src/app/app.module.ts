@@ -10,6 +10,7 @@ import { AjaxLoadDemoComponent }   	from './demo/ajax-load/ajax-load-demo.compon
 import { LazyLoadDemoComponent }   	from './demo/lazy-load/lazy-load-demo.component';
 import { PipesDemoComponent }   	from './demo/pipes/pipes-demo.component';
 import { CustomRenderDemoComponent }from './demo/custom-render/custom-render-demo.component';
+
 import { routing } from './app.routing';
 import { DataService } from './shared/data.service';
 

@@ -8,13 +8,13 @@ import { PipesDemoComponent }   	from './demo/pipes/pipes-demo.component';
 import { CustomRenderDemoComponent }from './demo/custom-render/custom-render-demo.component';
 
 const APP_ROUTES: Routes = [
-  { path: '',  pathMatch:'full', redirectTo: '/home' },
+  { path: '',  pathMatch:'full', redirectTo: 'home' },
   { path: 'home',  component: HomeComponent },
   { path: 'demo1', component: BasicDemoComponent },
   { path: 'demo2', component: AjaxLoadDemoComponent },
   { path: 'demo3', component: LazyLoadDemoComponent },
   { path: 'demo4', component: PipesDemoComponent },
-  { path: 'demo5', component: CustomRenderDemoComponent }  
+  { path: 'demo5', component: CustomRenderDemoComponent },  
 ];
 
 export const routing = RouterModule.forRoot(APP_ROUTES);

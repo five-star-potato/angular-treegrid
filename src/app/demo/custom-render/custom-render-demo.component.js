@@ -16,15 +16,18 @@ var treegrid_component_1 = require("../../treegrid/treegrid.component");
 /* Deomonstrate custom rendering                                                                                */
 /****************************************************************************************************************/
 var CustomRenderDemoComponent = (function () {
-    function CustomRenderDemoComponent(sanitizer) {
+    function CustomRenderDemoComponent(elementRef, sanitizer) {
+        this.elementRef = elementRef;
         this.sanitizer = sanitizer;
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
     CustomRenderDemoComponent.prototype.ngAfterViewInit = function () {
         // Initialize resizable columns after everything is rendered
-        // jQuery('body').on('input', 'input:checkbox', function() {
-        //     jQuery('#debugMessage').text(this.id + " is clicked");
-        // });
+        this.elementRef.nativeElement.querySelector('#chk0').innerHTML = "hello";
+    };
+    CustomRenderDemoComponent.prototype.onEvent = function (evt) {
+        console.log('cat event');
+        console.log(evt);
     };
     CustomRenderDemoComponent.prototype.ngOnInit = function () {
         var _this = this;
@@ -33,7 +36,10 @@ var CustomRenderDemoComponent = (function () {
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Select", dataField: "lastname",
-                render: function (data, row, index) { return _this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" id="chk' + index.toString() + '"/>&nbsp' + data.toUpperCase()); } }
+                render: function (data, row, index) {
+                    return _this.sanitizer.bypassSecurityTrustHtml("<input \n                                onclick=\"javascript: \n                                $('#debugMessage').text('" + data + "');\" type=\"checkbox\" id=\"chk" + index.toString() + "\"/>&nbsp" + data.toUpperCase());
+                }
+            }
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },
@@ -63,7 +69,7 @@ var CustomRenderDemoComponent = (function () {
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 
-        __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
+        __metadata('design:paramtypes', [core_1.ElementRef, platform_browser_1.DomSanitizationService])
     ], CustomRenderDemoComponent);
     return CustomRenderDemoComponent;
 }());

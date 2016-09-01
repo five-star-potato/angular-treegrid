@@ -8,7 +8,6 @@ import { DataTree, DataNode, SortDirection } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
 import { SimpleDataService } from './simpledata.service';
 
-
 export interface ColumnOrder {
     columnIndex?: number;
     //dataField?: string; // TODO: to be implemented
@@ -289,6 +288,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.dataView = [];
         rows.forEach(r => this.dataView.push(this.treeGridDef.data[r]));
     }
+
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
     private toggleTreeNode(node: DataNode) {
         this.numVisibleRows = this.dataTree.toggleNode(node);

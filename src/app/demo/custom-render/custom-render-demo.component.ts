@@ -1,5 +1,5 @@
 /// <reference path="../../../../typings/jquery/jquery.d.ts" />
-import { Component, Directive, OnInit,  AfterViewInit, ViewChild } from "@angular/core";
+import { Component, Directive, OnInit,  AfterViewInit, ViewChild, ElementRef } from "@angular/core";
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 
@@ -17,15 +17,15 @@ export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    constructor(private sanitizer: DomSanitizationService) {
+    constructor(private elementRef: ElementRef, private sanitizer: DomSanitizationService) {
     }
-
     ngAfterViewInit() {
         // Initialize resizable columns after everything is rendered
-        // jQuery('body').on('input', 'input:checkbox', function() {
-        //     jQuery('#debugMessage').text(this.id + " is clicked");
-        // });
-        
+        this.elementRef.nativeElement.querySelector('#chk0').innerHTML = "hello";
+    }
+    onEvent(evt:any) {
+        console.log('cat event');
+        console.log(evt);
     }
     ngOnInit() {
         this.treeDef.columns = [
@@ -34,7 +34,10 @@ export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Select", dataField: "lastname",
                 render: (data, row, index) => 
-                    { return this.sanitizer.bypassSecurityTrustHtml('<input type="checkbox" id="chk' + index.toString() + '"/>&nbsp' + data.toUpperCase()); }}
+                    {   return  this.sanitizer.bypassSecurityTrustHtml(`<input 
+                                onclick="javascript: 
+                                $('#debugMessage').text('` + data + `');" type="checkbox" id="chk` + index.toString() + `"/>&nbsp` + data.toUpperCase()); }
+                    }
         ];
         this.treeDef.data = [
             { emp_id: 101, firstname: "Tommen", lastname: "Baratheon" },
