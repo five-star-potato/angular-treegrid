@@ -5,7 +5,7 @@ import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
 
 /*
     Given the dynamic nature of modal dialog editor, it is better to leave it for the user to define the modal dialog and connect with the treegrid.
-    
+
 */
 @Component({
     selector: 'my-modal-editor',
@@ -23,6 +23,12 @@ import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
             <input type="text" class="form-control" [(ngModel)]="row['firstname']">
             <label>Family Name</label>
             <input type="text" class="form-control" [(ngModel)]="row['lastname']">
+            <!--
+                <div class="form-group" *ngFor="let dc of treeGridDef.columns">
+                    <label for="exampleInputEmail1">{{dc.labelHtml}}</label>
+                    <input type="text" class="form-control" [(ngModel)]="row[dc.dataField]">
+                </div>
+            -->            
         </div>
       </div>
       <div class="modal-footer">
