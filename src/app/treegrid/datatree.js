@@ -1,14 +1,5 @@
 "use strict";
-/***
-The idea is to create a representation of the 2D data array in a tree structure, using pk and fk fields.
-Each node of the tree contains a pointer to the row. Sorting will happen in the childNodes level, without affecting the
-row order in the original 2D array.
-***/
-(function (SortDirection) {
-    SortDirection[SortDirection["ASC"] = 0] = "ASC";
-    SortDirection[SortDirection["DESC"] = 1] = "DESC";
-})(exports.SortDirection || (exports.SortDirection = {}));
-var SortDirection = exports.SortDirection;
+var treedef_1 = require("./treedef");
 var DataTree = (function () {
     function DataTree(inputData, pk, fk) {
         var _this = this;
@@ -77,7 +68,7 @@ var DataTree = (function () {
         if (node.childNodes.length == 0)
             return;
         node.childNodes.sort(function (a, b) {
-            if (dir == SortDirection.ASC)
+            if (dir == treedef_1.SortDirection.ASC)
                 return a.row[field] > b.row[field] ? 1 : (a.row[field] < b.row[field] ? -1 : 0);
             else
                 return a.row[field] < b.row[field] ? 1 : (a.row[field] > b.row[field] ? -1 : 0);

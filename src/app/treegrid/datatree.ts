@@ -1,13 +1,10 @@
+import {SortDirection} from "./treedef";
+
 /***
 The idea is to create a representation of the 2D data array in a tree structure, using pk and fk fields.
 Each node of the tree contains a pointer to the row. Sorting will happen in the childNodes level, without affecting the
 row order in the original 2D array.
 ***/
-export enum SortDirection {
-    ASC,
-    DESC
-}
-
 export interface DataNode {
     row?: any;			// link to the actual data
     index?: number;		// index position data array

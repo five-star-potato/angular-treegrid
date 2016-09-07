@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
-
 import { DataService } from '../../shared/data.service';
 
 @Component({

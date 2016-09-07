@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 /* followed the instruction here to integrate with jQuery */
 /* http://stackoverflow.com/questions/34762720/using-jquery-globaly-within-angular-2-application */
 /// <reference path="../../../typings/jquery/jquery.d.ts" />
@@ -16,21 +19,8 @@ var core_2 = require("@angular/core");
 var datatree_1 = require('./datatree');
 var pagenav_component_1 = require('./pagenav.component');
 var simpledata_service_1 = require('./simpledata.service');
-var TreeGridDef = (function () {
-    function TreeGridDef() {
-        this.columns = [];
-        this.data = [];
-        this.paging = true;
-        this.sort = true;
-        this.pageSize = 25; /* make it small for debugging */
-        //currentPage: number = 0;
-        this.defaultOrder = [];
-        this.hierachy = null;
-        this.ajax = null;
-    }
-    return TreeGridDef;
-}());
-exports.TreeGridDef = TreeGridDef;
+var treedef_1 = require("./treedef");
+__export(require('./treedef'));
 /**
 * Controls the sorting by clicking the page header
 * The actual sorting the data is not done by this control. This control will fire the event to let the hosting component to handle the actual sorting.
@@ -56,7 +46,7 @@ var SortableHeader = (function () {
         if (!this.sort)
             return;
         // cyling sortDir among -1,0,1
-        this.sortDir = (this.sortDir == null) ? datatree_1.SortDirection.ASC : (this.sortDir == datatree_1.SortDirection.ASC ? datatree_1.SortDirection.DESC : datatree_1.SortDirection.ASC);
+        this.sortDir = (this.sortDir == null) ? treedef_1.SortDirection.ASC : (this.sortDir == treedef_1.SortDirection.ASC ? treedef_1.SortDirection.DESC : treedef_1.SortDirection.ASC);
         this.onSort.emit({ columnIndex: this.colIndex, sortDirection: this.sortDir });
         console.log('header clicked');
     };
@@ -68,7 +58,7 @@ var SortableHeader = (function () {
         __metadata('design:type', Object)
     ], SortableHeader.prototype, "onSort", void 0);
     __decorate([
-        core_1.Input(), 
+        core_1.Input('column-index'), 
         __metadata('design:type', Number)
     ], SortableHeader.prototype, "colIndex", void 0);
     __decorate([
@@ -107,11 +97,12 @@ var TreeGrid = (function () {
         this.dataService = dataService;
         this.elementRef = elementRef;
         this.debugVar = 0;
+        this.onDblClickRow = new core_2.EventEmitter();
         this.currentPage = { num: 0 };
         this.isLoading = false;
         this.self = this; // copy of context
         this.initalProcessed = false;
-        this.sortDirType = datatree_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
+        this.sortDirType = treedef_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
         this.currentPage.num = 0;
         console.log(this.elementRef);
     }
@@ -267,14 +258,25 @@ var TreeGrid = (function () {
         });
         return v;
     };
+    TreeGrid.prototype.dblClickRow = function (row) {
+        this.selectedRow = row;
+        this.onDblClickRow.emit(row);
+    };
+    TreeGrid.prototype.saveSelectedRowchanges = function (copyRow) {
+        Object.assign(this.selectedRow, copyRow);
+    };
     TreeGrid.prototype.debugFunc = function () {
         this.debugVar++;
         console.log(this.debugVar);
     };
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', TreeGridDef)
+        __metadata('design:type', treedef_1.TreeGridDef)
     ], TreeGrid.prototype, "treeGridDef", void 0);
+    __decorate([
+        core_2.Output(), 
+        __metadata('design:type', Object)
+    ], TreeGrid.prototype, "onDblClickRow", void 0);
     __decorate([
         core_2.ViewChild(pagenav_component_1.PageNavigator), 
         __metadata('design:type', pagenav_component_1.PageNavigator)
@@ -283,8 +285,8 @@ var TreeGrid = (function () {
         core_1.Component({
             moduleId: module.id,
             selector: 'tg-treegrid',
-            template: "\n\t\t\t<table class=\"treegrid-table table table-striped table-hover table-bordered\" data-resizable-columns-id=\"resizable-table\">\n                <colgroup>\n                        <!-- providing closing tags broke NG template parsing -->    \n                        <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n                </colgroup>\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                            tg-sortable-header [colIndex]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" \n                                >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr *ngFor=\"let dr of dataView; let x = index\">\n\t\t\t\t\t\t<td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 && showCollapseIcon(dr)\" (click)=\"toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && showExpandIcon(dr)\" (click)=\"toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                            <span *ngIf=\"dc.transforms\" [innerHTML]=\"transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <div class=\"row\">\n                <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n                <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav></div>\n            </div>\n            \n\t\t    ",
-            styles: ["th {\n    color: brown;\n}\nth.tg-sortable:after { \n    font-family: \"FontAwesome\"; \n    opacity: .3;\n    float: right;\n    content: \"\\f0dc\";\n}\nth.tg-sort-asc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0de\";\n    float: right;\n}\nth.tg-sort-desc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0dd\";\n    float: right;\n}\nspan.tg-opened, span.tg-closed {\n    margin-right: 0px;\n    cursor: pointer;\n}\nspan.tg-opened:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f078\";\n}\nspan.tg-closed:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f054\";\n}\nth.tg-header-left { \n    text-align: left;\n}\nth.tg-header-right { \n    text-align: right;\n}\nth.tg-header-center { \n    text-align: center;\n}\ntd.tg-body-left { \n    text-align: left;\n}\ntd.tg-body-right { \n    text-align: right;\n}\ntd.tg-body-center { \n    text-align: center;\n}\n\ndiv.loading-icon  {\n    opacity: 0;\n    transition: opacity 2s;\n}\n\ndiv.loading-icon.active {\n    opacity: 100;\n    transition: opacity 0.1s;\n}\n"],
+            template: "\n\t\t\t<table class=\"treegrid-table table table-hover  table-striped table-bordered\" data-resizable-columns-id=\"resizable-table\">\n                <colgroup>\n                        <!-- providing closing tags broke NG template parsing -->    \n                        <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n                </colgroup>\n\t\t\t    <thead>\n\t\t\t\t    <tr>\n\t\t\t\t\t    <th (onSort)=\"sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                            tg-sortable-header [column-index]=\"x\" [sort]=\"dc.sort\" [innerHTML]=\"dc.labelHtml\" \n                                [class.tg-sortable]=\"treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                                [class.tg-sort-asc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC\"\n                                [class.tg-sort-desc]=\"treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC\" \n                                >\n                        </th>\n\t\t\t\t    </tr>\n\t\t\t    </thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr *ngFor=\"let dr of dataView; let x = index\" (dblclick)=\"dblClickRow(dr)\">\n\t\t\t\t\t\t<td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\">\n                            <span class=\"tg-opened\" *ngIf=\"y == 0 && showCollapseIcon(dr)\" (click)=\"toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                            <span class=\"tg-closed\" *ngIf=\"y == 0 && showExpandIcon(dr)\" (click)=\"toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                            <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n    \t\t\t\t\t\t<span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                            <span *ngIf=\"dc.transforms\" [innerHTML]=\"transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                        </td>\n\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n            <div class=\"row\">\n                <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n                <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav></div>\n            </div>\n\t\t    ",
+            styles: ["th {\n    color: brown;\n}\nth.tg-sortable:after { \n    font-family: \"FontAwesome\"; \n    opacity: .3;\n    float: right;\n    content: \"\\f0dc\";\n}\nth.tg-sort-asc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0de\";\n    float: right;\n}\nth.tg-sort-desc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0dd\";\n    float: right;\n}\nspan.tg-opened, span.tg-closed {\n    margin-right: 0px;\n    cursor: pointer;\n}\nspan.tg-opened:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f078\";\n}\nspan.tg-closed:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f054\";\n}\nth.tg-header-left { \n    text-align: left;\n}\nth.tg-header-right { \n    text-align: right;\n}\nth.tg-header-center { \n    text-align: center;\n}\ntd.tg-body-left { \n    text-align: left;\n}\ntd.tg-body-right { \n    text-align: right;\n}\ntd.tg-body-center { \n    text-align: center;\n}\n\ndiv.loading-icon  {\n    opacity: 0;\n    transition: opacity 2s;\n}\n\ndiv.loading-icon.active {\n    opacity: 100;\n    transition: opacity 0.1s;\n}\n\n.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {\n  background-color: #E8F8F5;\n}\n"],
             directives: [SortableHeader, pagenav_component_1.PageNavigator],
             providers: [simpledata_service_1.SimpleDataService]
         }), 

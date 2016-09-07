@@ -6,6 +6,7 @@ import { AjaxLoadDemoComponent }   	from './demo/ajax-load/ajax-load-demo.compon
 import { LazyLoadDemoComponent }   	from './demo/lazy-load/lazy-load-demo.component';
 import { PipesDemoComponent }   	from './demo/pipes/pipes-demo.component';
 import { CustomRenderDemoComponent }from './demo/custom-render/custom-render-demo.component';
+import { ModalEditorDemoComponent }	from './demo/modal-editor/modal-editor-demo.component';
 
 const APP_ROUTES: Routes = [
   { path: '',  pathMatch:'full', redirectTo: 'home' },
@@ -15,6 +16,7 @@ const APP_ROUTES: Routes = [
   { path: 'demo3', component: LazyLoadDemoComponent },
   { path: 'demo4', component: PipesDemoComponent },
   { path: 'demo5', component: CustomRenderDemoComponent },  
+  { path: 'demo6', component: ModalEditorDemoComponent }
 ];
 
 export const routing = RouterModule.forRoot(APP_ROUTES);

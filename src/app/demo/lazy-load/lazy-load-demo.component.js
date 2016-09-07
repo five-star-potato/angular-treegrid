@@ -30,10 +30,10 @@ var LazyLoadDemoComponent = (function () {
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Date of Birth", dataField: "dob", className: "" },
+            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
     __decorate([

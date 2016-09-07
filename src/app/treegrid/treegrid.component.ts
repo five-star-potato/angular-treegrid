@@ -4,63 +4,12 @@
 import { Component, Directive, ComponentResolver, Input, ComponentMetadata, SimpleChange, ComponentFactory, ReflectiveInjector, OnInit, OnChanges} from "@angular/core";
 import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementRef, HostListener, ViewChild, ViewContainerRef, AfterViewInit } from "@angular/core";
 import { SafeHtml } from  '@angular/platform-browser';
-import { DataTree, DataNode, SortDirection } from './datatree';
+import { DataTree, DataNode } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
 import { SimpleDataService } from './simpledata.service';
+import { AjaxConfig, ColumnDef, ColumnOrder, ColumnTransform, EditorConfig, EditorType, SortDirection, TreeGridDef, TreeHierarchy } from "./treedef";
 
-export interface ColumnOrder {
-    columnIndex?: number;
-    //dataField?: string; // TODO: to be implemented
-    sortDirection: SortDirection;
-}
-
-/****************************
-* Some settings related to AJAX. 
-*****************************/
-export interface AjaxConfig {
-    url: string;        
-    method?: string;        // POST or GET
-    lazyLoad?: boolean;     // Lazy Loading means initially only the top level data rows are loaded. When the user clicks the expand button beside the rows, the corresponding children rows will then be fetched and inserted into the existing arrays of data rows
-    childrenIndicatorField?: string;    // This is the data field (returned from the ajax called) to indicate whether this row has children rows that can be fetched. So that the UI knows whether to place an "expand" icon beside the row
-    doNotLoad?: boolean;    // if set to true, the treeGrid will not $http intiallay. You need to call loadData() explicitly
-}
-/****************************
-* To match children rows with parent rows, I used the metaphor like database FK and PK
-****************************/
-export interface TreeHierarchy {
-    foreignKeyField: string;
-    primaryKeyField: string;
-}
-// Enable the user to use "Pipes" to transform the data
-export interface ColumnTransform {
-    pipe: PipeTransform,
-    param?: string
-}
-/**
-* To use this treegrid control, you need to provide the TreeGridDef to the TreeGrid component - TreeGridDef contains the column definitions and other options
-*/
-export interface ColumnDef {
-    labelHtml: string;
-    dataField: string;
-    width?: string;
-    className?: string;
-    sort?: boolean;
-    sortDirection?: SortDirection;
-    render?: (data: any, row: any, index: number) => SafeHtml;
-    transforms?: ColumnTransform[];
-}
-
-export class TreeGridDef  {
-    columns: ColumnDef[] = [];
-    data: any[] = [];
-    paging: boolean = true;
-    sort: boolean = true;
-    pageSize: number = 25; /* make it small for debugging */
-    //currentPage: number = 0;
-    defaultOrder: ColumnOrder[] = [];
-    hierachy: TreeHierarchy = null;
-    ajax: AjaxConfig = null;
-}
+export * from './treedef';
 
 /**
 * Controls the sorting by clicking the page header
@@ -77,7 +26,7 @@ export class SortableHeader {
 
     /* the actual sorting is done by the parent */
     @Output() onSort = new EventEmitter<ColumnOrder>();
-    @Input() colIndex: number;
+    @Input('column-index') colIndex: number;
     @Input() sort: boolean;
 
     constructor(private e: ElementRef, private vr: ViewContainerRef) {
@@ -107,7 +56,7 @@ export class SortableHeader {
     moduleId: module.id,
     selector: 'tg-treegrid',
     template: `
-			<table class="treegrid-table table table-striped table-hover table-bordered" data-resizable-columns-id="resizable-table">
+			<table class="treegrid-table table table-hover  table-striped table-bordered" data-resizable-columns-id="resizable-table">
                 <colgroup>
                         <!-- providing closing tags broke NG template parsing -->    
                         <col *ngFor="let dc of treeGridDef.columns" [class]="dc.className"> 
@@ -115,7 +64,7 @@ export class SortableHeader {
 			    <thead>
 				    <tr>
 					    <th (onSort)="sortColumnEvtHandler($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
-                            tg-sortable-header [colIndex]="x" [sort]="dc.sort" [innerHTML]="dc.labelHtml" 
+                            tg-sortable-header [column-index]="x" [sort]="dc.sort" [innerHTML]="dc.labelHtml" 
                                 [class.tg-sortable]="treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC"
                                 [class.tg-sort-asc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC"
                                 [class.tg-sort-desc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC" 
@@ -124,7 +73,7 @@ export class SortableHeader {
 				    </tr>
 			    </thead>
 				<tbody>
-					<tr *ngFor="let dr of dataView; let x = index">
+					<tr *ngFor="let dr of dataView; let x = index" (dblclick)="dblClickRow(dr)">
 						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? calcIndent(dr).toString() + 'px' : ''" [class]="dc.className">
                             <span class="tg-opened" *ngIf="y == 0 && showCollapseIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                             <span class="tg-closed" *ngIf="y == 0 && showExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
@@ -140,7 +89,6 @@ export class SortableHeader {
                 <div class="loading-icon col-md-offset-4 col-md-4" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
                 <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
             </div>
-            
 		    `,
     styles: [`th {
     color: brown;
@@ -201,6 +149,10 @@ div.loading-icon.active {
     opacity: 100;
     transition: opacity 0.1s;
 }
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  background-color: #E8F8F5;
+}
 `],
     directives: [SortableHeader, PageNavigator ],
     providers: [ SimpleDataService ]
@@ -209,6 +161,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private debugVar:number = 0;
     @Input()
     treeGridDef: TreeGridDef;
+    @Output() 
+    onDblClickRow = new EventEmitter<any>();
 
     @ViewChild(PageNavigator)
     private pageNav: PageNavigator;
@@ -219,6 +173,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private numVisibleRows: number;
     private currentPage: PageNumber = { num: 0 };
     private isLoading: boolean = false;
+    private selectedRow: any;
+
     self = this; // copy of context
 
     private initalProcessed: boolean = false;
@@ -388,10 +344,18 @@ export class TreeGrid implements OnInit, AfterViewInit {
         })
         return v;
     }
+    dblClickRow(row: any) {
+        this.selectedRow = row;
+        this.onDblClickRow.emit(row);
+    }
+    saveSelectedRowchanges(copyRow: any) {
+        Object.assign(this.selectedRow, copyRow);
+    }
     debugFunc() {
         this.debugVar++;
         console.log(this.debugVar);
     }
+
 	/* event not fired when treeGridDef was changed programmatically. Is this a bug?
 	http://www.bennadel.com/blog/3053-changing-directive-inputs-programmatically-won-t-trigger-ngonchanges-in-angularjs-2-beta-9.htm
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {
