@@ -97,7 +97,7 @@ var TreeGrid = (function () {
         this.dataService = dataService;
         this.elementRef = elementRef;
         this.debugVar = 0;
-        this.onDblClickRow = new core_2.EventEmitter();
+        this.onRowDblClick = new core_2.EventEmitter();
         this.currentPage = { num: 0 };
         this.isLoading = false;
         this.self = this; // copy of context
@@ -260,7 +260,7 @@ var TreeGrid = (function () {
     };
     TreeGrid.prototype.dblClickRow = function (row) {
         this.selectedRow = row;
-        this.onDblClickRow.emit(row);
+        this.onRowDblClick.emit(row);
     };
     TreeGrid.prototype.saveSelectedRowchanges = function (copyRow) {
         Object.assign(this.selectedRow, copyRow);
@@ -276,7 +276,7 @@ var TreeGrid = (function () {
     __decorate([
         core_2.Output(), 
         __metadata('design:type', Object)
-    ], TreeGrid.prototype, "onDblClickRow", void 0);
+    ], TreeGrid.prototype, "onRowDblClick", void 0);
     __decorate([
         core_2.ViewChild(pagenav_component_1.PageNavigator), 
         __metadata('design:type', pagenav_component_1.PageNavigator)

@@ -10,6 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require("@angular/core");
 var treegrid_component_1 = require("../../treegrid/treegrid.component");
+/*
+    Given the dynamic nature of modal dialog editor, it is better to leave it for the user to define the modal dialog and connect with the treegrid.
+    
+*/
 var MyModalEditor = (function () {
     function MyModalEditor() {
         this.onSave = new core_1.EventEmitter();
@@ -78,7 +82,7 @@ var ModalEditorDemoComponent = (function () {
     ModalEditorDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n    <div *componentOutlet=\"html; context:self; selector:'my-dynamic-component'\"></div>\n\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onDblClickRow)=\"modalEditor.show($event)\">\n    </tg-treegrid>\n\n    <my-modal-editor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n    ",
+            template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n    <div *componentOutlet=\"html; context:self; selector:'my-dynamic-component'\"></div>\n\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\">\n    </tg-treegrid>\n\n    <my-modal-editor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n    ",
             directives: [treegrid_component_1.TreeGrid, MyModalEditor],
         }), 
         __metadata('design:paramtypes', [])

@@ -3,6 +3,10 @@ import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from
 import { TreeGrid, TreeGridDef, EditorType } from "../../treegrid/treegrid.component";
 import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
 
+/*
+    Given the dynamic nature of modal dialog editor, it is better to leave it for the user to define the modal dialog and connect with the treegrid.
+    
+*/
 @Component({
     selector: 'my-modal-editor',
     template: `
@@ -52,7 +56,7 @@ class MyModalEditor {
     <p>{{message}}</p>
     <div *componentOutlet="html; context:self; selector:'my-dynamic-component'"></div>
 
-    <tg-treegrid [treeGridDef]="treeGridDef" (onDblClickRow)="modalEditor.show($event)">
+    <tg-treegrid [treeGridDef]="treeGridDef" (onRowDblClick)="modalEditor.show($event)">
     </tg-treegrid>
 
     <my-modal-editor (onSave)="treeGrid.saveSelectedRowchanges($event)"></my-modal-editor>

@@ -162,7 +162,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     @Input()
     treeGridDef: TreeGridDef;
     @Output() 
-    onDblClickRow = new EventEmitter<any>();
+    onRowDblClick = new EventEmitter<any>();
 
     @ViewChild(PageNavigator)
     private pageNav: PageNavigator;
@@ -346,7 +346,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     }
     dblClickRow(row: any) {
         this.selectedRow = row;
-        this.onDblClickRow.emit(row);
+        this.onRowDblClick.emit(row);
     }
     saveSelectedRowchanges(copyRow: any) {
         Object.assign(this.selectedRow, copyRow);
