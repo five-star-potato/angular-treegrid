@@ -24,7 +24,7 @@ import { SimpleDataService } from '../../treegrid/simpledata.service';
             <input type="text" class="form-control" [(ngModel)]="row['firstname']">
             <label>Family Name</label>
             <input type="text" class="form-control" [(ngModel)]="row['lastname']">
-            <label>Country</label>
+            <label>Origin</label>
             <select class="form-control" [(ngModel)]="row['origin']">
               <option *ngFor="let country of countries" value= {{country}}>
                 {{country}}
