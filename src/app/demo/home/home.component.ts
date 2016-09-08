@@ -87,8 +87,7 @@ export class HomeComponent implements OnInit {
 
     constructor(private dataService: DataService) { }
 
-    ngOnInit() { 
+    ngOnInit() {
         //this.projectName = this.dataService.getProjectName();
     }
-
 }

@@ -12,12 +12,13 @@ export class SimpleDataService {
         this.headers.append('Content-Type', 'application/json');
         this.headers.append('Access-Control-Allow-Origin', '*');
     }
-
+/*
     get(url: string): Observable<any[]> {
         return this.http.get(url, { headers: this.headers })
             .map((res: Response) => res.json())
             //.catch(this.handleError);
     }
+*/
     post(url: string): Observable<any[]> {
         return this.http.post(url, "", { headers: this.headers })
             .map((res: Response) => res.json())

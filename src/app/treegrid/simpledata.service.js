@@ -22,11 +22,13 @@ var SimpleDataService = (function () {
         this.headers.append('Content-Type', 'application/json');
         this.headers.append('Access-Control-Allow-Origin', '*');
     }
-    SimpleDataService.prototype.get = function (url) {
-        return this.http.get(url, { headers: this.headers })
-            .map(function (res) { return res.json(); });
-        //.catch(this.handleError);
-    };
+    /*
+        get(url: string): Observable<any[]> {
+            return this.http.get(url, { headers: this.headers })
+                .map((res: Response) => res.json())
+                //.catch(this.handleError);
+        }
+    */
     SimpleDataService.prototype.post = function (url) {
         return this.http.post(url, "", { headers: this.headers })
             .map(function (res) { return res.json(); });

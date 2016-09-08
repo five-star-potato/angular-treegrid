@@ -176,10 +176,6 @@ var TreeGrid = (function () {
                 }, function (err) { console.log(err); });
             }
             else {
-                this.dataService.get(ajax.url).subscribe(function (ret) {
-                    _this.treeGridDef.data = ret;
-                    _this.refresh();
-                }, function (err) { console.log(err); });
             }
         }
     };

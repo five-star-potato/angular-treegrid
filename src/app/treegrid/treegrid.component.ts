@@ -259,10 +259,12 @@ export class TreeGrid implements OnInit, AfterViewInit {
                 }, (err: any) => { console.log(err) });
             }
             else {
+                /*
                 this.dataService.get(ajax.url).subscribe((ret: any) => {
                         this.treeGridDef.data = ret;
                         this.refresh();
                     }, (err: any) => { console.log(err) });
+                */
             }
         }
     }
