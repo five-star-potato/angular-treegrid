@@ -1,7 +1,8 @@
-import { Component, Directive, OnInit, ViewChild, Pipe, PipeTransform} from "@angular/core";
+import { Component, Directive, OnInit, ViewChild, Pipe, PipeTransform, AfterViewInit, ElementRef } from "@angular/core";
 import { DatePipe, UpperCasePipe, LowerCasePipe } from '@angular/common';
-import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
+
+declare var hljs: any;
 
 /****************************************************************************************************************/
 /* Deomonstrate the use of Pipes in fomatting. You can chain pipes by supplying more than one pips             */
@@ -17,18 +18,53 @@ export class MyPipe implements PipeTransform {
     moduleId: module.id,
     template: `
     <h2>Formatting with Pipes</h2>
+    <h3>Description</h3>
+    Features included:
+    <ul>
+        <li>Using built-in pipes or custom pipes to format your data</li>
+    </ul>
+    
+    <h3>Sample Code</h3>
+    <pre>
+        <code #code class="typescript">
+/* we use this pipe to attch "- eh" at the end of <strong>value</strong> */
+@Pipe(&#123;name: 'MyPipe'&#125;)
+export class MyPipe implements PipeTransform &#123;
+  transform(value: string, param: string): string &#123;
+    return &#96;$&#123;value&#125; $&#123;param&#125;&#96;;
+  &#125;
+&#125;
+
+export class PipesDemoComponent implements OnInit &#123;
+    ngOnInit() &#123;
+        this.treeDef.columns = [
+            &#123; labelHtml: "Employee ID", dataField: "emp_id" &#125;,
+            &#123; labelHtml: "Given name", dataField: "firstname" &#125;,
+            &#123; labelHtml: "Family name", dataField: "lastname", transforms: [&#123; pipe: new LowerCasePipe() &#125;, &#123; pipe: new MyPipe(), param: " - eh"&#125;] &#125;,
+            &#123; labelHtml: "Birthdate", dataField: "dob", transforms: [&#123; pipe: new DatePipe(), param: "yMMMMd" &#125;, &#123; pipe: new UpperCasePipe() &#125;] &#125;
+        ];
+        /* ... */    
+    &#125;
+&#125;
+        </code>
+     </pre>
+
+    <h3>Demo</h3>
     <tg-treegrid [treeGridDef]="treeDef">
     </tg-treegrid>
     `,
-    directives: [TreeGrid],
-    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
+    directives: [TreeGrid]
 })
-export class PipesDemoComponent implements OnInit {
+export class PipesDemoComponent implements OnInit, AfterViewInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    constructor() {
+    @ViewChild('code')
+    codeElement: ElementRef;
+
+    ngAfterViewInit() {
+        hljs.highlightBlock(this.codeElement.nativeElement);
     }
 
     ngOnInit() {

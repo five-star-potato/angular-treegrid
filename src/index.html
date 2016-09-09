@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html>
 <head>
     <base href="/">
@@ -6,10 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="Angular 2 Bare Bones Starter">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300|Roboto" rel="stylesheet">    
+    
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" >
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="lib/jquery-resizable-columns/jquery.resizableColumns.css" rel="stylesheet" >
-    <link href="lib/prism/prism.css" rel="stylesheet" >
     <link href="styles/styles.css" rel="stylesheet" >
 
     <!-- Polyfill(s) for older browsers -->
@@ -22,9 +23,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="lib/jquery-resizable-columns/jquery.resizableColumns.js"></script>
-    <script src="lib/prism/prism.js"></script>
 
-    <!-- remove for bundle usage -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/arduino-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
     <script src="systemjs.config.js"></script>
     <script>
         System.import('app').catch(function(err){ console.error(err); });
@@ -49,10 +54,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- add for bundle usage -->
-    <!-- <script src="dist/bundle.min.js"></script> -->
-    <!-- add for bundle usage -->
 
 </body>
 </html>

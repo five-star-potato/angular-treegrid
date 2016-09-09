@@ -3,6 +3,8 @@ import { Component, Directive, OnInit,  AfterViewInit, ViewChild, ElementRef } f
 import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 
+declare var hljs: any;
+
 /****************************************************************************************************************/
 /* Deomonstrate custom rendering                                                                                */
 /****************************************************************************************************************/
@@ -10,10 +12,37 @@ import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
     moduleId: module.id,
     template: `
     <h2>Custom Column Rendering</h2>
+    <h3>Description</h3>
+    Features included:
+    <ul>
+        <li>Using the <strong>render</strong> property to provide a function to draw the cell</li>
+    </ul>
+    
+    <h3>Sample Code</h3>
+    <pre>
+        <code #code class="typescript">
+this.treeDef.columns = [
+    &#123; labelHtml: "Employee ID", dataField: "emp_id", sort: true &#125;,
+    &#123; labelHtml: "Given&lt;br/&gt;name", dataField: "firstname" &#125;,
+    &#123; labelHtml: "Family&lt;br/&gt;name", dataField: "lastname", className: "tg-body-center tg-header-center" &#125;,
+    &#123; labelHtml: "Select", dataField: "lastname",
+        render: (data, row, index) => 
+            &#123; 
+                return  this.sanitizer.bypassSecurityTrustHtml(&#96;&lt;input 
+                        onclick="javascript: $('#debugMessage').text('&#96; + data + &#96;');" 
+                        type="checkbox" id="chk&#96; + index.toString() + &#96;"/&gt;&nbsp&#96; + data.toUpperCase()); 
+            &#125; 
+    &#125; 
+];
+        </code>
+     </pre>
+
+    <h3>Demo</h3>
+
     <tg-treegrid [treeGridDef]="treeDef">
     </tg-treegrid>
 
-    <div id="debugMessage" style="width:500px; height:200px; border: 1px solid #ddd">
+    <div id="debugMessage" style="width:500px; height:100px; border: 1px solid #ddd">
     Debug Message
     </div>
     `,
@@ -25,11 +54,15 @@ export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
+    @ViewChild('code')
+    codeElement: ElementRef;
+
     constructor(private elementRef: ElementRef, private sanitizer: DomSanitizationService) {
     }
     ngAfterViewInit() {
         // Initialize resizable columns after everything is rendered
         this.elementRef.nativeElement.querySelector('#chk0').innerHTML = "hello";
+        hljs.highlightBlock(this.codeElement.nativeElement);
     }
     onEvent(evt:any) {
         console.log('cat event');

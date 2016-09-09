@@ -63,20 +63,20 @@ import { DataService } from '../../shared/data.service';
                                 You can also control completely how the grid cell is rendered by providing a rendering function. 
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <a routerLink="/demo6">Modal Dialog Editor</a>
+                            </td>
+                            <td>
+                                Data in the grid can be updated through a custom modal dialog editor (Modal dialog component is not part of this library. But the demo  provided a sample )
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    <!--
-
-                    <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo1" class="btn btn-default">Simple Table Data</a></li>
-                    <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo2" class="btn btn-default">Loading with Ajax</a></li>
-                    <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo3" class="btn btn-default">Lazy Loading with Ajax</a></li>
-                    <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo4" class="btn btn-default">Formatting with Pipes</a></li>
-                    <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo5" class="btn btn-default">Custom Column Rendering</a></li>
-
-    -->    
+      
     `,
     directives: [ ROUTER_DIRECTIVES ],
     providers: [ DataService ]

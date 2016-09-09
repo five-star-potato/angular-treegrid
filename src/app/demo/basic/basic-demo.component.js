@@ -9,14 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require("@angular/core");
-var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../../treegrid/treegrid.component");
-var componentOutlet_component_1 = require("../../treegrid/componentOutlet.component");
 var BasicDemoComponent = (function () {
-    function BasicDemoComponent(sanitizer) {
-        this.sanitizer = sanitizer;
+    function BasicDemoComponent() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    BasicDemoComponent.prototype.ngAfterViewInit = function () {
+        hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     BasicDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
@@ -44,14 +44,17 @@ var BasicDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], BasicDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([
+        core_1.ViewChild('code'), 
+        __metadata('design:type', core_1.ElementRef)
+    ], BasicDemoComponent.prototype, "codeElement", void 0);
     BasicDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n    <div *componentOutlet=\"html; context:self; selector:'my-dynamic-component'\"></div>\n\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-            directives: [treegrid_component_1.TreeGrid, componentOutlet_component_1.ComponentOutlet],
-            providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS],
+            template: "\n    <h2>Simple Table Data</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Table data statically defined</li>\n        <li>Column Resizing</li>\n        <li>Sorting</li>\n        <li>Paging</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family name\", dataField: \"lastname\" &#125;\n    &#125;    \n    this.treeDef.data = [\n        &#123; emp_id: 101, firstname: \"Tommen\", lastname: \"Baratheon\" &#125;,\n        &#123; emp_id: 102, firstname: \"Eddard\", lastname: \"Stark\" &#125;,\n        /* ... */\n        &#123; emp_id: 67, firstname: \"Ramsay\", lastname: \"Bolton\" &#125;\n    ];\n    this.treeDef.pageSize = 10;\n&#125;;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+            directives: [treegrid_component_1.TreeGrid]
         }), 
-        __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])
+        __metadata('design:paramtypes', [])
     ], BasicDemoComponent);
     return BasicDemoComponent;
 }());

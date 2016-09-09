@@ -2,7 +2,15 @@ html {
     overflow-y: scroll;
     overflow-x: hidden;
 }
-
+body {
+    font-family: 'Roboto', sans-serif;  
+}
+h2 {
+    font-family: 'Open Sans', sans-serif;
+}
+h3 {
+    color: #333;
+}
 main {
     position: relative;
     padding-top: 60px;

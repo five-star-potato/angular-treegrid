@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require("@angular/core");
 var common_1 = require('@angular/common');
-var platform_browser_1 = require('@angular/platform-browser');
 var treegrid_component_1 = require("../../treegrid/treegrid.component");
 /****************************************************************************************************************/
 /* Deomonstrate the use of Pipes in fomatting. You can chain pipes by supplying more than one pips             */
@@ -32,6 +31,9 @@ var PipesDemoComponent = (function () {
     function PipesDemoComponent() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    PipesDemoComponent.prototype.ngAfterViewInit = function () {
+        hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     PipesDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
@@ -48,12 +50,15 @@ var PipesDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], PipesDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([
+        core_1.ViewChild('code'), 
+        __metadata('design:type', core_1.ElementRef)
+    ], PipesDemoComponent.prototype, "codeElement", void 0);
     PipesDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Formatting with Pipes</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-            directives: [treegrid_component_1.TreeGrid],
-            providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
+            template: "\n    <h2>Formatting with Pipes</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using built-in pipes or custom pipes to format your data</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n/* we use this pipe to attch \"- eh\" at the end of <strong>value</strong> */\n@Pipe(&#123;name: 'MyPipe'&#125;)\nexport class MyPipe implements PipeTransform &#123;\n  transform(value: string, param: string): string &#123;\n    return &#96;$&#123;value&#125; $&#123;param&#125;&#96;;\n  &#125;\n&#125;\n\nexport class PipesDemoComponent implements OnInit &#123;\n    ngOnInit() &#123;\n        this.treeDef.columns = [\n            &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n            &#123; labelHtml: \"Given name\", dataField: \"firstname\" &#125;,\n            &#123; labelHtml: \"Family name\", dataField: \"lastname\", transforms: [&#123; pipe: new LowerCasePipe() &#125;, &#123; pipe: new MyPipe(), param: \" - eh\"&#125;] &#125;,\n            &#123; labelHtml: \"Birthdate\", dataField: \"dob\", transforms: [&#123; pipe: new DatePipe(), param: \"yMMMMd\" &#125;, &#123; pipe: new UpperCasePipe() &#125;] &#125;\n        ];\n        /* ... */    \n    &#125;\n&#125;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+            directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])
     ], PipesDemoComponent);

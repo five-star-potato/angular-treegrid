@@ -24,6 +24,7 @@ var CustomRenderDemoComponent = (function () {
     CustomRenderDemoComponent.prototype.ngAfterViewInit = function () {
         // Initialize resizable columns after everything is rendered
         this.elementRef.nativeElement.querySelector('#chk0').innerHTML = "hello";
+        hljs.highlightBlock(this.codeElement.nativeElement);
     };
     CustomRenderDemoComponent.prototype.onEvent = function (evt) {
         console.log('cat event');
@@ -62,10 +63,14 @@ var CustomRenderDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], CustomRenderDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([
+        core_1.ViewChild('code'), 
+        __metadata('design:type', core_1.ElementRef)
+    ], CustomRenderDemoComponent.prototype, "codeElement", void 0);
     CustomRenderDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Custom Column Rendering</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n\n    <div id=\"debugMessage\" style=\"width:500px; height:200px; border: 1px solid #ddd\">\n    Debug Message\n    </div>\n    ",
+            template: "\n    <h2>Custom Column Rendering</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using the <strong>render</strong> property to provide a function to draw the cell</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\nthis.treeDef.columns = [\n    &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\", sort: true &#125;,\n    &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n    &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n    &#123; labelHtml: \"Select\", dataField: \"lastname\",\n        render: (data, row, index) => \n            &#123; \n                return  this.sanitizer.bypassSecurityTrustHtml(&#96;&lt;input \n                        onclick=\"javascript: $('#debugMessage').text('&#96; + data + &#96;');\" \n                        type=\"checkbox\" id=\"chk&#96; + index.toString() + &#96;\"/&gt;&nbsp&#96; + data.toUpperCase()); \n            &#125; \n    &#125; \n];\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n\n    <div id=\"debugMessage\" style=\"width:500px; height:100px; border: 1px solid #ddd\">\n    Debug Message\n    </div>\n    ",
             directives: [treegrid_component_1.TreeGrid],
             providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
         }), 

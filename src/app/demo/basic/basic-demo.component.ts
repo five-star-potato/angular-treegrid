@@ -1,28 +1,61 @@
-import { Component, Directive, OnInit, ViewChild } from "@angular/core";
-import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
+import { Component, Directive, OnInit, ViewChild, AfterViewInit, ElementRef } from "@angular/core";
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
-import { ComponentOutlet } from "../../treegrid/componentOutlet.component";
+
+declare var hljs: any;
 
 @Component({
     moduleId: module.id,
     template: `
     <h2>Simple Table Data</h2>
+    <h3>Description</h3>
+    Features included:
+    <ul>
+        <li>Table data statically defined</li>
+        <li>Column Resizing</li>
+        <li>Sorting</li>
+        <li>Paging</li>
+    </ul>
+    
+    <h3>Sample Code</h3>
+    <pre>
+        <code #code class="typescript">
+@ViewChild(TreeGrid)
+treeGrid: TreeGrid;
+treeDef: TreeGridDef = new TreeGridDef();
 
-    <p>{{message}}</p>
-    <div *componentOutlet="html; context:self; selector:'my-dynamic-component'"></div>
+ngOnInit&#40;&#41;  &#123;
+    this.treeDef.columns = [
+        &#123; labelHtml: "Employee ID", dataField: "emp_id" &#125;,
+        &#123; labelHtml: "Given name", dataField: "firstname" &#125;,
+        &#123; labelHtml: "Family name", dataField: "lastname" &#125;
+    &#125;    
+    this.treeDef.data = [
+        &#123; emp_id: 101, firstname: "Tommen", lastname: "Baratheon" &#125;,
+        &#123; emp_id: 102, firstname: "Eddard", lastname: "Stark" &#125;,
+        /* ... */
+        &#123; emp_id: 67, firstname: "Ramsay", lastname: "Bolton" &#125;
+    ];
+    this.treeDef.pageSize = 10;
+&#125;;
+        </code>
+     </pre>
 
+    <h3>Demo</h3>
     <tg-treegrid [treeGridDef]="treeDef">
     </tg-treegrid>
     `,
-    directives: [TreeGrid, ComponentOutlet],
-    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS],
+    directives: [TreeGrid]
 })
-export class BasicDemoComponent implements OnInit {
+export class BasicDemoComponent implements OnInit, AfterViewInit {
     @ViewChild(TreeGrid)
-    private treeGrid: TreeGrid;
+    treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    constructor(private sanitizer: DomSanitizationService) {
+    @ViewChild('code')
+    codeElement: ElementRef;
+
+    ngAfterViewInit() {
+        hljs.highlightBlock(this.codeElement.nativeElement);
     }
 
     ngOnInit() {

@@ -24769,7 +24769,7 @@ $__System.registerDynamic("app/demo/home/home.component.js", ["node_modules/@ang
   return module.exports;
 });
 
-$__System.registerDynamic("app/treegrid/componentOutlet.component.js", ["node_modules/@angular/core//bundles/core.umd.js"], true, function($__require, exports, module) {
+$__System.registerDynamic("app/demo/basic/basic-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -24792,75 +24792,14 @@ $__System.registerDynamic("app/treegrid/componentOutlet.component.js", ["node_mo
       return Reflect.metadata(k, v);
   };
   var core_1 = $__require('node_modules/@angular/core//bundles/core.umd.js');
-  var ComponentOutlet = (function() {
-    function ComponentOutlet(vcRef, compiler) {
-      this.vcRef = vcRef;
-      this.compiler = compiler;
-    }
-    ComponentOutlet.prototype._createDynamicComponent = function() {
-      this.context = this.context || {};
-      var metadata = new core_1.ComponentMetadata({
-        selector: this.selector,
-        template: this.template
-      });
-      var cmpClass = (function() {
-        function _() {}
-        return _;
-      }());
-      cmpClass.prototype = this.context;
-      return core_1.Component(metadata)(cmpClass);
-    };
-    ComponentOutlet.prototype.ngOnChanges = function() {
-      var _this = this;
-      if (!this.template)
-        return;
-      this.compiler.compileComponentAsync(this._createDynamicComponent()).then(function(factory) {
-        var injector = core_1.ReflectiveInjector.fromResolvedProviders([], _this.vcRef.parentInjector);
-        _this.vcRef.clear();
-        _this.vcRef.createComponent(factory, 0, injector);
-      });
-    };
-    __decorate([core_1.Input('componentOutlet'), __metadata('design:type', String)], ComponentOutlet.prototype, "template", void 0);
-    __decorate([core_1.Input('componentOutletSelector'), __metadata('design:type', String)], ComponentOutlet.prototype, "selector", void 0);
-    __decorate([core_1.Input('componentOutletContext'), __metadata('design:type', Object)], ComponentOutlet.prototype, "context", void 0);
-    ComponentOutlet = __decorate([core_1.Directive({selector: '[componentOutlet]'}), __metadata('design:paramtypes', [core_1.ViewContainerRef, core_1.Compiler])], ComponentOutlet);
-    return ComponentOutlet;
-  }());
-  exports.ComponentOutlet = ComponentOutlet;
-  return module.exports;
-});
-
-$__System.registerDynamic("app/demo/basic/basic-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "node_modules/@angular/platform-browser//bundles/platform-browser.umd.js", "app/treegrid/treegrid.component.js", "app/treegrid/componentOutlet.component.js"], true, function($__require, exports, module) {
-  "use strict";
-  ;
-  var define,
-      global = this || self,
-      GLOBAL = global;
-  var __decorate = (this && this.__decorate) || function(decorators, target, key, desc) {
-    var c = arguments.length,
-        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
-        d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-      r = Reflect.decorate(decorators, target, key, desc);
-    else
-      for (var i = decorators.length - 1; i >= 0; i--)
-        if (d = decorators[i])
-          r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-  };
-  var __metadata = (this && this.__metadata) || function(k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function")
-      return Reflect.metadata(k, v);
-  };
-  var core_1 = $__require('node_modules/@angular/core//bundles/core.umd.js');
-  var platform_browser_1 = $__require('node_modules/@angular/platform-browser//bundles/platform-browser.umd.js');
   var treegrid_component_1 = $__require('app/treegrid/treegrid.component.js');
-  var componentOutlet_component_1 = $__require('app/treegrid/componentOutlet.component.js');
   var BasicDemoComponent = (function() {
-    function BasicDemoComponent(sanitizer) {
-      this.sanitizer = sanitizer;
+    function BasicDemoComponent() {
       this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    BasicDemoComponent.prototype.ngAfterViewInit = function() {
+      hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     BasicDemoComponent.prototype.ngOnInit = function() {
       this.treeDef.columns = [{
         labelHtml: "Employee ID",
@@ -24929,19 +24868,19 @@ $__System.registerDynamic("app/demo/basic/basic-demo.component.js", ["node_modul
       this.treeDef.pageSize = 10;
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], BasicDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], BasicDemoComponent.prototype, "codeElement", void 0);
     BasicDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n    <div *componentOutlet=\"html; context:self; selector:'my-dynamic-component'\"></div>\n\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-      directives: [treegrid_component_1.TreeGrid, componentOutlet_component_1.ComponentOutlet],
-      providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
-    }), __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])], BasicDemoComponent);
+      template: "\n    <h2>Simple Table Data</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Table data statically defined</li>\n        <li>Column Resizing</li>\n        <li>Sorting</li>\n        <li>Paging</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family name\", dataField: \"lastname\" &#125;\n    &#125;    \n    this.treeDef.data = [\n        &#123; emp_id: 101, firstname: \"Tommen\", lastname: \"Baratheon\" &#125;,\n        &#123; emp_id: 102, firstname: \"Eddard\", lastname: \"Stark\" &#125;,\n        /* ... */\n        &#123; emp_id: 67, firstname: \"Ramsay\", lastname: \"Bolton\" &#125;\n    ];\n    this.treeDef.pageSize = 10;\n&#125;;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+      directives: [treegrid_component_1.TreeGrid]
+    }), __metadata('design:paramtypes', [])], BasicDemoComponent);
     return BasicDemoComponent;
   }());
   exports.BasicDemoComponent = BasicDemoComponent;
   return module.exports;
 });
 
-$__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "node_modules/@angular/platform-browser//bundles/platform-browser.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
+$__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -24964,13 +24903,14 @@ $__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["no
       return Reflect.metadata(k, v);
   };
   var core_1 = $__require('node_modules/@angular/core//bundles/core.umd.js');
-  var platform_browser_1 = $__require('node_modules/@angular/platform-browser//bundles/platform-browser.umd.js');
   var treegrid_component_1 = $__require('app/treegrid/treegrid.component.js');
   var AjaxLoadDemoComponent = (function() {
-    function AjaxLoadDemoComponent(sanitizer) {
-      this.sanitizer = sanitizer;
+    function AjaxLoadDemoComponent() {
       this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    AjaxLoadDemoComponent.prototype.ngAfterViewInit = function() {
+      hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     AjaxLoadDemoComponent.prototype.ngOnInit = function() {
       this.treeDef.hierachy = {
         foreignKeyField: "report_to",
@@ -24980,14 +24920,12 @@ $__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["no
         url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees',
         method: "POST",
         lazyLoad: false,
-        doNotLoad: false,
-        childrenIndicatorField: 'hasChildren'
+        doNotLoad: false
       };
       this.treeDef.columns = [{
         labelHtml: "Employee ID",
         dataField: "emp_id",
-        sort: true,
-        className: "column_sample_style"
+        sort: true
       }, {
         labelHtml: "Given<br/>name",
         dataField: "firstname"
@@ -25001,19 +24939,19 @@ $__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["no
       }];
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], AjaxLoadDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], AjaxLoadDemoComponent.prototype, "codeElement", void 0);
     AjaxLoadDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Loading with Ajax</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-      directives: [treegrid_component_1.TreeGrid],
-      providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
-    }), __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])], AjaxLoadDemoComponent);
+      template: "\n    <h2>Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li>If <strong>doNotLoad</strong> is true, ajax will not be called initially. You can use the method <strong>TreeGrid.loadAjaxData</strong> to load the data</li>    \n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: false,\n        doNotLoad: false\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\", sort: true &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+      directives: [treegrid_component_1.TreeGrid]
+    }), __metadata('design:paramtypes', [])], AjaxLoadDemoComponent);
     return AjaxLoadDemoComponent;
   }());
   exports.AjaxLoadDemoComponent = AjaxLoadDemoComponent;
   return module.exports;
 });
 
-$__System.registerDynamic("app/demo/lazy-load/lazy-load-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "node_modules/@angular/platform-browser//bundles/platform-browser.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
+$__System.registerDynamic("app/demo/lazy-load/lazy-load-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -25036,13 +24974,14 @@ $__System.registerDynamic("app/demo/lazy-load/lazy-load-demo.component.js", ["no
       return Reflect.metadata(k, v);
   };
   var core_1 = $__require('node_modules/@angular/core//bundles/core.umd.js');
-  var platform_browser_1 = $__require('node_modules/@angular/platform-browser//bundles/platform-browser.umd.js');
   var treegrid_component_1 = $__require('app/treegrid/treegrid.component.js');
   var LazyLoadDemoComponent = (function() {
-    function LazyLoadDemoComponent(sanitizer) {
-      this.sanitizer = sanitizer;
+    function LazyLoadDemoComponent() {
       this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    LazyLoadDemoComponent.prototype.ngAfterViewInit = function() {
+      hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     LazyLoadDemoComponent.prototype.ngOnInit = function() {
       this.treeDef.hierachy = {
         foreignKeyField: "report_to",
@@ -25076,19 +25015,19 @@ $__System.registerDynamic("app/demo/lazy-load/lazy-load-demo.component.js", ["no
       }];
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], LazyLoadDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], LazyLoadDemoComponent.prototype, "codeElement", void 0);
     LazyLoadDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Lazy Loading with Ajax</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-      directives: [treegrid_component_1.TreeGrid],
-      providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
-    }), __metadata('design:paramtypes', [platform_browser_1.DomSanitizationService])], LazyLoadDemoComponent);
+      template: "\n    <h2>Lazy Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li><strong>childrenIndicatorField</strong> is the data field that TreeGrid will use to determine whether to display the expand/collapse icon</li>    \n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: true,\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\", sort: true &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+      directives: [treegrid_component_1.TreeGrid]
+    }), __metadata('design:paramtypes', [])], LazyLoadDemoComponent);
     return LazyLoadDemoComponent;
   }());
   exports.LazyLoadDemoComponent = LazyLoadDemoComponent;
   return module.exports;
 });
 
-$__System.registerDynamic("app/demo/pipes/pipes-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "node_modules/@angular/common//bundles/common.umd.js", "node_modules/@angular/platform-browser//bundles/platform-browser.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
+$__System.registerDynamic("app/demo/pipes/pipes-demo.component.js", ["node_modules/@angular/core//bundles/core.umd.js", "node_modules/@angular/common//bundles/common.umd.js", "app/treegrid/treegrid.component.js"], true, function($__require, exports, module) {
   "use strict";
   ;
   var define,
@@ -25112,7 +25051,6 @@ $__System.registerDynamic("app/demo/pipes/pipes-demo.component.js", ["node_modul
   };
   var core_1 = $__require('node_modules/@angular/core//bundles/core.umd.js');
   var common_1 = $__require('node_modules/@angular/common//bundles/common.umd.js');
-  var platform_browser_1 = $__require('node_modules/@angular/platform-browser//bundles/platform-browser.umd.js');
   var treegrid_component_1 = $__require('app/treegrid/treegrid.component.js');
   var MyPipe = (function() {
     function MyPipe() {}
@@ -25127,6 +25065,9 @@ $__System.registerDynamic("app/demo/pipes/pipes-demo.component.js", ["node_modul
     function PipesDemoComponent() {
       this.treeDef = new treegrid_component_1.TreeGridDef();
     }
+    PipesDemoComponent.prototype.ngAfterViewInit = function() {
+      hljs.highlightBlock(this.codeElement.nativeElement);
+    };
     PipesDemoComponent.prototype.ngOnInit = function() {
       this.treeDef.columns = [{
         labelHtml: "Employee ID",
@@ -25162,11 +25103,11 @@ $__System.registerDynamic("app/demo/pipes/pipes-demo.component.js", ["node_modul
       }];
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], PipesDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], PipesDemoComponent.prototype, "codeElement", void 0);
     PipesDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Formatting with Pipes</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
-      directives: [treegrid_component_1.TreeGrid],
-      providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
+      template: "\n    <h2>Formatting with Pipes</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using built-in pipes or custom pipes to format your data</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\n/* we use this pipe to attch \"- eh\" at the end of <strong>value</strong> */\n@Pipe(&#123;name: 'MyPipe'&#125;)\nexport class MyPipe implements PipeTransform &#123;\n  transform(value: string, param: string): string &#123;\n    return &#96;$&#123;value&#125; $&#123;param&#125;&#96;;\n  &#125;\n&#125;\n\nexport class PipesDemoComponent implements OnInit &#123;\n    ngOnInit() &#123;\n        this.treeDef.columns = [\n            &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n            &#123; labelHtml: \"Given name\", dataField: \"firstname\" &#125;,\n            &#123; labelHtml: \"Family name\", dataField: \"lastname\", transforms: [&#123; pipe: new LowerCasePipe() &#125;, &#123; pipe: new MyPipe(), param: \" - eh\"&#125;] &#125;,\n            &#123; labelHtml: \"Birthdate\", dataField: \"dob\", transforms: [&#123; pipe: new DatePipe(), param: \"yMMMMd\" &#125;, &#123; pipe: new UpperCasePipe() &#125;] &#125;\n        ];\n        /* ... */    \n    &#125;\n&#125;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n    ",
+      directives: [treegrid_component_1.TreeGrid]
     }), __metadata('design:paramtypes', [])], PipesDemoComponent);
     return PipesDemoComponent;
   }());
@@ -25207,6 +25148,7 @@ $__System.registerDynamic("app/demo/custom-render/custom-render-demo.component.j
     }
     CustomRenderDemoComponent.prototype.ngAfterViewInit = function() {
       this.elementRef.nativeElement.querySelector('#chk0').innerHTML = "hello";
+      hljs.highlightBlock(this.codeElement.nativeElement);
     };
     CustomRenderDemoComponent.prototype.onEvent = function(evt) {
       console.log('cat event');
@@ -25286,9 +25228,10 @@ $__System.registerDynamic("app/demo/custom-render/custom-render-demo.component.j
       this.treeDef.pageSize = 10;
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], CustomRenderDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], CustomRenderDemoComponent.prototype, "codeElement", void 0);
     CustomRenderDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Custom Column Rendering</h2>\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n\n    <div id=\"debugMessage\" style=\"width:500px; height:200px; border: 1px solid #ddd\">\n    Debug Message\n    </div>\n    ",
+      template: "\n    <h2>Custom Column Rendering</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using the <strong>render</strong> property to provide a function to draw the cell</li>\n    </ul>\n    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"typescript\">\nthis.treeDef.columns = [\n    &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\", sort: true &#125;,\n    &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n    &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n    &#123; labelHtml: \"Select\", dataField: \"lastname\",\n        render: (data, row, index) => \n            &#123; \n                return  this.sanitizer.bypassSecurityTrustHtml(&#96;&lt;input \n                        onclick=\"javascript: $('#debugMessage').text('&#96; + data + &#96;');\" \n                        type=\"checkbox\" id=\"chk&#96; + index.toString() + &#96;\"/&gt;&nbsp&#96; + data.toUpperCase()); \n            &#125; \n    &#125; \n];\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n\n    <div id=\"debugMessage\" style=\"width:500px; height:100px; border: 1px solid #ddd\">\n    Debug Message\n    </div>\n    ",
       directives: [treegrid_component_1.TreeGrid],
       providers: [platform_browser_1.DomSanitizationService, platform_browser_1.BROWSER_SANITIZATION_PROVIDERS]
     }), __metadata('design:paramtypes', [core_1.ElementRef, platform_browser_1.DomSanitizationService])], CustomRenderDemoComponent);
@@ -36752,12 +36695,12 @@ $__System.registerDynamic("app/demo/modal-editor/modal-editor-demo.component.js"
     MyModalEditor.prototype.saveChanges = function() {
       this.onSave.emit(this.row);
     };
-    __decorate([core_1.Input(), __metadata('design:type', Array)], MyModalEditor.prototype, "countries", void 0);
+    __decorate([core_1.Input(), __metadata('design:type', Array)], MyModalEditor.prototype, "regions", void 0);
     __decorate([core_1.Input(), __metadata('design:type', Object)], MyModalEditor.prototype, "row", void 0);
     __decorate([core_1.Output(), __metadata('design:type', Object)], MyModalEditor.prototype, "onSave", void 0);
     MyModalEditor = __decorate([core_1.Component({
       selector: 'my-modal-editor',
-      template: "\n<div class=\"modal fade\" id=\"modalEditor\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n  <div class=\"modal-dialog\" role=\"document\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n        <h4 class=\"modal-title\">This is a sample modal editor</h4>\n      </div>\n      <div class=\"modal-body\" *ngIf=\"row != null\">\n        <div class=\"form-group\">\n            <label>Given Name</label>\n            <input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['firstname']\">\n            <label>Family Name</label>\n            <input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['lastname']\">\n            <label>Country</label>\n            <select class=\"form-control\" [(ngModel)]=\"row['origin']\">\n              <option *ngFor=\"let country of countries\" value= {{country}}>\n                {{country}}\n              </option>\n            </select>                \n        </div>\n      </div>\n      <div class=\"modal-footer\">\n        <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>\n        <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" (click)=\"saveChanges()\">Save changes</button>\n      </div>\n    </div>\n  </div>\n</div>\n"
+      template: "\n<div class=\"modal fade\" id=\"modalEditor\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n  <div class=\"modal-dialog\" role=\"document\">\n    <div class=\"modal-content\">\n      <div class=\"modal-header\">\n        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n        <h4 class=\"modal-title\">This is a sample modal editor</h4>\n      </div>\n      <div class=\"modal-body\" *ngIf=\"row != null\">\n        <div class=\"form-group\">\n            <label>Given Name</label>\n            <input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['firstname']\">\n            <label>Family Name</label>\n            <input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['lastname']\">\n            <label>Origin</label>\n            <select class=\"form-control\" [(ngModel)]=\"row['origin']\">\n              <option *ngFor=\"let region of regions\" value= {{region}}>\n                {{region}}\n              </option>\n            </select>                \n        </div>\n      </div>\n      <div class=\"modal-footer\">\n        <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>\n        <button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" (click)=\"saveChanges()\">Save changes</button>\n      </div>\n    </div>\n  </div>\n</div>\n"
     }), __metadata('design:paramtypes', [])], MyModalEditor);
     return MyModalEditor;
   }());
@@ -36765,15 +36708,16 @@ $__System.registerDynamic("app/demo/modal-editor/modal-editor-demo.component.js"
     function ModalEditorDemoComponent(dataService) {
       this.dataService = dataService;
       this.treeGridDef = new treegrid_component_1.TreeGridDef();
-      this.countries = [];
+      this.regions = [];
     }
     ModalEditorDemoComponent.prototype.ngAfterViewInit = function() {
       var _this = this;
-      this.dataService.post("http://treegriddemoservice.azurewebsites.net/api/values/GetCountries").subscribe(function(ret) {
-        _this.modalEditor.countries = ret;
+      this.dataService.post("http://treegriddemoservice.azurewebsites.net/api/values/GetRegions").subscribe(function(ret) {
+        _this.modalEditor.regions = ret;
       }, function(err) {
         console.log(err);
       });
+      hljs.highlightBlock(this.codeElement.nativeElement);
     };
     ModalEditorDemoComponent.prototype.ngOnInit = function() {
       this.treeGridDef.columns = [{
@@ -36859,10 +36803,11 @@ $__System.registerDynamic("app/demo/modal-editor/modal-editor-demo.component.js"
       this.treeGridDef.editor = {editorType: treegrid_component_1.EditorType.MODAL};
     };
     __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], ModalEditorDemoComponent.prototype, "treeGrid", void 0);
+    __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], ModalEditorDemoComponent.prototype, "codeElement", void 0);
     __decorate([core_1.ViewChild('modalEditor'), __metadata('design:type', MyModalEditor)], ModalEditorDemoComponent.prototype, "modalEditor", void 0);
     ModalEditorDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Simple Table Data</h2>\n\n    <p>{{message}}</p>\n\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\">\n    </tg-treegrid>\n\n    <my-modal-editor [countries]=\"countries\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n    ",
+      template: "\n    <h2>Modal Dialog Editor</h2>\n    <h3>Description</h3>\n    <p>The TreeGrid library does not come with any pre-built modal dialog editor. Instead, this example provides you a way to build one yourself. The TreeGrid and the modal dialog component are decoupled. They communicate through custom events.</p>    \n    <h3>Sample Code</h3>\n    <pre>\n        <code #code class=\"html\">\n&lt;tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\"&gt;&lt;/tg-treegrid&gt;\n\n&lt;my-modal-editor [regions]=\"regions\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"&gt;&lt;/my-modal-editor&gt;\n        </code>\n     </pre>\n\n    <h3>Demo</h3>\n\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\"></tg-treegrid>\n\n    <my-modal-editor [regions]=\"regions\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n    ",
       directives: [treegrid_component_1.TreeGrid, MyModalEditor],
       providers: [simpledata_service_1.SimpleDataService]
     }), __metadata('design:paramtypes', [simpledata_service_1.SimpleDataService])], ModalEditorDemoComponent);
