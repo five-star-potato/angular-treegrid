@@ -18,7 +18,13 @@ declare var hljs: any;
         <li>Using the <strong>render</strong> property to provide a function to draw the cell</li>
     </ul>
     
-    <h3>Sample Code</h3>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
+  <li><a data-toggle="tab" href="#srcTab">Code and Explanation</a></li>
+</ul>    
+
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane" id="srcTab">
     <pre>
         <code #code class="typescript">
 this.treeDef.columns = [
@@ -36,15 +42,18 @@ this.treeDef.columns = [
 ];
         </code>
      </pre>
+ </div>
 
-    <h3>Demo</h3>
-
-    <tg-treegrid [treeGridDef]="treeDef">
+<div role="tabpanel" class="tab-pane active" id="demoTab">    <tg-treegrid [treeGridDef]="treeDef">
     </tg-treegrid>
 
     <div id="debugMessage" style="width:500px; height:100px; border: 1px solid #ddd">
     Debug Message
     </div>
+</div>
+ 
+ </div>
+    
     `,
     directives: [TreeGrid],
     providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]

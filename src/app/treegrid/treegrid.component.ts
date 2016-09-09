@@ -1,9 +1,8 @@
 /* followed the instruction here to integrate with jQuery */
 /* http://stackoverflow.com/questions/34762720/using-jquery-globaly-within-angular-2-application */
 /// <reference path="../../../typings/jquery/jquery.d.ts" />
-import { Component, Directive, ComponentResolver, Input, ComponentMetadata, SimpleChange, ComponentFactory, ReflectiveInjector, OnInit, OnChanges} from "@angular/core";
+import { Component, Directive, Input, ComponentMetadata, SimpleChange, ComponentFactory, OnInit, OnChanges} from "@angular/core";
 import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementRef, HostListener, ViewChild, ViewContainerRef, AfterViewInit } from "@angular/core";
-import { SafeHtml } from  '@angular/platform-browser';
 import { DataTree, DataNode } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
 import { SimpleDataService } from './simpledata.service';

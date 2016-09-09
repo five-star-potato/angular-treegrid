@@ -24,7 +24,13 @@ export class MyPipe implements PipeTransform {
         <li>Using built-in pipes or custom pipes to format your data</li>
     </ul>
     
-    <h3>Sample Code</h3>
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
+  <li><a data-toggle="tab" href="#srcTab">Code and Explanation</a></li>
+</ul>    
+
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane" id="srcTab">
     <pre>
         <code #code class="typescript">
 /* we use this pipe to attch "- eh" at the end of <strong>value</strong> */
@@ -48,10 +54,13 @@ export class PipesDemoComponent implements OnInit &#123;
 &#125;
         </code>
      </pre>
+</div>
 
-    <h3>Demo</h3>
+<div role="tabpanel" class="tab-pane active" id="demoTab">
     <tg-treegrid [treeGridDef]="treeDef">
     </tg-treegrid>
+</div>
+</div>
     `,
     directives: [TreeGrid]
 })

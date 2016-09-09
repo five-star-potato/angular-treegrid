@@ -60,7 +60,14 @@ class MyModalEditor {
     <h2>Modal Dialog Editor</h2>
     <h3>Description</h3>
     <p>The TreeGrid library does not come with any pre-built modal dialog editor. Instead, this example provides you a way to build one yourself. The TreeGrid and the modal dialog component are decoupled. They communicate through custom events.</p>    
-    <h3>Sample Code</h3>
+
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
+  <li><a data-toggle="tab" href="#srcTab">Code and Explanation</a></li>
+</ul>    
+
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane" id="srcTab">
     <pre>
         <code #code1 class="typescript">
 @Component(&#123;
@@ -120,12 +127,13 @@ class MyModalEditor &#123;
 &lt;my-modal-editor [regions]="regions" #modalEditor (onSave)="treeGrid.saveSelectedRowchanges($event)"&gt;&lt;/my-modal-editor&gt;
         </code>
      </pre>
+</div>
 
-    <h3>Demo</h3>
-
+<div role="tabpanel" class="tab-pane active" id="demoTab">
     <tg-treegrid [treeGridDef]="treeGridDef" (onRowDblClick)="modalEditor.show($event)"></tg-treegrid>
-
     <my-modal-editor [regions]="regions" #modalEditor (onSave)="treeGrid.saveSelectedRowchanges($event)"></my-modal-editor>
+</div>
+</div>
     `,
     directives: [TreeGrid, MyModalEditor],
     providers: [ SimpleDataService ]
