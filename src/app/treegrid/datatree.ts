@@ -91,6 +91,18 @@ export class DataTree {
         });
         node.childNodes.forEach(n => this.sort(n, field, dir));
     }
+    sortRows(startRow:number, endRow:number, field: string, dir: SortDirection) {
+        let rows = this.inputData.slice(startRow, endRow + 1);
+
+        rows.sort((a: any, b: any) => {
+            if (dir == SortDirection.ASC)
+                return a[field] > b[field] ? 1 : (a[field] < b[field] ? -1 : 0);
+            else
+                return a[field] < b[field] ? 1 : (a[field] > b[field] ? -1 : 0);
+        });
+        this.inputData.splice(startRow, rows.length, ... rows);
+    }
+
     sortColumn(field: string, dir: SortDirection) {
         this.sort(this.rootNode, field, dir);
     }
@@ -108,7 +120,9 @@ export class DataTree {
         }
         this.rowCounter++;
         if (node.isOpen)
-            node.childNodes.forEach(n => this.traverse(n, startRow, endRow));
+            for (let i = 0; i < node.childNodes.length; i++) {
+                this.traverse(node.childNodes[i], startRow, endRow);
+            }
     }
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;

@@ -55,7 +55,7 @@ export class SortableHeader {
     moduleId: module.id,
     selector: 'tg-treegrid',
     template: `
-			<table class="treegrid-table table table-hover  table-striped table-bordered" data-resizable-columns-id="resizable-table">
+			<table [class]="treeGridDef.className" data-resizable-columns-id="resizable-table">
                 <colgroup>
                         <!-- providing closing tags broke NG template parsing -->    
                         <col *ngFor="let dc of treeGridDef.columns" [class]="dc.className"> 
@@ -173,6 +173,9 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private currentPage: PageNumber = { num: 0 };
     private isLoading: boolean = false;
     private selectedRow: any;
+    private sortColumnField: string;
+    private sortDirection: SortDirection;
+    private DEFAULT_CLASS:string = "table table-hover table-striped table-bordered";
 
     self = this; // copy of context
 
@@ -182,7 +185,6 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.currentPage.num = 0;
         console.log(this.elementRef);
     }
-
     private sortColumnEvtHandler(event: ColumnOrder) {
         // assuming that we can only sort one column at a time;
         // clear all the sortDirection flags across columns;
@@ -191,12 +193,12 @@ export class TreeGrid implements OnInit, AfterViewInit {
             item.sortDirection = null;
         });
         this.treeGridDef.columns[event.columnIndex].sortDirection = event.sortDirection;
-        let columnName: string = this.treeGridDef.columns[event.columnIndex].dataField;
+        this.sortColumnField = this.treeGridDef.columns[event.columnIndex].dataField;
+        this.sortDirection = event.sortDirection;
+        this.dataTree.sortColumn(this.sortColumnField, this.sortDirection);
 
-        this.dataTree.sortColumn(columnName, event.sortDirection);
         this.refresh();
     }    
-
     calcIndent(row: any):number {
         var showExpand = this.showExpandIcon(row);
         var showCollapse = this.showCollapseIcon(row);
@@ -231,7 +233,6 @@ export class TreeGrid implements OnInit, AfterViewInit {
         }
         return false;
     } 
-
     refresh() {
         if (!this.initalProcessed) {
             if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
@@ -293,18 +294,21 @@ export class TreeGrid implements OnInit, AfterViewInit {
         else if (this.treeGridDef.data.length > 0) {
                 this.refresh();
         }
+        if (!this.treeGridDef.className)
+            this.treeGridDef.className = this.DEFAULT_CLASS;
     }
 	// Handling Pagination logic
     goPage(pn: number) {
         var sz = this.treeGridDef.pageSize;
-        let rows: number[]; // indices of the paged data rows
+        let rowInds: number[]; // indices of the paged data rows
         if (this.treeGridDef.paging)
-            rows = this.dataTree.getPageData(pn, sz);
+            rowInds = this.dataTree.getPageData(pn, sz);
         else
-            rows = this.dataTree.getPageData(0, -1);
+            rowInds = this.dataTree.getPageData(0, -1);
         
         this.dataView = [];
-        rows.forEach(r => this.dataView.push(this.treeGridDef.data[r]));
+        rowInds.forEach(i => 
+            this.dataView.push(this.treeGridDef.data[i]));
     }
 
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
@@ -327,6 +331,9 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         let endIndex = startIndex + ret.length - 1;
                         ret.forEach((r: any) => this.treeGridDef.data.push(r));
                         this.dataTree.addRows(startIndex, endIndex, node);
+                        if (this.sortColumnField) {
+                            this.dataTree.sortRows(startIndex, endIndex, this.sortColumnField, this.sortDirection);
+                        }
                     }
                     this.toggleTreeNode(node);
                     this.isLoading = false;

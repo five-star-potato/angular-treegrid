@@ -29,6 +29,7 @@ var LazyLoadDemoComponent = (function () {
             lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
+        this.treeDef.pageSize = 50;
         this.treeDef.columns = [
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },

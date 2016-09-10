@@ -19,6 +19,7 @@ var ajax_load_demo_component_1 = require('./demo/ajax-load/ajax-load-demo.compon
 var lazy_load_demo_component_1 = require('./demo/lazy-load/lazy-load-demo.component');
 var pipes_demo_component_1 = require('./demo/pipes/pipes-demo.component');
 var custom_render_demo_component_1 = require('./demo/custom-render/custom-render-demo.component');
+var modal_editor_demo_component_1 = require('./demo/modal-editor/modal-editor-demo.component');
 var app_routing_1 = require('./app.routing');
 var data_service_1 = require('./shared/data.service');
 var AppModule = (function () {
@@ -27,7 +28,7 @@ var AppModule = (function () {
     AppModule = __decorate([
         core_1.NgModule({
             imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing],
-            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent],
+            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent, modal_editor_demo_component_1.ModalEditorDemoComponent],
             providers: [data_service_1.DataService],
             bootstrap: [app_component_1.AppComponent]
         }), 

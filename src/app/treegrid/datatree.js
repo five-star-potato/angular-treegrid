@@ -75,6 +75,17 @@ var DataTree = (function () {
         });
         node.childNodes.forEach(function (n) { return _this.sort(n, field, dir); });
     };
+    DataTree.prototype.sortRows = function (startRow, endRow, field, dir) {
+        var rows = this.inputData.slice(startRow, endRow + 1);
+        rows.sort(function (a, b) {
+            if (dir == treedef_1.SortDirection.ASC)
+                return a[field] > b[field] ? 1 : (a[field] < b[field] ? -1 : 0);
+            else
+                return a[field] < b[field] ? 1 : (a[field] > b[field] ? -1 : 0);
+        });
+        (_a = this.inputData).splice.apply(_a, [startRow, rows.length].concat(rows));
+        var _a;
+    };
     DataTree.prototype.sortColumn = function (field, dir) {
         this.sort(this.rootNode, field, dir);
     };
@@ -86,7 +97,6 @@ var DataTree = (function () {
             node.childNodes.forEach(function (n) { return _this.traverseAll(n); });
     };
     DataTree.prototype.traverse = function (node, startRow, endRow) {
-        var _this = this;
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
@@ -94,7 +104,9 @@ var DataTree = (function () {
         }
         this.rowCounter++;
         if (node.isOpen)
-            node.childNodes.forEach(function (n) { return _this.traverse(n, startRow, endRow); });
+            for (var i = 0; i < node.childNodes.length; i++) {
+                this.traverse(node.childNodes[i], startRow, endRow);
+            }
     };
     DataTree.prototype.getPageData = function (pageNum, pageSize) {
         var _this = this;

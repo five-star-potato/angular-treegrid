@@ -57,6 +57,7 @@ export interface ColumnDef {
 }
 
 export class TreeGridDef  {
+    className: string;
     columns: ColumnDef[] = [];
     data: any[] = [];
     paging: boolean = true;
