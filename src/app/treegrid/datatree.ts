@@ -79,7 +79,8 @@ export class DataTree {
             node.childNodes.forEach(n => this.processNode(n));
         }
     }
-    private sort(node: DataNode, field: string, dir: SortDirection) {
+    // recursive sort the children within each node
+    sortNode(node: DataNode, field: string, dir: SortDirection) {
         if (node.childNodes.length == 0)
             return;
 
@@ -89,22 +90,10 @@ export class DataTree {
             else
                 return a.row[field] < b.row[field] ? 1 : (a.row[field] > b.row[field] ? -1 : 0);
         });
-        node.childNodes.forEach(n => this.sort(n, field, dir));
+        node.childNodes.forEach(n => this.sortNode(n, field, dir));
     }
-    sortRows(startRow:number, endRow:number, field: string, dir: SortDirection) {
-        let rows = this.inputData.slice(startRow, endRow + 1);
-
-        rows.sort((a: any, b: any) => {
-            if (dir == SortDirection.ASC)
-                return a[field] > b[field] ? 1 : (a[field] < b[field] ? -1 : 0);
-            else
-                return a[field] < b[field] ? 1 : (a[field] > b[field] ? -1 : 0);
-        });
-        this.inputData.splice(startRow, rows.length, ... rows);
-    }
-
-    sortColumn(field: string, dir: SortDirection) {
-        this.sort(this.rootNode, field, dir);
+    sortByColumn(field: string, dir: SortDirection) {
+        this.sortNode(this.rootNode, field, dir);
     }
     // This is a depth-first traversal to return all rows
     private traverseAll(node: DataNode) {
@@ -120,9 +109,7 @@ export class DataTree {
         }
         this.rowCounter++;
         if (node.isOpen)
-            for (let i = 0; i < node.childNodes.length; i++) {
-                this.traverse(node.childNodes[i], startRow, endRow);
-            }
+            node.childNodes.forEach(n => this.traverse(n, startRow, endRow));
     }
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;

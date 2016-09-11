@@ -195,7 +195,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.treeGridDef.columns[event.columnIndex].sortDirection = event.sortDirection;
         this.sortColumnField = this.treeGridDef.columns[event.columnIndex].dataField;
         this.sortDirection = event.sortDirection;
-        this.dataTree.sortColumn(this.sortColumnField, this.sortDirection);
+        this.dataTree.sortByColumn(this.sortColumnField, this.sortDirection);
 
         this.refresh();
     }    
@@ -331,9 +331,12 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         let endIndex = startIndex + ret.length - 1;
                         ret.forEach((r: any) => this.treeGridDef.data.push(r));
                         this.dataTree.addRows(startIndex, endIndex, node);
+                        // The data has been sorted, the newly loaded data should be sorted as well.
                         if (this.sortColumnField) {
-                            this.dataTree.sortRows(startIndex, endIndex, this.sortColumnField, this.sortDirection);
+                            this.dataTree.sortNode(node, this.sortColumnField, this.sortDirection);
+                            //this.dataTree.sortRows(startIndex, endIndex
                         }
+                            
                     }
                     this.toggleTreeNode(node);
                     this.isLoading = false;

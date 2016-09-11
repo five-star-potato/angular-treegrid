@@ -117,7 +117,7 @@ var TreeGrid = (function () {
         this.treeGridDef.columns[event.columnIndex].sortDirection = event.sortDirection;
         this.sortColumnField = this.treeGridDef.columns[event.columnIndex].dataField;
         this.sortDirection = event.sortDirection;
-        this.dataTree.sortColumn(this.sortColumnField, this.sortDirection);
+        this.dataTree.sortByColumn(this.sortColumnField, this.sortDirection);
         this.refresh();
     };
     TreeGrid.prototype.calcIndent = function (row) {
@@ -242,8 +242,9 @@ var TreeGrid = (function () {
                         var endIndex = startIndex + ret.length - 1;
                         ret.forEach(function (r) { return _this.treeGridDef.data.push(r); });
                         _this.dataTree.addRows(startIndex, endIndex, node);
+                        // The data has been sorted, the newly loaded data should be sorted as well.
                         if (_this.sortColumnField) {
-                            _this.dataTree.sortRows(startIndex, endIndex, _this.sortColumnField, _this.sortDirection);
+                            _this.dataTree.sortNode(node, _this.sortColumnField, _this.sortDirection);
                         }
                     }
                     _this.toggleTreeNode(node);

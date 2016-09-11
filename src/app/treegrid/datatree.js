@@ -63,7 +63,7 @@ var DataTree = (function () {
             node.childNodes.forEach(function (n) { return _this.processNode(n); });
         }
     };
-    DataTree.prototype.sort = function (node, field, dir) {
+    DataTree.prototype.sortNode = function (node, field, dir) {
         var _this = this;
         if (node.childNodes.length == 0)
             return;
@@ -73,21 +73,10 @@ var DataTree = (function () {
             else
                 return a.row[field] < b.row[field] ? 1 : (a.row[field] > b.row[field] ? -1 : 0);
         });
-        node.childNodes.forEach(function (n) { return _this.sort(n, field, dir); });
+        node.childNodes.forEach(function (n) { return _this.sortNode(n, field, dir); });
     };
-    DataTree.prototype.sortRows = function (startRow, endRow, field, dir) {
-        var rows = this.inputData.slice(startRow, endRow + 1);
-        rows.sort(function (a, b) {
-            if (dir == treedef_1.SortDirection.ASC)
-                return a[field] > b[field] ? 1 : (a[field] < b[field] ? -1 : 0);
-            else
-                return a[field] < b[field] ? 1 : (a[field] > b[field] ? -1 : 0);
-        });
-        (_a = this.inputData).splice.apply(_a, [startRow, rows.length].concat(rows));
-        var _a;
-    };
-    DataTree.prototype.sortColumn = function (field, dir) {
-        this.sort(this.rootNode, field, dir);
+    DataTree.prototype.sortByColumn = function (field, dir) {
+        this.sortNode(this.rootNode, field, dir);
     };
     // This is a depth-first traversal to return all rows
     DataTree.prototype.traverseAll = function (node) {
@@ -97,6 +86,7 @@ var DataTree = (function () {
             node.childNodes.forEach(function (n) { return _this.traverseAll(n); });
     };
     DataTree.prototype.traverse = function (node, startRow, endRow) {
+        var _this = this;
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
@@ -104,9 +94,7 @@ var DataTree = (function () {
         }
         this.rowCounter++;
         if (node.isOpen)
-            for (var i = 0; i < node.childNodes.length; i++) {
-                this.traverse(node.childNodes[i], startRow, endRow);
-            }
+            node.childNodes.forEach(function (n) { return _this.traverse(n, startRow, endRow); });
     };
     DataTree.prototype.getPageData = function (pageNum, pageSize) {
         var _this = this;
