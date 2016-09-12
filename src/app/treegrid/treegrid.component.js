@@ -234,7 +234,7 @@ var TreeGrid = (function () {
         if (ajax != null) {
             if (ajax.lazyLoad && !node.isLoaded) {
                 this.isLoading = true;
-                this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function (ret) {
+                this.dataService.post(ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function (ret) {
                     // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
                     node.isLoaded = true;
                     if (ret.length > 0) {

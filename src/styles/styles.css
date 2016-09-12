@@ -13,7 +13,7 @@ h3 {
 }
 main {
     position: relative;
-    padding-top: 60px;
+    padding-top: 10px;
 }
 
 /* Ensure display:flex and others don't override a [hidden] */

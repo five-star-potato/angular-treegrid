@@ -19,21 +19,27 @@ var SimpleDataService = (function () {
     function SimpleDataService(http) {
         this.http = http;
         this.headers = new http_1.Headers();
-        this.headers.append('Content-Type', 'application/json');
+        this.headers.append('Content-Type', 'application/x-www-form-urlencoded');
         this.headers.append('Access-Control-Allow-Origin', '*');
     }
-    /*
-        get(url: string): Observable<any[]> {
-            return this.http.get(url, { headers: this.headers })
-                .map((res: Response) => res.json())
-                //.catch(this.handleError);
-        }
-    */
+    SimpleDataService.prototype.get = function (url) {
+        return this.http.get(url, { headers: this.headers })
+            .map(function (res) { return res.json(); });
+        //.catch(this.handleError);
+    };
     SimpleDataService.prototype.post = function (url) {
         return this.http.post(url, "", { headers: this.headers })
             .map(function (res) { return res.json(); });
         //.catch(this.handleError);
     };
+    /*    post(url: string, body: string = "{}"): Observable<any[]> {
+            var params = new URLSearchParams();
+            params.set('id', '23');
+            return this.http.post(url, params.toString(), { headers: this.headers })
+                .map((res: Response) => res.json())
+                //.catch(this.handleError);
+        }
+       */
     SimpleDataService.prototype.handleError = function (error) {
         // In a real world app, we might use a remote logging infrastructure
         // We'd also dig deeper into the error to get a better message

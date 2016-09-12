@@ -20,7 +20,7 @@ declare var hljs: any;
     
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
-  <li><a data-toggle="tab" href="#srcTab">Code and Explanation</a></li>
+  <li><a data-toggle="tab" href="#srcTab">Code</a></li>
 </ul>    
 
 <div class="tab-content">

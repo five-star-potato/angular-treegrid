@@ -55,7 +55,6 @@ export interface ColumnDef {
     render?: (data: any, row: any, index: number) => SafeHtml;
     transforms?: ColumnTransform[];
 }
-
 export class TreeGridDef  {
     className: string;
     columns: ColumnDef[] = [];
@@ -67,5 +66,5 @@ export class TreeGridDef  {
     defaultOrder: ColumnOrder[] = [];
     hierachy: TreeHierarchy = null;
     ajax: AjaxConfig = null;
-    editor: EditorConfig = null;
+    editor: EditorConfig = null
 }

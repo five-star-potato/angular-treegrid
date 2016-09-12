@@ -20,7 +20,7 @@ declare var hljs: any;
     
 <ul class="nav nav-tabs">
   <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
-  <li><a data-toggle="tab" href="#srcTab">Code and Explanation</a></li>
+  <li><a data-toggle="tab" href="#srcTab">Code</a></li>
 </ul>    
 
 <div class="tab-content">
@@ -77,7 +77,8 @@ export class LazyLoadDemoComponent implements OnInit {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
+            //url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
+            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };

@@ -63,6 +63,7 @@ var DataTree = (function () {
             node.childNodes.forEach(function (n) { return _this.processNode(n); });
         }
     };
+    // recursive sort the children within each node
     DataTree.prototype.sortNode = function (node, field, dir) {
         var _this = this;
         if (node.childNodes.length == 0)
