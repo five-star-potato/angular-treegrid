@@ -69,10 +69,10 @@ export class SortableHeader {
                         <span class="caret"></span>
                       </button>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                        <li (click)="searchField=ANY_SEARCH_COLUMN; searchLabel='Any column'"><a >Any column</a></li>
+                        <li (click)="_searchColumnChange(ANY_SEARCH_COLUMN, 'Any column')"><a >Any column</a></li>
                         <li role="separator" class="divider"></li>
                         <template ngFor let-dc [ngForOf]="treeGridDef.columns" >
-                            <li *ngIf="dc.searchable"><a (click)="searchField=dc.dataField; searchLabel=utils.stripHTML(dc.labelHtml)" [innerHTML]="utils.stripHTML(dc.labelHtml)"></a></li>
+                            <li *ngIf="dc.searchable"><a (click)="_searchColumnChange(dc.dataField, dc.labelHtml)" [innerHTML]="utils.stripHTML(dc.labelHtml)"></a></li>
                         </template>
                       </ul>
                 </div>
@@ -207,7 +207,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private DEFAULT_CLASS:string = "table table-hover table-striped table-bordered";
     private searchField:string = this.ANY_SEARCH_COLUMN;
     private searchLabel:string = "Any column";
-
+    private _setIsLoaded:boolean = false; // need to know whether to set each node to be "loaded"; in the case of a search result, I always set it to loaded, to avoid duplicate rows
     private items: Observable<Array<string>>;
     private term:FormControl = new FormControl();
 
@@ -249,7 +249,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
                 throw new Error("Ajax Method must be GET or POST");
             }            
             if (!ajax.doNotLoad) {
-                this.loadAjaxData();
+                this.reloadAjax();
             }
         }
         else if (this.treeGridDef.data.length > 0) {
@@ -263,15 +263,12 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
             }
             else {
-                let cfg:SearchConfig = <SearchConfig> this.treeGridDef.search;
                 this.term.valueChanges
                          .debounceTime(400)
                          .distinctUntilChanged()
-                         .switchMap(term => this._searchTerm(cfg.method, cfg.url, term, this.searchField))
+                         .switchMap(term => this._searchOrReloadObservable(term, this.searchField))
                          .subscribe((ret: any) => {
-                            this.isDataTreeConstructed = false;
-                            this.treeGridDef.data = ret;
-                            this.refresh();
+                            this._reloadData(ret);
                         }, (err: any) => { console.log(err) });
             }
         }
@@ -363,9 +360,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         // The data has been sorted, the newly loaded data should be sorted as well.
                         if (this.sortColumnField) {
                             this.dataTree.sortNode(node, this.sortColumnField, this.sortDirection);
-                            //this.dataTree.sortRows(startIndex, endIndex
                         }
-                            
                     }
                     this._toggleTreeNode(node);
                     this.isLoading = false;
@@ -381,8 +376,39 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.selectedRow = row;
         this.onRowDblClick.emit(row);
     }
-    private _searchTerm(method:string, url:string, term: string, field: string): Observable<any[]> {
-        return this.dataService.send(method, url + "?value=" + term + "&field=" + field);
+    private _reloadData(data: any[]) {
+        this.isDataTreeConstructed = false;
+        this.treeGridDef.data = data;
+        this.refresh();
+    }
+    // I tried to push the decision to whether search or reload the data (two different Urls) to the last minute
+    private _searchOrReloadObservable(term: string, field: string): Observable<any[]> {
+        if (term) {
+            this._setIsLoaded = true;
+            let cfg:SearchConfig = <SearchConfig> this.treeGridDef.search;
+            if (cfg && cfg.method && cfg.url)
+                return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
+            else 
+                throw new Error("Search config missing");
+        }
+        else { // if term is empty, reload 
+            this._setIsLoaded = false;
+            let ajax = this.treeGridDef.ajax;
+            if (ajax && ajax.url) 
+                return this.dataService.send(ajax.method, ajax.url)
+            else
+                throw new Error("Ajax config missing");
+        }
+    }
+    // handles the search column dropdown change
+    private _searchColumnChange(field:string, labelHTML:string) {
+        this.searchField = field; 
+        this.searchLabel = labelHTML;
+        if (this.term.value) {
+            this._searchOrReloadObservable(this.term.value, this.searchField).subscribe((ret: any) => {
+                this._reloadData(ret);
+            }, (err: any) => { console.log(err) });
+        }
     }
     private _transformWithPipe(value:any, trans:ColumnTransform[]) {
         let v:any = value;
@@ -394,21 +420,21 @@ export class TreeGrid implements OnInit, AfterViewInit {
     saveSelectedRowchanges(copyRow: any) {
         Object.assign(this.selectedRow, copyRow);
     }
-    loadAjaxData(url?: string) { // user can provide a different url to override the url in AjaxConfig
+    reloadAjax(url?: string) { // user can provide a different url to override the url in AjaxConfig
         let ajax = this.treeGridDef.ajax;
         if (ajax && (url || ajax.url)) {
             this.isLoading = true;
             this.dataService.send(ajax.method, url ? url : ajax.url).subscribe((ret: any) => {
-                this.treeGridDef.data = ret;
-                this.refresh();
-                this.isLoading = false;
+                this._reloadData(ret);
             }, (err: any) => { console.log(err) });
         }
     }
+    // the setIsLoaded flag is to be used by Searching - searching may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
+    // otherwise the ajax call will create duplicate rows
     refresh() {
         if (!this.isDataTreeConstructed) {
             if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField, this._setIsLoaded);
             else // data is just flat 2d table
                 this.dataTree = new DataTree(this.treeGridDef.data);
             this.numVisibleRows = this.dataTree.recountDisplayCount();

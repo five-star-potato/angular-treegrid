@@ -20,63 +20,59 @@ export class DataTree {
     private cnt: number;						 // temp var
     private rowCounter: number;			 // temp var for counting rows
     private returnRowsIndices: number[]; // store the row indices to the inputData array corresponding to a page
-    
-    constructor(private inputData: any[], private pk?: string, private fk?: string) {
+
+    private _createNewNode(r: any, i:number, parentNode: DataNode, lvl: number = 0) {
+        var n:DataNode = {
+            row: r,
+            index: i,
+            level: lvl,
+            displayCount: 0, // assuming intially all the nodes are closed
+            childNodes: [],
+            parent: parentNode,
+            isLoaded: this.setIsLoaded
+        };
+        r.__node = n;
+        parentNode.childNodes.push(n);
+    }    
+    constructor(private inputData: any[], private pk?: string, private fk?: string, private setIsLoaded:boolean = true) {
         this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
         if (pk && fk) {
             for (let i = 0; i < this.cnt; i++) {
-                if (inputData[i][fk] == null) {
-                    let newNode: DataNode = {
-                        row: inputData[i],
-                        index: i,
-                        level: 0,
-                        displayCount: 0, // assuming intially all the nodes are closed
-                        childNodes: [],
-                        parent: this.rootNode
-                    };
-                    this.rootNode.childNodes.push(newNode);
-                    inputData[i].__node = newNode;
+                if (inputData[i][fk] == undefined) { // don't want to assume "0" is "false", i.e. not a valid FK, in some cases, 0 is a valid FK value
+                    this._createNewNode(inputData[i], i, this.rootNode);
                 }
             }
+            // also need to load children (fk) with missing parents (pk)
+            for (let i = 0; i < this.cnt; i++) {
+                let keyVal:any = inputData[i][fk];
+                if (keyVal != undefined) {
+                    if (inputData.findIndex((x:any) => { return (x[pk] == keyVal); }) < 0) {
+                        // this entry has fk value, but element of the same pk is not found
+                        this._createNewNode(inputData[i], i, this.rootNode);
+                    }
+                }                
+            }            
             this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
-            this.rootNode.childNodes.forEach(n => this.processNode(n));
+            this.rootNode.childNodes.forEach(n => this._processNode(n));
         }
         else {    // no pk and fk, data is flat; just one level
             for (let i = 0; i < this.cnt; i++) {
-                let newNode: DataNode = {
-                    row: inputData[i],
-                    index: i,
-                    level: 0,
-                    displayCount: 0, // assuming intially all the nodes are closed
-                    childNodes: [],
-                    parent: this.rootNode
-                };
-                this.rootNode.childNodes.push(newNode);
-                inputData[i].__node = newNode;
+                this._createNewNode(inputData[i], i, this.rootNode);
             }
             this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         }
     }
     
-    private processNode(node: DataNode) {
+    private _processNode(node: DataNode) {
         for (let i = 0; i < this.cnt; i++) {
             if (this.inputData[i][this.fk] == node.row[this.pk]) {
-                let newNode: DataNode = {
-                    row: this.inputData[i],
-                    index: i,
-                    level: node.level + 1,
-                    displayCount: 0, // assuming intially all the nodes are closed
-                    childNodes: [],
-                    parent: node
-                };
-                node.childNodes.push(newNode);
-                this.inputData[i].__node = newNode;
+                this._createNewNode(this.inputData[i], i, node, node.level + 1);
             }
         }
         if (node.childNodes.length > 0) {
             node.isOpen = false; // only node with children should have such flag
-            node.childNodes.forEach(n => this.processNode(n));
+            node.childNodes.forEach(n => this._processNode(n));
         }
     }
     // recursive sort the children within each node
@@ -96,12 +92,12 @@ export class DataTree {
         this.sortNode(this.rootNode, field, dir);
     }
     // This is a depth-first traversal to return all rows
-    private traverseAll(node: DataNode) {
+    private _traverseAll(node: DataNode) {
         this.returnRowsIndices.push(node.index);
         if (node.isOpen)
-            node.childNodes.forEach(n => this.traverseAll(n));
+            node.childNodes.forEach(n => this._traverseAll(n));
     }
-    private traverse(node: DataNode, startRow: number, endRow: number) {
+    private _traverse(node: DataNode, startRow: number, endRow: number) {
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
@@ -109,51 +105,51 @@ export class DataTree {
         }
         this.rowCounter++;
         if (node.isOpen)
-            node.childNodes.forEach(n => this.traverse(n, startRow, endRow));
+            node.childNodes.forEach(n => this._traverse(n, startRow, endRow));
     }
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;
         this.returnRowsIndices = [];
 
         if (pageSize < 0) {
-            this.rootNode.childNodes.forEach(n => this.traverseAll(n));
+            this.rootNode.childNodes.forEach(n => this._traverseAll(n));
         }
         else {
-            this.rootNode.childNodes.forEach(n => this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1));
+            this.rootNode.childNodes.forEach(n => this._traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1));
         }
         return this.returnRowsIndices;
     }
     // propagate the increase of decrease of changes (deltaVal) up the ancestors path
-    private applyDeltaUpward(node: DataNode, deltaVal: number) {
+    private _applyDeltaUpward(node: DataNode, deltaVal: number) {
         if (!node) return;
         node.displayCount += deltaVal;
-        this.applyDeltaUpward(node.parent, deltaVal);
+        this._applyDeltaUpward(node.parent, deltaVal);
     }
-    private subtractDisplayCount(node: DataNode) {
+    private _subtractDisplayCount(node: DataNode) {
         let oldVal = node.displayCount;
         node.displayCount = 0;
-        this.applyDeltaUpward(node.parent, -1 * oldVal);
+        this._applyDeltaUpward(node.parent, -1 * oldVal);
     }
-    private addDisplayCount(node: DataNode) {
+    private _addDisplayCount(node: DataNode) {
         let sum: number = 0;
         node.childNodes.forEach(c => sum += c.displayCount);
         node.displayCount = node.childNodes.length + sum;
         // since node was closed before (i.e. displayCount = 0), propagate the change upward
-        this.applyDeltaUpward(node.parent, node.displayCount);
+        this._applyDeltaUpward(node.parent, node.displayCount);
     }
     // the displayCount keep track of how many descendants (not just children) are on display. So when a branch is open, displayCount of this node goes up; but so does all the ancestors as well
     toggleNode(node: DataNode): number {
         node.isOpen = !(node.isOpen);
         if (node.isOpen)
-            this.addDisplayCount(node);
+            this._addDisplayCount(node);
         else
-            this.subtractDisplayCount(node);
+            this._subtractDisplayCount(node);
 
         return this.rootNode.displayCount;
     }
     // reset the displayCount on each node based on the current status of IsOpen on each node. Useful if we have an operation to open all nodes or close all 
-    private mapReduceDisplayCount(node: DataNode): number {
-        node.childNodes.forEach(c => this.mapReduceDisplayCount(c));
+    private _mapReduceDisplayCount(node: DataNode): number {
+        node.childNodes.forEach(c => this._mapReduceDisplayCount(c));
         let sum: number = 0;
         node.childNodes.forEach(c => sum += c.displayCount);
         if (node.isOpen)
@@ -165,7 +161,7 @@ export class DataTree {
     // recalculate displayCount of each node based on isOpen flag
     recountDisplayCount(): number {
         this.cnt = 0;
-        return this.mapReduceDisplayCount(this.rootNode);
+        return this._mapReduceDisplayCount(this.rootNode);
     }
     // If lazyLoad is enabled, then new rows are fetched from the backend and appended into the data array. We use the start index and end index of this new segment to construct a branch
     addRows(startIndex: number, endIndex: number, parentNode: DataNode) {

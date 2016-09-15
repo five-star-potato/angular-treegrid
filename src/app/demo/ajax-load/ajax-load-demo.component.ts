@@ -12,7 +12,7 @@ declare var hljs: any;
     <ul>
         <li>Loading table with Ajax</li>
         <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    
-        <li>If <strong>doNotLoad</strong> is true, ajax will not be called initially. You can call the method <strong>TreeGrid.loadAjaxData</strong> to load the data</li>    
+        <li>If <strong>doNotLoad</strong> is true, ajax will not be called initially. You can call the method <strong>TreeGrid.reloadAjax</strong> to load the data</li>    
     </ul>
  
  <ul class="nav nav-tabs">

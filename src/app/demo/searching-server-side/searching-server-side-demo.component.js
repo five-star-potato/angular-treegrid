@@ -18,18 +18,18 @@ var SearchingServerSideDemoComponent = (function () {
         hljs.highlightBlock(this.codeElement.nativeElement);
     };
     SearchingServerSideDemoComponent.prototype.ngOnInit = function () {
-        //this.treeDef.hierachy = {
-        //    foreignKeyField: "report_to", primaryKeyField: "emp_id"
-        //};
+        this.treeDef.hierachy = {
+            foreignKeyField: "report_to", primaryKeyField: "emp_id"
+        };
         this.treeDef.search = {
             url: "http://treegriddemoservice.azurewebsites.net/api/values/Search",
             method: "POST"
         };
         this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees',
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees',
             method: "POST",
-            lazyLoad: false,
-            doNotLoad: false
+            lazyLoad: true,
+            childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", searchable: false },
@@ -48,7 +48,7 @@ var SearchingServerSideDemoComponent = (function () {
     SearchingServerSideDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Formatting with Pipes</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using server-side logic to filter data</li>\n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
+            template: "\n    <h2>Server-side Search</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using server-side logic to filter data</li>\n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
             directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])

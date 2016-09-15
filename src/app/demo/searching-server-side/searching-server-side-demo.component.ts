@@ -7,7 +7,7 @@ declare var hljs: any;
 @Component({
     moduleId: module.id,
     template: `
-    <h2>Formatting with Pipes</h2>
+    <h2>Server-side Search</h2>
     <h3>Description</h3>
     Features included:
     <ul>
@@ -48,18 +48,18 @@ export class SearchingServerSideDemoComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        //this.treeDef.hierachy = {
-        //    foreignKeyField: "report_to", primaryKeyField: "emp_id"
-        //};
+        this.treeDef.hierachy = {
+            foreignKeyField: "report_to", primaryKeyField: "emp_id"
+        };
         this.treeDef.search = {
             url: "http://treegriddemoservice.azurewebsites.net/api/values/Search",
             method: "POST"
         }
         this.treeDef.ajax = {
-            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', 
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', 
             method: "POST",
-            lazyLoad: false,
-            doNotLoad: false
+            lazyLoad: true,
+            childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id", searchable: false },
