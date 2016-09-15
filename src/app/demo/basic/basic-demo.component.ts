@@ -68,6 +68,8 @@ export class BasicDemoComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
+        this.treeDef.search = true;
+
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },

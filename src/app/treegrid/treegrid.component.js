@@ -17,6 +17,7 @@ function __export(m) {
 var core_1 = require("@angular/core");
 var core_2 = require("@angular/core");
 var forms_1 = require('@angular/forms');
+var Rx_1 = require('rxjs/Rx');
 var datatree_1 = require('./datatree');
 var pagenav_component_1 = require('./pagenav.component');
 var simpledata_service_1 = require('./simpledata.service');
@@ -151,22 +152,17 @@ var TreeGrid = (function () {
             }
         }
         else if (this.treeGridDef.data.length > 0) {
+            this._dataBackup = this.treeGridDef.data;
             this.refresh();
         }
         if (!this.treeGridDef.className)
             this.treeGridDef.className = this.DEFAULT_CLASS;
         if (this.treeGridDef.search) {
-            if (typeof this.treeGridDef.search === "boolean") {
-            }
-            else {
-                this.term.valueChanges
-                    .debounceTime(400)
-                    .distinctUntilChanged()
-                    .switchMap(function (term) { return _this._searchOrReloadObservable(term, _this.searchField); })
-                    .subscribe(function (ret) {
-                    _this._reloadData(ret);
-                }, function (err) { console.log(err); });
-            }
+            this.term.valueChanges
+                .debounceTime(400)
+                .distinctUntilChanged()
+                .switchMap(function (term) { return _this._searchOrReloadObservable(term, _this.searchField); })
+                .subscribe(function (ret) { _this._reloadData(ret); }, function (err) { console.log(err); });
         }
     };
     TreeGrid.prototype._sortColumnEvtHandler = function (event) {
@@ -278,19 +274,32 @@ var TreeGrid = (function () {
     TreeGrid.prototype._searchOrReloadObservable = function (term, field) {
         if (term) {
             this._setIsLoaded = true;
-            var cfg = this.treeGridDef.search;
-            if (cfg && cfg.method && cfg.url)
-                return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
-            else
-                throw new Error("Search config missing");
+            if (this.treeGridDef.search) {
+                if (typeof this.treeGridDef.search === "object") {
+                    var cfg = this.treeGridDef.search;
+                    if (cfg && cfg.method && cfg.url)
+                        return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
+                    else
+                        throw new Error("Search config missing");
+                }
+                else {
+                    var searchResult = this.treeGridDef.data.filter(function (row) { return row['firstname'].includes(term); });
+                    return Rx_1.Observable.from(searchResult).toArray();
+                }
+            }
         }
         else {
-            this._setIsLoaded = false;
-            var ajax = this.treeGridDef.ajax;
-            if (ajax && ajax.url)
-                return this.dataService.send(ajax.method, ajax.url);
-            else
-                throw new Error("Ajax config missing");
+            if (this.treeGridDef.ajax) {
+                this._setIsLoaded = false;
+                var ajax = this.treeGridDef.ajax;
+                if (ajax && ajax.url)
+                    return this.dataService.send(ajax.method, ajax.url);
+                else
+                    throw new Error("Ajax config missing");
+            }
+            else {
+                return Rx_1.Observable.from(this._dataBackup).toArray();
+            }
         }
     };
     // handles the search column dropdown change

@@ -21321,7 +21321,7 @@ $__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["no
     __decorate([core_1.ViewChild('code'), __metadata('design:type', core_1.ElementRef)], AjaxLoadDemoComponent.prototype, "codeElement", void 0);
     AjaxLoadDemoComponent = __decorate([core_1.Component({
       moduleId: module.id,
-      template: "\n    <h2>Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li>If <strong>doNotLoad</strong> is true, ajax will not be called initially. You can call the method <strong>TreeGrid.loadAjaxData</strong> to load the data</li>    \n    </ul>\n \n <ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: false,\n        doNotLoad: false\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n</div>\n\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
+      template: "\n    <h2>Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li>If <strong>doNotLoad</strong> is true, ajax will not be called initially. You can call the method <strong>TreeGrid.reloadAjax</strong> to load the data</li>    \n    </ul>\n \n <ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: false,\n        doNotLoad: false\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n</div>\n\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
       directives: [treegrid_component_1.TreeGrid]
     }), __metadata('design:paramtypes', [])], AjaxLoadDemoComponent);
     return AjaxLoadDemoComponent;
@@ -25202,11 +25202,15 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
       GLOBAL = global;
   var treedef_1 = $__require('app/treegrid/treedef.js');
   var DataTree = (function() {
-    function DataTree(inputData, pk, fk) {
+    function DataTree(inputData, pk, fk, setIsLoaded) {
       var _this = this;
+      if (setIsLoaded === void 0) {
+        setIsLoaded = true;
+      }
       this.inputData = inputData;
       this.pk = pk;
       this.fk = fk;
+      this.setIsLoaded = setIsLoaded;
       this.rootNode = {
         childNodes: [],
         level: -1,
@@ -25217,59 +25221,62 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
       this.cnt = inputData.length;
       if (pk && fk) {
         for (var i = 0; i < this.cnt; i++) {
-          if (inputData[i][fk] == null) {
-            var newNode = {
-              row: inputData[i],
-              index: i,
-              level: 0,
-              displayCount: 0,
-              childNodes: [],
-              parent: this.rootNode
-            };
-            this.rootNode.childNodes.push(newNode);
-            inputData[i].__node = newNode;
+          if (inputData[i][fk] == undefined) {
+            this._createNewNode(inputData[i], i, this.rootNode);
           }
+        }
+        var _loop_1 = function(i) {
+          var keyVal = inputData[i][fk];
+          if (keyVal != undefined) {
+            if (inputData.findIndex(function(x) {
+              return (x[pk] == keyVal);
+            }) < 0) {
+              this_1._createNewNode(inputData[i], i, this_1.rootNode);
+            }
+          }
+        };
+        var this_1 = this;
+        for (var i = 0; i < this.cnt; i++) {
+          _loop_1(i);
         }
         this.rootNode.displayCount = this.rootNode.childNodes.length;
         this.rootNode.childNodes.forEach(function(n) {
-          return _this.processNode(n);
+          return _this._processNode(n);
         });
       } else {
         for (var i = 0; i < this.cnt; i++) {
-          var newNode = {
-            row: inputData[i],
-            index: i,
-            level: 0,
-            displayCount: 0,
-            childNodes: [],
-            parent: this.rootNode
-          };
-          this.rootNode.childNodes.push(newNode);
-          inputData[i].__node = newNode;
+          this._createNewNode(inputData[i], i, this.rootNode);
         }
         this.rootNode.displayCount = this.rootNode.childNodes.length;
       }
     }
-    DataTree.prototype.processNode = function(node) {
+    DataTree.prototype._createNewNode = function(r, i, parentNode, lvl) {
+      if (lvl === void 0) {
+        lvl = 0;
+      }
+      var n = {
+        row: r,
+        index: i,
+        level: lvl,
+        displayCount: 0,
+        childNodes: [],
+        parent: parentNode,
+        isLoaded: this.setIsLoaded
+      };
+      r.__node = n;
+      parentNode.childNodes.push(n);
+    };
+    DataTree.prototype._processNode = function(node) {
       var _this = this;
       for (var i = 0; i < this.cnt; i++) {
         if (this.inputData[i][this.fk] == node.row[this.pk]) {
-          var newNode = {
-            row: this.inputData[i],
-            index: i,
-            level: node.level + 1,
-            displayCount: 0,
-            childNodes: [],
-            parent: node
-          };
-          node.childNodes.push(newNode);
-          this.inputData[i].__node = newNode;
+          this._createNewNode(this.inputData[i], i, node, node.level + 1);
         }
       }
       if (node.childNodes.length > 0) {
         node.isOpen = false;
         node.childNodes.forEach(function(n) {
-          return _this.processNode(n);
+          return _this._processNode(n);
         });
       }
     };
@@ -25290,15 +25297,15 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
     DataTree.prototype.sortByColumn = function(field, dir) {
       this.sortNode(this.rootNode, field, dir);
     };
-    DataTree.prototype.traverseAll = function(node) {
+    DataTree.prototype._traverseAll = function(node) {
       var _this = this;
       this.returnRowsIndices.push(node.index);
       if (node.isOpen)
         node.childNodes.forEach(function(n) {
-          return _this.traverseAll(n);
+          return _this._traverseAll(n);
         });
     };
-    DataTree.prototype.traverse = function(node, startRow, endRow) {
+    DataTree.prototype._traverse = function(node, startRow, endRow) {
       var _this = this;
       if (this.rowCounter > endRow)
         return;
@@ -25308,7 +25315,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
       this.rowCounter++;
       if (node.isOpen)
         node.childNodes.forEach(function(n) {
-          return _this.traverse(n, startRow, endRow);
+          return _this._traverse(n, startRow, endRow);
         });
     };
     DataTree.prototype.getPageData = function(pageNum, pageSize) {
@@ -25317,46 +25324,46 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
       this.returnRowsIndices = [];
       if (pageSize < 0) {
         this.rootNode.childNodes.forEach(function(n) {
-          return _this.traverseAll(n);
+          return _this._traverseAll(n);
         });
       } else {
         this.rootNode.childNodes.forEach(function(n) {
-          return _this.traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1);
+          return _this._traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1);
         });
       }
       return this.returnRowsIndices;
     };
-    DataTree.prototype.applyDeltaUpward = function(node, deltaVal) {
+    DataTree.prototype._applyDeltaUpward = function(node, deltaVal) {
       if (!node)
         return;
       node.displayCount += deltaVal;
-      this.applyDeltaUpward(node.parent, deltaVal);
+      this._applyDeltaUpward(node.parent, deltaVal);
     };
-    DataTree.prototype.subtractDisplayCount = function(node) {
+    DataTree.prototype._subtractDisplayCount = function(node) {
       var oldVal = node.displayCount;
       node.displayCount = 0;
-      this.applyDeltaUpward(node.parent, -1 * oldVal);
+      this._applyDeltaUpward(node.parent, -1 * oldVal);
     };
-    DataTree.prototype.addDisplayCount = function(node) {
+    DataTree.prototype._addDisplayCount = function(node) {
       var sum = 0;
       node.childNodes.forEach(function(c) {
         return sum += c.displayCount;
       });
       node.displayCount = node.childNodes.length + sum;
-      this.applyDeltaUpward(node.parent, node.displayCount);
+      this._applyDeltaUpward(node.parent, node.displayCount);
     };
     DataTree.prototype.toggleNode = function(node) {
       node.isOpen = !(node.isOpen);
       if (node.isOpen)
-        this.addDisplayCount(node);
+        this._addDisplayCount(node);
       else
-        this.subtractDisplayCount(node);
+        this._subtractDisplayCount(node);
       return this.rootNode.displayCount;
     };
-    DataTree.prototype.mapReduceDisplayCount = function(node) {
+    DataTree.prototype._mapReduceDisplayCount = function(node) {
       var _this = this;
       node.childNodes.forEach(function(c) {
-        return _this.mapReduceDisplayCount(c);
+        return _this._mapReduceDisplayCount(c);
       });
       var sum = 0;
       node.childNodes.forEach(function(c) {
@@ -25370,7 +25377,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
     };
     DataTree.prototype.recountDisplayCount = function() {
       this.cnt = 0;
-      return this.mapReduceDisplayCount(this.rootNode);
+      return this._mapReduceDisplayCount(this.rootNode);
     };
     DataTree.prototype.addRows = function(startIndex, endIndex, parentNode) {
       for (var i = startIndex; i <= endIndex; i++) {
@@ -44699,6 +44706,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
       this.DEFAULT_CLASS = "table table-hover table-striped table-bordered";
       this.searchField = this.ANY_SEARCH_COLUMN;
       this.searchLabel = "Any column";
+      this._setIsLoaded = false;
       this.term = new forms_1.FormControl();
       this.self = this;
       this.isDataTreeConstructed = false;
@@ -44736,7 +44744,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
           throw new Error("Ajax Method must be GET or POST");
         }
         if (!ajax.doNotLoad) {
-          this.loadAjaxData();
+          this.reloadAjax();
         }
       } else if (this.treeGridDef.data.length > 0) {
         this.refresh();
@@ -44745,13 +44753,10 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
         this.treeGridDef.className = this.DEFAULT_CLASS;
       if (this.treeGridDef.search) {
         if (typeof this.treeGridDef.search === "boolean") {} else {
-          var cfg_1 = this.treeGridDef.search;
           this.term.valueChanges.debounceTime(400).distinctUntilChanged().switchMap(function(term) {
-            return _this._searchTerm(cfg_1.method, cfg_1.url, term, _this.searchField);
+            return _this._searchOrReloadObservable(term, _this.searchField);
           }).subscribe(function(ret) {
-            _this.isDataTreeConstructed = false;
-            _this.treeGridDef.data = ret;
-            _this.refresh();
+            _this._reloadData(ret);
           }, function(err) {
             console.log(err);
           });
@@ -44850,8 +44855,39 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
       this.selectedRow = row;
       this.onRowDblClick.emit(row);
     };
-    TreeGrid.prototype._searchTerm = function(method, url, term, field) {
-      return this.dataService.send(method, url + "?value=" + term + "&field=" + field);
+    TreeGrid.prototype._reloadData = function(data) {
+      this.isDataTreeConstructed = false;
+      this.treeGridDef.data = data;
+      this.refresh();
+    };
+    TreeGrid.prototype._searchOrReloadObservable = function(term, field) {
+      if (term) {
+        this._setIsLoaded = true;
+        var cfg = this.treeGridDef.search;
+        if (cfg && cfg.method && cfg.url)
+          return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
+        else
+          throw new Error("Search config missing");
+      } else {
+        this._setIsLoaded = false;
+        var ajax = this.treeGridDef.ajax;
+        if (ajax && ajax.url)
+          return this.dataService.send(ajax.method, ajax.url);
+        else
+          throw new Error("Ajax config missing");
+      }
+    };
+    TreeGrid.prototype._searchColumnChange = function(field, labelHTML) {
+      var _this = this;
+      this.searchField = field;
+      this.searchLabel = labelHTML;
+      if (this.term.value) {
+        this._searchOrReloadObservable(this.term.value, this.searchField).subscribe(function(ret) {
+          _this._reloadData(ret);
+        }, function(err) {
+          console.log(err);
+        });
+      }
     };
     TreeGrid.prototype._transformWithPipe = function(value, trans) {
       var v = value;
@@ -44863,15 +44899,13 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
     TreeGrid.prototype.saveSelectedRowchanges = function(copyRow) {
       Object.assign(this.selectedRow, copyRow);
     };
-    TreeGrid.prototype.loadAjaxData = function(url) {
+    TreeGrid.prototype.reloadAjax = function(url) {
       var _this = this;
       var ajax = this.treeGridDef.ajax;
       if (ajax && (url || ajax.url)) {
         this.isLoading = true;
         this.dataService.send(ajax.method, url ? url : ajax.url).subscribe(function(ret) {
-          _this.treeGridDef.data = ret;
-          _this.refresh();
-          _this.isLoading = false;
+          _this._reloadData(ret);
         }, function(err) {
           console.log(err);
         });
@@ -44880,7 +44914,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
     TreeGrid.prototype.refresh = function() {
       if (!this.isDataTreeConstructed) {
         if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-          this.dataTree = new datatree_1.DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+          this.dataTree = new datatree_1.DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField, this._setIsLoaded);
         else
           this.dataTree = new datatree_1.DataTree(this.treeGridDef.data);
         this.numVisibleRows = this.dataTree.recountDisplayCount();
@@ -44896,7 +44930,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
     TreeGrid = __decorate([core_1.Component({
       moduleId: module.id,
       selector: 'tg-treegrid',
-      template: "\n        <form class=\"form-inline\" style=\"margin:5px\" *ngIf=\"treeGridDef.search\">\n            <div class=\"form-group\">\n                <div class=\"dropdown\" style=\"display:inline\">\n                      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n                        {{ searchLabel }}\n                        <span class=\"caret\"></span>\n                      </button>\n                      <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n                        <li (click)=\"searchField=ANY_SEARCH_COLUMN; searchLabel='Any column'\"><a >Any column</a></li>\n                        <li role=\"separator\" class=\"divider\"></li>\n                        <template ngFor let-dc [ngForOf]=\"treeGridDef.columns\" >\n                            <li *ngIf=\"dc.searchable\"><a (click)=\"searchField=dc.dataField; searchLabel=utils.stripHTML(dc.labelHtml)\" [innerHTML]=\"utils.stripHTML(dc.labelHtml)\"></a></li>\n                        </template>\n                      </ul>\n                </div>\n            </div>\n            <div class=\"form-group\">\n                <input type=\"text\" [formControl]=\"term\" class=\"form-control\" id=\"searchText\" placeholder=\"Type to search\">\n            </div>\n        </form>\n\n        <table [class]=\"treeGridDef.className\" data-resizable-columns-id=\"resizable-table\">\n            <colgroup>\n                    <!-- providing closing tags broke NG template parsing -->    \n                    <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n            </colgroup>\n            <thead>\n                <tr>\n                    <th (onSort)=\"_sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                        tg-sortable-header [column-index]=\"x\" [sortable]=\"dc.sortable\" [innerHTML]=\"dc.labelHtml\" \n                            [class.tg-sortable]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                            [class.tg-sort-asc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.ASC\"\n                            [class.tg-sort-desc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.DESC\" \n                            >\n                    </th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr *ngFor=\"let dr of dataView; let x = index\" (dblclick)=\"_dblClickRow(dr)\">\n                    <td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? _calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\">\n                        <span class=\"tg-opened\" *ngIf=\"y == 0 && _showCollapseIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span class=\"tg-closed\" *ngIf=\"y == 0 && _showExpandIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n                        <span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        <span *ngIf=\"dc.transforms\" [innerHTML]=\"_transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n        <div class=\"row\">\n            <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n            <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"_goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav></div>\n        </div>\n            ",
+      template: "\n        <form class=\"form-inline\" style=\"margin:5px\" *ngIf=\"treeGridDef.search\">\n            <div class=\"form-group\">\n                <div class=\"dropdown\" style=\"display:inline\">\n                      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n                        {{ searchLabel }}\n                        <span class=\"caret\"></span>\n                      </button>\n                      <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n                        <li (click)=\"_searchColumnChange(ANY_SEARCH_COLUMN, 'Any column')\"><a >Any column</a></li>\n                        <li role=\"separator\" class=\"divider\"></li>\n                        <template ngFor let-dc [ngForOf]=\"treeGridDef.columns\" >\n                            <li *ngIf=\"dc.searchable\"><a (click)=\"_searchColumnChange(dc.dataField, dc.labelHtml)\" [innerHTML]=\"utils.stripHTML(dc.labelHtml)\"></a></li>\n                        </template>\n                      </ul>\n                </div>\n            </div>\n            <div class=\"form-group\">\n                <input type=\"text\" [formControl]=\"term\" class=\"form-control\" id=\"searchText\" placeholder=\"Type to search\">\n            </div>\n        </form>\n\n        <table [class]=\"treeGridDef.className\" data-resizable-columns-id=\"resizable-table\">\n            <colgroup>\n                    <!-- providing closing tags broke NG template parsing -->    \n                    <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n            </colgroup>\n            <thead>\n                <tr>\n                    <th (onSort)=\"_sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                        tg-sortable-header [column-index]=\"x\" [sortable]=\"dc.sortable\" [innerHTML]=\"dc.labelHtml\" \n                            [class.tg-sortable]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                            [class.tg-sort-asc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.ASC\"\n                            [class.tg-sort-desc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.DESC\" \n                            >\n                    </th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr *ngFor=\"let dr of dataView; let x = index\" (dblclick)=\"_dblClickRow(dr)\">\n                    <td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? _calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\">\n                        <span class=\"tg-opened\" *ngIf=\"y == 0 && _showCollapseIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span class=\"tg-closed\" *ngIf=\"y == 0 && _showExpandIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n                        <span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        <span *ngIf=\"dc.transforms\" [innerHTML]=\"_transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n        <div class=\"row\">\n            <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n            <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"_goPage($event)\" *ngIf=\"treeGridDef.paging\" [currentPage]=\"currentPage\"></tg-page-nav></div>\n        </div>\n            ",
       styles: ["th {\n    color: brown;\n}\nth.tg-sortable:after { \n    font-family: \"FontAwesome\"; \n    opacity: .3;\n    float: right;\n    content: \"\\f0dc\";\n}\nth.tg-sort-asc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0de\";\n    float: right;\n}\nth.tg-sort-desc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0dd\";\n    float: right;\n}\nspan.tg-opened, span.tg-closed {\n    margin-right: 0px;\n    cursor: pointer;\n}\nspan.tg-opened:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f078\";\n}\nspan.tg-closed:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f054\";\n}\nth.tg-header-left { \n    text-align: left;\n}\nth.tg-header-right { \n    text-align: right;\n}\nth.tg-header-center { \n    text-align: center;\n}\ntd.tg-body-left { \n    text-align: left;\n}\ntd.tg-body-right { \n    text-align: right;\n}\ntd.tg-body-center { \n    text-align: center;\n}\n\ndiv.loading-icon  {\n    opacity: 0;\n    transition: opacity 2s;\n}\n\ndiv.loading-icon.active {\n    opacity: 100;\n    transition: opacity 0.1s;\n}\n\n.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {\n  background-color: #E8F8F5;\n}\n"],
       directives: [SortableHeader, pagenav_component_1.PageNavigator],
       providers: [simpledata_service_1.SimpleDataService, utils_1.Utils, WikipediaService_1.WikipediaService]
@@ -44939,15 +44973,19 @@ $__System.registerDynamic("app/demo/searching-server-side/searching-server-side-
       hljs.highlightBlock(this.codeElement.nativeElement);
     };
     SearchingServerSideDemoComponent.prototype.ngOnInit = function() {
+      this.treeDef.hierachy = {
+        foreignKeyField: "report_to",
+        primaryKeyField: "emp_id"
+      };
       this.treeDef.search = {
         url: "http://treegriddemoservice.azurewebsites.net/api/values/Search",
         method: "POST"
       };
       this.treeDef.ajax = {
-        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees',
+        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees',
         method: "POST",
-        lazyLoad: false,
-        doNotLoad: false
+        lazyLoad: true,
+        childrenIndicatorField: 'hasChildren'
       };
       this.treeDef.columns = [{
         labelHtml: "Employee ID",

@@ -4,7 +4,7 @@
 import { Component, Directive, Input, ComponentMetadata, SimpleChange, ComponentFactory, OnInit, OnChanges} from "@angular/core";
 import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementRef, HostListener, ViewChild, ViewContainerRef, AfterViewInit } from "@angular/core";
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs/Rx';
 
 import { DataTree, DataNode } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
@@ -211,6 +211,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private items: Observable<Array<string>>;
     private term:FormControl = new FormControl();
 
+    private _dataBackup: any[]; // used to restore the dataview after searching, if Ajax is not configured, i.e. the data is static
+
     self = this; // copy of context
 
     private isDataTreeConstructed: boolean = false;
@@ -253,24 +255,18 @@ export class TreeGrid implements OnInit, AfterViewInit {
             }
         }
         else if (this.treeGridDef.data.length > 0) {
+            this._dataBackup = this.treeGridDef.data;
             this.refresh();
         }
         if (!this.treeGridDef.className)
             this.treeGridDef.className = this.DEFAULT_CLASS;
 
         if (this.treeGridDef.search) {
-            if (typeof this.treeGridDef.search === "boolean") {
-
-            }
-            else {
-                this.term.valueChanges
-                         .debounceTime(400)
-                         .distinctUntilChanged()
-                         .switchMap(term => this._searchOrReloadObservable(term, this.searchField))
-                         .subscribe((ret: any) => {
-                            this._reloadData(ret);
-                        }, (err: any) => { console.log(err) });
-            }
+            this.term.valueChanges
+                     .debounceTime(400)
+                     .distinctUntilChanged()
+                     .switchMap(term => this._searchOrReloadObservable(term, this.searchField))
+                     .subscribe((ret: any) => { this._reloadData(ret); }, (err: any) => { console.log(err) });
         }
     }
     
@@ -385,19 +381,32 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private _searchOrReloadObservable(term: string, field: string): Observable<any[]> {
         if (term) {
             this._setIsLoaded = true;
-            let cfg:SearchConfig = <SearchConfig> this.treeGridDef.search;
-            if (cfg && cfg.method && cfg.url)
-                return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
-            else 
-                throw new Error("Search config missing");
+            if (this.treeGridDef.search) {
+                if (typeof this.treeGridDef.search === "object") {
+                    let cfg:SearchConfig = <SearchConfig> this.treeGridDef.search;
+                    if (cfg && cfg.method && cfg.url)
+                        return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
+                    else 
+                        throw new Error("Search config missing");
+                }
+                else { // do client-side search
+                    let searchResult:any[] = this.treeGridDef.data.filter((row:any) => { return row['firstname'].includes(term); });
+                    return Observable.from(searchResult).toArray();
+                }
+            }
         }
         else { // if term is empty, reload 
-            this._setIsLoaded = false;
-            let ajax = this.treeGridDef.ajax;
-            if (ajax && ajax.url) 
-                return this.dataService.send(ajax.method, ajax.url)
-            else
-                throw new Error("Ajax config missing");
+            if (this.treeGridDef.ajax) {
+                this._setIsLoaded = false;
+                let ajax = this.treeGridDef.ajax;
+                if (ajax && ajax.url) 
+                    return this.dataService.send(ajax.method, ajax.url)
+                else
+                    throw new Error("Ajax config missing");
+            }
+            else {
+                return Observable.from(this._dataBackup).toArray();
+            }
         }
     }
     // handles the search column dropdown change
