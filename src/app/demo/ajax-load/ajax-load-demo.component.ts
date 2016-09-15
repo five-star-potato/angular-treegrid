@@ -39,7 +39,7 @@ ngOnInit&#40;&#41;  &#123;
         doNotLoad: false
     &#125;;
     this.treeDef.columns = [
-        &#123; labelHtml: "Employee ID", dataField: "emp_id", sort: true &#125;,
+        &#123; labelHtml: "Employee ID", dataField: "emp_id" &#125;,
         &#123; labelHtml: "Given&lt;br/&gt;name", dataField: "firstname" &#125;,
         &#123; labelHtml: "Family&lt;br/&gt;name", dataField: "lastname", className: "tg-body-center tg-header-center" &#125;,
         &#123; labelHtml: "Report To", dataField: "report_to" &#125;
@@ -81,7 +81,7 @@ export class AjaxLoadDemoComponent implements OnInit, AfterViewInit {
             doNotLoad: false
         };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true },
+            { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given<br/>name", dataField: "firstname" },
             { labelHtml: "Family<br/>name", dataField: "lastname", className: "tg-body-center tg-header-center" },
             { labelHtml: "Report To", dataField: "report_to" }];

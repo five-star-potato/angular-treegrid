@@ -14,13 +14,14 @@ var TreeGridDef = (function () {
         this.columns = [];
         this.data = [];
         this.paging = true;
-        this.sort = true;
+        this.sortable = true;
         this.pageSize = 25; /* make it small for debugging */
         //currentPage: number = 0;
         this.defaultOrder = [];
         this.hierachy = null;
         this.ajax = null;
         this.editor = null;
+        this.search = false;
     }
     return TreeGridDef;
 }());

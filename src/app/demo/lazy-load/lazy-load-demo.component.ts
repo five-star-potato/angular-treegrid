@@ -41,9 +41,9 @@ ngOnInit&#40;&#41;  &#123;
         lazyLoad: true,
     &#125;;
     this.treeDef.columns = [
-        &#123; labelHtml: "Employee ID", dataField: "emp_id", sort: true &#125;,
+        &#123; labelHtml: "Employee ID", dataField: "emp_id" &#125;,
         &#123; labelHtml: "Given&lt;br/&gt;name", dataField: "firstname" &#125;,
-        &#123; labelHtml: "Family&lt;br/&gt;name", dataField: "lastname", className: "tg-body-center tg-header-center" &#125;,
+        &#123; labelHtml: "Family&lt;br/&gt;name", dataField: "lastname" &#125;,
         &#123; labelHtml: "Report To", dataField: "report_to" &#125;
      ];
 &#125;
@@ -77,8 +77,8 @@ export class LazyLoadDemoComponent implements OnInit {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            //url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
-            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
+            //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
@@ -86,8 +86,8 @@ export class LazyLoadDemoComponent implements OnInit {
         this.treeDef.columns = [
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },
-            { labelHtml: "Date of Birth", dataField: "dob", className: "" },
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
+            { labelHtml: "Date of Birth", dataField: "dob" },
+            { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Report To", dataField: "report_to" }];
     }
 }

@@ -25,8 +25,8 @@ var LazyLoadDemoComponent = (function () {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
         this.treeDef.ajax = {
-            //url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
-            url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
+            //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
             lazyLoad: true,
             childrenIndicatorField: 'hasChildren'
         };
@@ -34,8 +34,8 @@ var LazyLoadDemoComponent = (function () {
         this.treeDef.columns = [
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },
-            { labelHtml: "Date of Birth", dataField: "dob", className: "" },
-            { labelHtml: "Employee ID", dataField: "emp_id", sort: true, className: "" },
+            { labelHtml: "Date of Birth", dataField: "dob" },
+            { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Report To", dataField: "report_to" }];
     };
     __decorate([
@@ -49,7 +49,7 @@ var LazyLoadDemoComponent = (function () {
     LazyLoadDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Lazy Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li><strong>childrenIndicatorField</strong> is the data field that TreeGrid will use to determine whether to display the expand/collapse icon</li>    \n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: true,\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\", sort: true &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\", className: \"tg-body-center tg-header-center\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n\n</div>    \n    ",
+            template: "\n    <h2>Lazy Loading with Ajax</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Loading table with Ajax</li>\n        <li>If <strong>lazyLoad</strong> is true, only the top level nodes are loaded initially; children nodes are loaded only when you expand the parent row. If it is set to false, all nodes are loaded</li>    \n        <li><strong>childrenIndicatorField</strong> is the data field that TreeGrid will use to determine whether to display the expand/collapse icon</li>    \n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.hierachy = [\n        foreignKeyField: \"report_to\", primaryKeyField: \"emp_id\"\n    &#125;;\n    this.treeDef.ajax = &#123;\n        url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', \n        method: \"POST\",\n        lazyLoad: true,\n    &#125;;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given&lt;br/&gt;name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family&lt;br/&gt;name\", dataField: \"lastname\" &#125;,\n        &#123; labelHtml: \"Report To\", dataField: \"report_to\" &#125;\n     ];\n&#125;\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n\n</div>    \n    ",
             directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])

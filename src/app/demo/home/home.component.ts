@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ROUTER_DIRECTIVES } from '@angular/router';
-import { DataService } from '../../shared/data.service';
 
 @Component({
     moduleId: module.id,
@@ -78,16 +77,7 @@ import { DataService } from '../../shared/data.service';
     </div>
       
     `,
-    directives: [ ROUTER_DIRECTIVES ],
-    providers: [ DataService ]
+    directives: [ ROUTER_DIRECTIVES ]
 })
-export class HomeComponent implements OnInit {
-    
-    projectName: string;
-
-    constructor(private dataService: DataService) { }
-
-    ngOnInit() {
-        //this.projectName = this.dataService.getProjectName();
-    }
+export class HomeComponent {
 }

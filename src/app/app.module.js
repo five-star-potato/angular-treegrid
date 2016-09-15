@@ -12,6 +12,8 @@ var core_1 = require('@angular/core');
 var platform_browser_1 = require('@angular/platform-browser');
 var forms_1 = require('@angular/forms');
 var http_1 = require('@angular/http');
+var forms_2 = require('@angular/forms');
+var http_2 = require('@angular/http');
 var app_component_1 = require('./app.component');
 var home_component_1 = require('./demo/home/home.component');
 var basic_demo_component_1 = require('./demo/basic/basic-demo.component');
@@ -20,16 +22,16 @@ var lazy_load_demo_component_1 = require('./demo/lazy-load/lazy-load-demo.compon
 var pipes_demo_component_1 = require('./demo/pipes/pipes-demo.component');
 var custom_render_demo_component_1 = require('./demo/custom-render/custom-render-demo.component');
 var modal_editor_demo_component_1 = require('./demo/modal-editor/modal-editor-demo.component');
+var searching_server_side_demo_component_1 = require('./demo/searching-server-side/searching-server-side-demo.component');
 var app_routing_1 = require('./app.routing');
-var data_service_1 = require('./shared/data.service');
 var AppModule = (function () {
     function AppModule() {
     }
     AppModule = __decorate([
         core_1.NgModule({
-            imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing],
-            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent, modal_editor_demo_component_1.ModalEditorDemoComponent],
-            providers: [data_service_1.DataService],
+            imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing, forms_2.ReactiveFormsModule],
+            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent, modal_editor_demo_component_1.ModalEditorDemoComponent, searching_server_side_demo_component_1.SearchingServerSideDemoComponent],
+            providers: [http_2.JSONP_PROVIDERS],
             bootstrap: [app_component_1.AppComponent]
         }), 
         __metadata('design:paramtypes', [])

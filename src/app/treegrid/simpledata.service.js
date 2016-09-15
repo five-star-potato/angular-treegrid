@@ -32,14 +32,14 @@ var SimpleDataService = (function () {
             .map(function (res) { return res.json(); });
         //.catch(this.handleError);
     };
-    /*    post(url: string, body: string = "{}"): Observable<any[]> {
-            var params = new URLSearchParams();
-            params.set('id', '23');
-            return this.http.post(url, params.toString(), { headers: this.headers })
-                .map((res: Response) => res.json())
-                //.catch(this.handleError);
+    SimpleDataService.prototype.send = function (method, url) {
+        if (method === "POST") {
+            return this.post(url);
         }
-       */
+        else {
+            return this.get(url);
+        }
+    };
     SimpleDataService.prototype.handleError = function (error) {
         // In a real world app, we might use a remote logging infrastructure
         // We'd also dig deeper into the error to get a better message

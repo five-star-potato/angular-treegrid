@@ -3,10 +3,16 @@
 /// <reference path="../../../typings/jquery/jquery.d.ts" />
 import { Component, Directive, Input, ComponentMetadata, SimpleChange, ComponentFactory, OnInit, OnChanges} from "@angular/core";
 import { Pipe, PipeTransform, Injectable, Inject, Output, EventEmitter, ElementRef, HostListener, ViewChild, ViewContainerRef, AfterViewInit } from "@angular/core";
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs/Observable';
+
 import { DataTree, DataNode } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
 import { SimpleDataService } from './simpledata.service';
-import { AjaxConfig, ColumnDef, ColumnOrder, ColumnTransform, EditorConfig, EditorType, SortDirection, TreeGridDef, TreeHierarchy } from "./treedef";
+import { AjaxConfig, ColumnDef, ColumnOrder, ColumnTransform, EditorConfig, EditorType, SortDirection, TreeGridDef, TreeHierarchy, SearchConfig } from "./treedef";
+import { Utils } from './utils';
+
+import { WikipediaService } from './WikipediaService';
 
 export * from './treedef';
 
@@ -19,35 +25,35 @@ export * from './treedef';
     selector: '[tg-sortable-header]'
 })
 export class SortableHeader {
-    private el: HTMLElement;
-    private vc: ViewContainerRef;
-    private sortDir:SortDirection = null;
+    private _el: HTMLElement;
+    private _vc: ViewContainerRef;
+    private _sortDir:SortDirection = null;
 
     /* the actual sorting is done by the parent */
     @Output() onSort = new EventEmitter<ColumnOrder>();
     @Input('column-index') colIndex: number;
-    @Input() sort: boolean;
+    @Input() sortable: boolean;
 
     constructor(private e: ElementRef, private vr: ViewContainerRef) {
-        this.el = e.nativeElement;
-        this.vc = vr;
+        this._el = e.nativeElement;
+        this._vc = vr;
     }
     @HostListener('mouseenter') onMouseEnter() {
-        this.highlight('#DDD');
+        this._highlight('#DDD');
     }
     @HostListener('mouseleave') onMouseLeave() {
-        this.highlight(null);
+        this._highlight(null);
     }
     @HostListener('click') onClick() {
-        if (!this.sort) return;
+        if (!this.sortable) return;
 
-        // cyling sortDir among -1,0,1
-        this.sortDir = (this.sortDir == null) ? SortDirection.ASC : (this.sortDir == SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC);
-        this.onSort.emit({ columnIndex: this.colIndex, sortDirection: this.sortDir });
+        // cyling sortDir among -1,0,1; don't check !this.sortDir because 0 is a valid value
+        this._sortDir = (this._sortDir == undefined) ? SortDirection.ASC : (this._sortDir == SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC);
+        this.onSort.emit({ columnIndex: this.colIndex, sortDirection: this._sortDir });
         console.log('header clicked')
     }
-    private highlight(color: string) {
-        this.el.style.backgroundColor = color;
+    private _highlight(color: string) {
+        this._el.style.backgroundColor = color;
     }
 }
 
@@ -55,40 +61,61 @@ export class SortableHeader {
     moduleId: module.id,
     selector: 'tg-treegrid',
     template: `
-			<table [class]="treeGridDef.className" data-resizable-columns-id="resizable-table">
-                <colgroup>
-                        <!-- providing closing tags broke NG template parsing -->    
-                        <col *ngFor="let dc of treeGridDef.columns" [class]="dc.className"> 
-                </colgroup>
-			    <thead>
-				    <tr>
-					    <th (onSort)="sortColumnEvtHandler($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
-                            tg-sortable-header [column-index]="x" [sort]="dc.sort" [innerHTML]="dc.labelHtml" 
-                                [class.tg-sortable]="treeGridDef.sort && dc.sort && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC"
-                                [class.tg-sort-asc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.ASC"
-                                [class.tg-sort-desc]="treeGridDef.sort && dc.sort && dc.sortDirection == sortDirType.DESC" 
-                                >
-                        </th>
-				    </tr>
-			    </thead>
-				<tbody>
-					<tr *ngFor="let dr of dataView; let x = index" (dblclick)="dblClickRow(dr)">
-						<td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? calcIndent(dr).toString() + 'px' : ''" [class]="dc.className">
-                            <span class="tg-opened" *ngIf="y == 0 && showCollapseIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
-                            <span class="tg-closed" *ngIf="y == 0 && showExpandIcon(dr)" (click)="toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
-                            <span *ngIf="!dc.render && !dc.transforms">{{ dr[dc.dataField] }}</span>
-    						<span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
-                            <span *ngIf="dc.transforms" [innerHTML]="transformWithPipe(dr[dc.dataField], dc.transforms)"></span>
-                        </td>
-
-					</tr>
-				</tbody>
-			</table>
-            <div class="row">
-                <div class="loading-icon col-md-offset-4 col-md-4" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
-                <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
+        <form class="form-inline" style="margin:5px" *ngIf="treeGridDef.search">
+            <div class="form-group">
+                <div class="dropdown" style="display:inline">
+                      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ searchLabel }}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li (click)="searchField=ANY_SEARCH_COLUMN; searchLabel='Any column'"><a >Any column</a></li>
+                        <li role="separator" class="divider"></li>
+                        <template ngFor let-dc [ngForOf]="treeGridDef.columns" >
+                            <li *ngIf="dc.searchable"><a (click)="searchField=dc.dataField; searchLabel=utils.stripHTML(dc.labelHtml)" [innerHTML]="utils.stripHTML(dc.labelHtml)"></a></li>
+                        </template>
+                      </ul>
+                </div>
             </div>
-		    `,
+            <div class="form-group">
+                <input type="text" [formControl]="term" class="form-control" id="searchText" placeholder="Type to search">
+            </div>
+        </form>
+
+        <table [class]="treeGridDef.className" data-resizable-columns-id="resizable-table">
+            <colgroup>
+                    <!-- providing closing tags broke NG template parsing -->    
+                    <col *ngFor="let dc of treeGridDef.columns" [class]="dc.className"> 
+            </colgroup>
+            <thead>
+                <tr>
+                    <th (onSort)="_sortColumnEvtHandler($event)" *ngFor="let dc of treeGridDef.columns; let x = index" data-resizable-column-id="#" [style.width]="dc.width" [class]="dc.className"
+                        tg-sortable-header [column-index]="x" [sortable]="dc.sortable" [innerHTML]="dc.labelHtml" 
+                            [class.tg-sortable]="treeGridDef.sortable && dc.sortable && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC"
+                            [class.tg-sort-asc]="treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.ASC"
+                            [class.tg-sort-desc]="treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.DESC" 
+                            >
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let dr of dataView; let x = index" (dblclick)="_dblClickRow(dr)">
+                    <td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? _calcIndent(dr).toString() + 'px' : ''" [class]="dc.className">
+                        <span class="tg-opened" *ngIf="y == 0 && _showCollapseIcon(dr)" (click)="_toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
+                        <span class="tg-closed" *ngIf="y == 0 && _showExpandIcon(dr)" (click)="_toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
+                        <span *ngIf="!dc.render && !dc.transforms">{{ dr[dc.dataField] }}</span>
+                        <span *ngIf="dc.render != null" [innerHTML]="dc.render(dr[dc.dataField], dr, x)"></span>
+                        <span *ngIf="dc.transforms" [innerHTML]="_transformWithPipe(dr[dc.dataField], dc.transforms)"></span>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="loading-icon col-md-offset-4 col-md-4" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
+            <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="_goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
+        </div>
+            `,
     styles: [`th {
     color: brown;
 }
@@ -154,7 +181,7 @@ div.loading-icon.active {
 }
 `],
     directives: [SortableHeader, PageNavigator ],
-    providers: [ SimpleDataService ]
+    providers: [ SimpleDataService, Utils, WikipediaService ]
 })
 export class TreeGrid implements OnInit, AfterViewInit {
     private debugVar:number = 0;
@@ -166,26 +193,91 @@ export class TreeGrid implements OnInit, AfterViewInit {
     @ViewChild(PageNavigator)
     private pageNav: PageNavigator;
 
+    get ANY_SEARCH_COLUMN():string { return "[any]"; }
+
 	// dataView is what the user is seeing on the screen; one page of data if paging is enabled
     private dataView: any[];
     private dataTree: DataTree;
     private numVisibleRows: number;
     private currentPage: PageNumber = { num: 0 };
-    private isLoading: boolean = false;
+    private isLoading: boolean = false; // show loading icon
     private selectedRow: any;
     private sortColumnField: string;
     private sortDirection: SortDirection;
     private DEFAULT_CLASS:string = "table table-hover table-striped table-bordered";
+    private searchField:string = this.ANY_SEARCH_COLUMN;
+    private searchLabel:string = "Any column";
+
+    private items: Observable<Array<string>>;
+    private term:FormControl = new FormControl();
 
     self = this; // copy of context
 
-    private initalProcessed: boolean = false;
+    private isDataTreeConstructed: boolean = false;
     public sortDirType = SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
-    constructor(private dataService: SimpleDataService, private elementRef: ElementRef) {
+
+    constructor(private dataService: SimpleDataService, private elementRef: ElementRef, private utils: Utils, private wikipediaService: WikipediaService) {
         this.currentPage.num = 0;
+
         console.log(this.elementRef);
+        // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
+
     }
-    private sortColumnEvtHandler(event: ColumnOrder) {
+    ngAfterViewInit() {
+        // Initialize resizable columns after everything is rendered
+        let y: any;
+        y = jQuery(this.elementRef.nativeElement).find('table');
+        y.resizableColumns();
+
+        if (this.treeGridDef.paging && this.pageNav) 
+            this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
+    }
+    ngOnInit() {
+        this.treeGridDef.columns.forEach((item) => {
+            // can't find good ways to initialize interface
+            if (item.sortable == undefined)
+                item.sortable = true;
+            if (item.searchable == undefined)
+                item.searchable = true;
+        });
+
+        let ajax = this.treeGridDef.ajax;
+        if (ajax) {
+            if (!ajax.method)
+                ajax.method = "GET";
+            if (ajax.method != "GET" && ajax.method != "POST") {
+                throw new Error("Ajax Method must be GET or POST");
+            }            
+            if (!ajax.doNotLoad) {
+                this.loadAjaxData();
+            }
+        }
+        else if (this.treeGridDef.data.length > 0) {
+            this.refresh();
+        }
+        if (!this.treeGridDef.className)
+            this.treeGridDef.className = this.DEFAULT_CLASS;
+
+        if (this.treeGridDef.search) {
+            if (typeof this.treeGridDef.search === "boolean") {
+
+            }
+            else {
+                let cfg:SearchConfig = <SearchConfig> this.treeGridDef.search;
+                this.term.valueChanges
+                         .debounceTime(400)
+                         .distinctUntilChanged()
+                         .switchMap(term => this._searchTerm(cfg.method, cfg.url, term, this.searchField))
+                         .subscribe((ret: any) => {
+                            this.isDataTreeConstructed = false;
+                            this.treeGridDef.data = ret;
+                            this.refresh();
+                        }, (err: any) => { console.log(err) });
+            }
+        }
+    }
+    
+    private _sortColumnEvtHandler(event: ColumnOrder) {
         // assuming that we can only sort one column at a time;
         // clear all the sortDirection flags across columns;
         let dir: SortDirection = event.sortDirection;
@@ -199,10 +291,11 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
         this.refresh();
     }    
-    calcIndent(row: any):number {
-        var showExpand = this.showExpandIcon(row);
-        var showCollapse = this.showCollapseIcon(row);
-        var ident:number = row.__node.level * 30 + 10;
+    // Calculate how much indentation we need per level; notice that the open/close icon are not of the same width
+    private _calcIndent(row: any):number {
+        var showExpand = this._showExpandIcon(row);
+        var showCollapse = this._showCollapseIcon(row);
+        var ident:number = row.__node.level * 20 + 10;
 
         if (showExpand)
             ident -= 17;
@@ -210,13 +303,13 @@ export class TreeGrid implements OnInit, AfterViewInit {
             ident -= 21;
         return ident;
     }
-    showCollapseIcon(row: any):boolean {
+    private _showCollapseIcon(row: any):boolean {
         if (!row.__node)
             return false;
         return (row.__node.isOpen && row.__node.childNodes.length > 0);
     }
     // test to see if the node should show an icon for opening the subtree
-    showExpandIcon(row: any): boolean {
+    private _showExpandIcon(row: any): boolean {
         if (!row.__node)
             return false;
 
@@ -233,72 +326,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
         }
         return false;
     } 
-    refresh() {
-        if (!this.initalProcessed) {
-            if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
-            else // data is just flat 2d table
-                this.dataTree = new DataTree(this.treeGridDef.data);
-            this.numVisibleRows = this.dataTree.recountDisplayCount();
-            this.initalProcessed = true;
-        }
-        this.goPage(this.currentPage.num);
-        if (this.treeGridDef.paging && this.pageNav) 
-            this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
-    }
-
-    loadAjaxData(url?: string) { // user can provide a different url to override the url in AjaxConfig
-        let ajax = this.treeGridDef.ajax;
-        if (ajax && (url || ajax.url)) {
-            this.isLoading = true;
-            if (ajax.method == "POST") {
-                this.dataService.post(url ? url : ajax.url).subscribe((ret: any) => {
-                    this.treeGridDef.data = ret;
-                    this.refresh();
-                    this.isLoading = false;
-                }, (err: any) => { console.log(err) });
-            }
-            else {
-                /*
-                this.dataService.get(ajax.url).subscribe((ret: any) => {
-                        this.treeGridDef.data = ret;
-                        this.refresh();
-                    }, (err: any) => { console.log(err) });
-                */
-            }
-        }
-    }
-    ngAfterViewInit() {
-        // Initialize resizable columns after everything is rendered
-        let y: any;
-        y = jQuery(this.elementRef.nativeElement).find('table');
-        y.resizableColumns();
-
-        if (this.treeGridDef.paging) 
-            this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
-    }
-
-    ngOnInit() {
-        this.treeGridDef.columns.forEach((item) => {
-            // can't find good ways to initialize interface
-            if (item.sort == undefined)
-                item.sort = true;
-        });
-
-        let ajax = this.treeGridDef.ajax;
-        if (ajax != null) {
-            if (!ajax.doNotLoad) {
-                this.loadAjaxData();
-            }
-        }
-        else if (this.treeGridDef.data.length > 0) {
-                this.refresh();
-        }
-        if (!this.treeGridDef.className)
-            this.treeGridDef.className = this.DEFAULT_CLASS;
-    }
 	// Handling Pagination logic
-    goPage(pn: number) {
+    private _goPage(pn: number) {
         var sz = this.treeGridDef.pageSize;
         let rowInds: number[]; // indices of the paged data rows
         if (this.treeGridDef.paging)
@@ -312,18 +341,18 @@ export class TreeGrid implements OnInit, AfterViewInit {
     }
 
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
-    private toggleTreeNode(node: DataNode) {
+    private _toggleTreeNode(node: DataNode) {
         this.numVisibleRows = this.dataTree.toggleNode(node);
-        this.goPage(this.currentPage.num);
-        if (this.treeGridDef.paging)
+        this._goPage(this.currentPage.num);
+        if (this.treeGridDef.paging && this.pageNav) 
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
-    toggleTreeEvtHandler(node: DataNode) {
+    private _toggleTreeEvtHandler(node: DataNode) {
         let ajax = this.treeGridDef.ajax;
-        if (ajax != null) {
+        if (ajax) {
             if (ajax.lazyLoad && !node.isLoaded) {
                 this.isLoading = true;
-                this.dataService.post(ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
+                this.dataService.send(ajax.method, ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
                     // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
                     node.isLoaded = true;
                     if (ret.length > 0) {
@@ -338,33 +367,56 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         }
                             
                     }
-                    this.toggleTreeNode(node);
+                    this._toggleTreeNode(node);
                     this.isLoading = false;
                 }, (err: any) => { console.log(err) });
             }
             else
-                this.toggleTreeNode(node);
+                this._toggleTreeNode(node);
         }
         else 
-            this.toggleTreeNode(node);
+            this._toggleTreeNode(node);
     }
-    transformWithPipe(value:any, trans:ColumnTransform[]) {
+    private _dblClickRow(row: any) {
+        this.selectedRow = row;
+        this.onRowDblClick.emit(row);
+    }
+    private _searchTerm(method:string, url:string, term: string, field: string): Observable<any[]> {
+        return this.dataService.send(method, url + "?value=" + term + "&field=" + field);
+    }
+    private _transformWithPipe(value:any, trans:ColumnTransform[]) {
         let v:any = value;
         trans.forEach(function(t:ColumnTransform) {
             v = t.pipe.transform(v, t.param);
         })
         return v;
     }
-    dblClickRow(row: any) {
-        this.selectedRow = row;
-        this.onRowDblClick.emit(row);
-    }
     saveSelectedRowchanges(copyRow: any) {
         Object.assign(this.selectedRow, copyRow);
     }
-    debugFunc() {
-        this.debugVar++;
-        console.log(this.debugVar);
+    loadAjaxData(url?: string) { // user can provide a different url to override the url in AjaxConfig
+        let ajax = this.treeGridDef.ajax;
+        if (ajax && (url || ajax.url)) {
+            this.isLoading = true;
+            this.dataService.send(ajax.method, url ? url : ajax.url).subscribe((ret: any) => {
+                this.treeGridDef.data = ret;
+                this.refresh();
+                this.isLoading = false;
+            }, (err: any) => { console.log(err) });
+        }
+    }
+    refresh() {
+        if (!this.isDataTreeConstructed) {
+            if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
+                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField);
+            else // data is just flat 2d table
+                this.dataTree = new DataTree(this.treeGridDef.data);
+            this.numVisibleRows = this.dataTree.recountDisplayCount();
+            this.isDataTreeConstructed = true;
+        }
+        this._goPage(this.currentPage.num);
+        if (this.treeGridDef.paging && this.pageNav) 
+                this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
 
 	/* event not fired when treeGridDef was changed programmatically. Is this a bug?

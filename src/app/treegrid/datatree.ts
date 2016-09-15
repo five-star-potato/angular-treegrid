@@ -1,4 +1,4 @@
-import {SortDirection} from "./treedef";
+import { SortDirection} from "./treedef";
 
 /***
 The idea is to create a representation of the 2D data array in a tree structure, using pk and fk fields.
@@ -20,7 +20,7 @@ export class DataTree {
     private cnt: number;						 // temp var
     private rowCounter: number;			 // temp var for counting rows
     private returnRowsIndices: number[]; // store the row indices to the inputData array corresponding to a page
-
+    
     constructor(private inputData: any[], private pk?: string, private fk?: string) {
         this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;

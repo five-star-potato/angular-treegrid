@@ -9,17 +9,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var DataService = (function () {
-    function DataService() {
+var http_1 = require('@angular/http');
+var WikipediaService = (function () {
+    function WikipediaService(jsonp) {
+        this.jsonp = jsonp;
     }
-    DataService.prototype.getProjectName = function () {
-        return 'Angular 2 Bare Bones';
+    WikipediaService.prototype.search = function (term) {
+        var search = new http_1.URLSearchParams();
+        search.set('action', 'opensearch');
+        search.set('search', term);
+        search.set('format', 'json');
+        return this.jsonp
+            .get('http://en.wikipedia.org/w/api.php?callback=JSONP_CALLBACK', { search: search })
+            .map(function (response) { return response.json()[1]; });
     };
-    DataService = __decorate([
+    WikipediaService = __decorate([
         core_1.Injectable(), 
-        __metadata('design:paramtypes', [])
-    ], DataService);
-    return DataService;
+        __metadata('design:paramtypes', [http_1.Jsonp])
+    ], WikipediaService);
+    return WikipediaService;
 }());
-exports.DataService = DataService;
-//# sourceMappingURL=data.service.js.map
+exports.WikipediaService = WikipediaService;
+//# sourceMappingURL=WikipediaService.js.map

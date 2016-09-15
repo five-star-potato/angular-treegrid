@@ -50,21 +50,27 @@ export interface ColumnDef {
     dataField: string;
     width?: string;
     className?: string;
-    sort?: boolean;
+    sortable?: boolean;
+    searchable?: boolean;
     sortDirection?: SortDirection;
     render?: (data: any, row: any, index: number) => SafeHtml;
     transforms?: ColumnTransform[];
+}
+export interface SearchConfig {
+    url: string;
+    method?: string;    // POST or GET
 }
 export class TreeGridDef  {
     className: string;
     columns: ColumnDef[] = [];
     data: any[] = [];
     paging: boolean = true;
-    sort: boolean = true;
+    sortable: boolean = true;
     pageSize: number = 25; /* make it small for debugging */
     //currentPage: number = 0;
     defaultOrder: ColumnOrder[] = [];
     hierachy: TreeHierarchy = null;
     ajax: AjaxConfig = null;
-    editor: EditorConfig = null
+    editor: EditorConfig = null;
+    search: boolean | SearchConfig = false; 
 }

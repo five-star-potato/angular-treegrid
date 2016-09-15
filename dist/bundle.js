@@ -25754,7 +25754,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
       if (ajax != null) {
         if (ajax.lazyLoad && !node.isLoaded) {
           this.isLoading = true;
-          this.dataService.post(ajax.url + "/" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function(ret) {
+          this.dataService.post(ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function(ret) {
             node.isLoaded = true;
             if (ret.length > 0) {
               var startIndex = _this.treeGridDef.data.length;
@@ -36646,9 +36646,14 @@ $__System.registerDynamic("app/treegrid/simpledata.service.js", ["node_modules/@
     function SimpleDataService(http) {
       this.http = http;
       this.headers = new http_1.Headers();
-      this.headers.append('Content-Type', 'application/json');
+      this.headers.append('Content-Type', 'application/x-www-form-urlencoded');
       this.headers.append('Access-Control-Allow-Origin', '*');
     }
+    SimpleDataService.prototype.get = function(url) {
+      return this.http.get(url, {headers: this.headers}).map(function(res) {
+        return res.json();
+      });
+    };
     SimpleDataService.prototype.post = function(url) {
       return this.http.post(url, "", {headers: this.headers}).map(function(res) {
         return res.json();
