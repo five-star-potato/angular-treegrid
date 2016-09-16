@@ -115,8 +115,6 @@ var TreeGrid = (function () {
         this.isDataTreeConstructed = false;
         this.sortDirType = treedef_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
         this.currentPage.num = 0;
-        console.log(this.elementRef);
-        // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
     }
     Object.defineProperty(TreeGrid.prototype, "ANY_SEARCH_COLUMN", {
         get: function () { return "[any]"; },
@@ -157,6 +155,7 @@ var TreeGrid = (function () {
         }
         if (!this.treeGridDef.className)
             this.treeGridDef.className = this.DEFAULT_CLASS;
+        // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
         if (this.treeGridDef.search) {
             this.term.valueChanges
                 .debounceTime(400)
@@ -283,7 +282,7 @@ var TreeGrid = (function () {
                         throw new Error("Search config missing");
                 }
                 else {
-                    var searchResult = this.treeGridDef.data.filter(function (row) { return row['firstname'].includes(term); });
+                    var searchResult = this._searchInExistingData(term, field);
                     return Rx_1.Observable.from(searchResult).toArray();
                 }
             }
@@ -312,6 +311,27 @@ var TreeGrid = (function () {
                 _this._reloadData(ret);
             }, function (err) { console.log(err); });
         }
+    };
+    TreeGrid.prototype._searchInExistingData = function (term, field) {
+        var searchResult = new Set();
+        if (field === this.ANY_SEARCH_COLUMN) {
+            // user may choose search any fields
+            var _loop_1 = function(dc) {
+                if (dc.searchable)
+                    // remember to search from the initial dataset; not withing the prev search result
+                    this_1._dataBackup.filter(function (row) { return row[dc.dataField].toString().toLowerCase().includes(term); })
+                        .forEach(function (x) { return searchResult.add(x); });
+            };
+            var this_1 = this;
+            for (var _i = 0, _a = this.treeGridDef.columns; _i < _a.length; _i++) {
+                var dc = _a[_i];
+                _loop_1(dc);
+            }
+        }
+        else {
+            searchResult.add(this.treeGridDef.data.filter(function (row) { return row[field].toString().toLowerCase().includes(term); }));
+        }
+        return Array.from(searchResult);
     };
     TreeGrid.prototype._transformWithPipe = function (value, trans) {
         var v = value;

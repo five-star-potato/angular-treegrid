@@ -220,10 +220,6 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
     constructor(private dataService: SimpleDataService, private elementRef: ElementRef, private utils: Utils, private wikipediaService: WikipediaService) {
         this.currentPage.num = 0;
-
-        console.log(this.elementRef);
-        // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
-
     }
     ngAfterViewInit() {
         // Initialize resizable columns after everything is rendered
@@ -261,6 +257,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         if (!this.treeGridDef.className)
             this.treeGridDef.className = this.DEFAULT_CLASS;
 
+        // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
         if (this.treeGridDef.search) {
             this.term.valueChanges
                      .debounceTime(400)
@@ -390,7 +387,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         throw new Error("Search config missing");
                 }
                 else { // do client-side search
-                    let searchResult:any[] = this.treeGridDef.data.filter((row:any) => { return row['firstname'].includes(term); });
+                    let searchResult:any[] = this._searchInExistingData(term, field);
                     return Observable.from(searchResult).toArray();
                 }
             }
@@ -418,6 +415,22 @@ export class TreeGrid implements OnInit, AfterViewInit {
                 this._reloadData(ret);
             }, (err: any) => { console.log(err) });
         }
+    }
+    private _searchInExistingData(term:string, field:string):any[] {
+        let searchResult:Set<any> = new Set<any>();
+        if (field === this.ANY_SEARCH_COLUMN) {
+            // user may choose search any fields
+            for (let dc of this.treeGridDef.columns) {
+                if (dc.searchable) 
+                    // remember to search from the initial dataset; not withing the prev search result
+                    this._dataBackup.filter((row:any) => { return row[dc.dataField].toString().toLowerCase().includes(term); })
+                        .forEach(x => searchResult.add(x));
+            }
+        }
+        else { // use specifies one column to search
+            searchResult.add(this.treeGridDef.data.filter((row:any) => { return row[field].toString().toLowerCase().includes(term); }));
+        }
+        return Array.from(searchResult);
     }
     private _transformWithPipe(value:any, trans:ColumnTransform[]) {
         let v:any = value;
