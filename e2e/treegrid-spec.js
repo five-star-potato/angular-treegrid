@@ -1,6 +1,6 @@
 describe('angular 2 treegrid', function() {
   it('should display a treegrid', function() {
-    browser.get('http://localhost:3000/home');
+    browser.get('http://localhost:3000/demo1');
 
     expect(element.all(by.css('.treegrid-table > thead > tr > th')).first().getText()).toMatch(/Employee/);
 

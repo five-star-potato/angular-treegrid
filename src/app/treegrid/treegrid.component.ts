@@ -12,8 +12,6 @@ import { SimpleDataService } from './simpledata.service';
 import { AjaxConfig, ColumnDef, ColumnOrder, ColumnTransform, EditorConfig, EditorType, SortDirection, TreeGridDef, TreeHierarchy, SearchConfig } from "./treedef";
 import { Utils } from './utils';
 
-import { WikipediaService } from './WikipediaService';
-
 export * from './treedef';
 
 /**
@@ -82,7 +80,7 @@ export class SortableHeader {
             </div>
         </form>
 
-        <table [class]="treeGridDef.className" data-resizable-columns-id="resizable-table">
+        <table [class]="'treegrid-table ' + treeGridDef.className" data-resizable-columns-id="resizable-table">
             <colgroup>
                     <!-- providing closing tags broke NG template parsing -->    
                     <col *ngFor="let dc of treeGridDef.columns" [class]="dc.className"> 
@@ -99,7 +97,7 @@ export class SortableHeader {
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let dr of dataView; let x = index" (dblclick)="_dblClickRow(dr)">
+                <tr *ngFor="let dr of _dataView; let x = index" (dblclick)="_dblClickRow(dr)">
                     <td *ngFor="let dc of treeGridDef.columns; let y = index" [style.padding-left]="y == 0 ? _calcIndent(dr).toString() + 'px' : ''" [class]="dc.className">
                         <span class="tg-opened" *ngIf="y == 0 && _showCollapseIcon(dr)" (click)="_toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
                         <span class="tg-closed" *ngIf="y == 0 && _showExpandIcon(dr)" (click)="_toggleTreeEvtHandler(dr.__node)">&nbsp;</span>
@@ -113,7 +111,7 @@ export class SortableHeader {
         </table>
         <div class="row">
             <div class="loading-icon col-md-offset-4 col-md-4" style="text-align:center" [class.active]="isLoading"><i style="color:#DDD" class="fa fa-cog fa-spin fa-3x fa-fw"></i></div>
-            <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="_goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="currentPage"></tg-page-nav></div>
+            <div class="col-md-4"><tg-page-nav style="float: right" [numRows]="_numVisibleRows" [pageSize]="treeGridDef.pageSize" (onNavClick)="_goPage($event)" *ngIf="treeGridDef.paging" [currentPage]="_currentPage"></tg-page-nav></div>
         </div>
             `,
     styles: [`th {
@@ -181,7 +179,7 @@ div.loading-icon.active {
 }
 `],
     directives: [SortableHeader, PageNavigator ],
-    providers: [ SimpleDataService, Utils, WikipediaService ]
+    providers: [ SimpleDataService, Utils ]
 })
 export class TreeGrid implements OnInit, AfterViewInit {
     private debugVar:number = 0;
@@ -195,11 +193,11 @@ export class TreeGrid implements OnInit, AfterViewInit {
 
     get ANY_SEARCH_COLUMN():string { return "[any]"; }
 
-	// dataView is what the user is seeing on the screen; one page of data if paging is enabled
-    private dataView: any[];
-    private dataTree: DataTree;
-    private numVisibleRows: number;
-    private currentPage: PageNumber = { num: 0 };
+	// _dataView is what the user is seeing on the screen; one page of data if paging is enabled
+    private _dataView: any[];
+    private _dataTree: DataTree;
+    private _numVisibleRows: number;
+    private _currentPage: PageNumber = { num: 0 };
     private isLoading: boolean = false; // show loading icon
     private selectedRow: any;
     private sortColumnField: string;
@@ -211,15 +209,15 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private items: Observable<Array<string>>;
     private term:FormControl = new FormControl();
 
-    private _dataBackup: any[]; // used to restore the dataview after searching, if Ajax is not configured, i.e. the data is static
+    private _dataBackup: any[]; // used to restore the _dataview after searching, if Ajax is not configured, i.e. the data is static
 
     self = this; // copy of context
 
     private isDataTreeConstructed: boolean = false;
     public sortDirType = SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
 
-    constructor(private dataService: SimpleDataService, private elementRef: ElementRef, private utils: Utils, private wikipediaService: WikipediaService) {
-        this.currentPage.num = 0;
+    constructor(private dataService: SimpleDataService, private elementRef: ElementRef, private utils: Utils) {
+        this._currentPage.num = 0;
     }
     ngAfterViewInit() {
         // Initialize resizable columns after everything is rendered
@@ -233,6 +231,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
     ngOnInit() {
         this.treeGridDef.columns.forEach((item) => {
             // can't find good ways to initialize interface
+            if (item.className == undefined)
+                item.className = ""; // got class="undefined tg-sortable" ... if I don't give it an empty string
             if (item.sortable == undefined)
                 item.sortable = true;
             if (item.searchable == undefined)
@@ -277,7 +277,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.treeGridDef.columns[event.columnIndex].sortDirection = event.sortDirection;
         this.sortColumnField = this.treeGridDef.columns[event.columnIndex].dataField;
         this.sortDirection = event.sortDirection;
-        this.dataTree.sortByColumn(this.sortColumnField, this.sortDirection);
+        this._dataTree.sortByColumn(this.sortColumnField, this.sortDirection);
 
         this.refresh();
     }    
@@ -285,7 +285,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
     private _calcIndent(row: any):number {
         var showExpand = this._showExpandIcon(row);
         var showCollapse = this._showCollapseIcon(row);
-        var ident:number = row.__node.level * 20 + 10;
+        var ident:number = row.__node.level * 20 + 20;
 
         if (showExpand)
             ident -= 17;
@@ -321,19 +321,19 @@ export class TreeGrid implements OnInit, AfterViewInit {
         var sz = this.treeGridDef.pageSize;
         let rowInds: number[]; // indices of the paged data rows
         if (this.treeGridDef.paging)
-            rowInds = this.dataTree.getPageData(pn, sz);
+            rowInds = this._dataTree.getPageData(pn, sz);
         else
-            rowInds = this.dataTree.getPageData(0, -1);
+            rowInds = this._dataTree.getPageData(0, -1);
         
-        this.dataView = [];
+        this._dataView = [];
         rowInds.forEach(i => 
-            this.dataView.push(this.treeGridDef.data[i]));
+            this._dataView.push(this.treeGridDef.data[i]));
     }
 
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
     private _toggleTreeNode(node: DataNode) {
-        this.numVisibleRows = this.dataTree.toggleNode(node);
-        this._goPage(this.currentPage.num);
+        this._numVisibleRows = this._dataTree.toggleNode(node);
+        this._goPage(this._currentPage.num);
         if (this.treeGridDef.paging && this.pageNav) 
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
@@ -349,10 +349,10 @@ export class TreeGrid implements OnInit, AfterViewInit {
                         let startIndex = this.treeGridDef.data.length;
                         let endIndex = startIndex + ret.length - 1;
                         ret.forEach((r: any) => this.treeGridDef.data.push(r));
-                        this.dataTree.addRows(startIndex, endIndex, node);
+                        this._dataTree.addRows(startIndex, endIndex, node);
                         // The data has been sorted, the newly loaded data should be sorted as well.
                         if (this.sortColumnField) {
-                            this.dataTree.sortNode(node, this.sortColumnField, this.sortDirection);
+                            this._dataTree.sortNode(node, this.sortColumnField, this.sortDirection);
                         }
                     }
                     this._toggleTreeNode(node);
@@ -456,13 +456,13 @@ export class TreeGrid implements OnInit, AfterViewInit {
     refresh() {
         if (!this.isDataTreeConstructed) {
             if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-                this.dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField, this._setIsLoaded);
+                this._dataTree = new DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField, this._setIsLoaded);
             else // data is just flat 2d table
-                this.dataTree = new DataTree(this.treeGridDef.data);
-            this.numVisibleRows = this.dataTree.recountDisplayCount();
+                this._dataTree = new DataTree(this.treeGridDef.data);
+            this._numVisibleRows = this._dataTree.recountDisplayCount();
             this.isDataTreeConstructed = true;
         }
-        this._goPage(this.currentPage.num);
+        this._goPage(this._currentPage.num);
         if (this.treeGridDef.paging && this.pageNav) 
                 this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
@@ -471,7 +471,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
 	http://www.bennadel.com/blog/3053-changing-directive-inputs-programmatically-won-t-trigger-ngonchanges-in-angularjs-2-beta-9.htm
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {
         let newTreeDef = <TreeGridDef> changes["treeGridDef"].currentValue;
-        this.dataView = newTreeDef.data.slice(0);
+        this._dataView = newTreeDef.data.slice(0);
         console.log(changes);
     }
 	*/
