@@ -141,8 +141,8 @@ var TreeGrid = (function () {
         var ajax = this.treeGridDef.ajax;
         if (ajax) {
             if (!ajax.method)
-                ajax.method = "GET";
-            if (ajax.method != "GET" && ajax.method != "POST") {
+                ajax.method = simpledata_service_1.HttpMethod.GET;
+            if (ajax.method != simpledata_service_1.HttpMethod.GET && ajax.method != simpledata_service_1.HttpMethod.POST) {
                 throw new Error("Ajax Method must be GET or POST");
             }
             if (!ajax.doNotLoad) {
@@ -268,6 +268,7 @@ var TreeGrid = (function () {
         this.isDataTreeConstructed = false;
         this.treeGridDef.data = data;
         this.refresh();
+        this.isLoading = false;
     };
     // I tried to push the decision to whether search or reload the data (two different Urls) to the last minute
     TreeGrid.prototype._searchOrReloadObservable = function (term, field) {

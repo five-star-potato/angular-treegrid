@@ -15,6 +15,14 @@ var core_1 = require('@angular/core');
 var http_1 = require('@angular/http');
 var Observable_1 = require('rxjs/Observable');
 require('rxjs/add/operator/map');
+var HttpMethod = (function () {
+    function HttpMethod() {
+    }
+    HttpMethod.GET = "GET";
+    HttpMethod.POST = "POST";
+    return HttpMethod;
+}());
+exports.HttpMethod = HttpMethod;
 var SimpleDataService = (function () {
     function SimpleDataService(http) {
         this.http = http;
@@ -33,7 +41,7 @@ var SimpleDataService = (function () {
         //.catch(this.handleError);
     };
     SimpleDataService.prototype.send = function (method, url) {
-        if (method === "POST") {
+        if (method === HttpMethod.POST) {
             return this.post(url);
         }
         else {

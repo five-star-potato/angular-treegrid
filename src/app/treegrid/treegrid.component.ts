@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { DataTree, DataNode } from './datatree';
 import { PageNavigator, PageNumber } from './pagenav.component';
-import { SimpleDataService } from './simpledata.service';
+import { SimpleDataService, HttpMethod } from './simpledata.service';
 import { AjaxConfig, ColumnDef, ColumnOrder, ColumnTransform, EditorConfig, EditorType, SortDirection, TreeGridDef, TreeHierarchy, SearchConfig } from "./treedef";
 import { Utils } from './utils';
 
@@ -242,8 +242,8 @@ export class TreeGrid implements OnInit, AfterViewInit {
         let ajax = this.treeGridDef.ajax;
         if (ajax) {
             if (!ajax.method)
-                ajax.method = "GET";
-            if (ajax.method != "GET" && ajax.method != "POST") {
+                ajax.method = HttpMethod.GET;
+            if (ajax.method != HttpMethod.GET && ajax.method != HttpMethod.POST) {
                 throw new Error("Ajax Method must be GET or POST");
             }            
             if (!ajax.doNotLoad) {
@@ -373,6 +373,7 @@ export class TreeGrid implements OnInit, AfterViewInit {
         this.isDataTreeConstructed = false;
         this.treeGridDef.data = data;
         this.refresh();
+        this.isLoading = false;
     }
     // I tried to push the decision to whether search or reload the data (two different Urls) to the last minute
     private _searchOrReloadObservable(term: string, field: string): Observable<any[]> {

@@ -3,6 +3,11 @@ import { Http, Response, Headers, URLSearchParams } from '@angular/http';
 import { Observable }     from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
+export class HttpMethod {
+    public static GET = "GET";
+    public static POST = "POST";
+}
+
 @Injectable()
 export class SimpleDataService {
     headers: Headers;
@@ -23,7 +28,7 @@ export class SimpleDataService {
             //.catch(this.handleError);
     }
     send(method: string, url: string): Observable<any[]> {
-        if (method === "POST") {
+        if (method === HttpMethod.POST) {
             return this.post(url);
         }
         else {
