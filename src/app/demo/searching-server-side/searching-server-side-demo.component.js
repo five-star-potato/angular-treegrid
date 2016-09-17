@@ -18,6 +18,7 @@ var SearchingServerSideDemoComponent = (function () {
         hljs.highlightBlock(this.codeElement.nativeElement);
     };
     SearchingServerSideDemoComponent.prototype.ngOnInit = function () {
+        this.treeDef.pageSize = 10;
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };

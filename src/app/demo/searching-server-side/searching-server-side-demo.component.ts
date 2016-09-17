@@ -48,6 +48,7 @@ export class SearchingServerSideDemoComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
+        this.treeDef.pageSize = 10;
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };

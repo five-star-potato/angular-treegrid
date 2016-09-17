@@ -70,6 +70,17 @@ import { ROUTER_DIRECTIVES } from '@angular/router';
                                 Data in the grid can be updated through a custom modal dialog editor (Modal dialog component is not part of this library. But the demo  provided a sample )
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <a routerLink="/demo7">Server-side Searching</a>
+                            </td>
+                            <td>
+                                Using server-side method to perform the searching.
+                            </td>
+                        </tr>
+
+
+
                     </tbody>
                 </table>
             </div>

@@ -17,9 +17,11 @@ var PageNavigator = (function () {
         // fire the event when the user click, let the parent handle refreshing the page data
         this.onNavClick = new core_1.EventEmitter();
         this.onResetCurrent = new core_1.EventEmitter();
+        // 2-way binding works but doesn't trigger an OnChange event in treegrid
+        this.currentPageChange = new core_1.EventEmitter();
     }
     PageNavigator.prototype.ngOnChanges = function (changes) {
-        this.refresh();
+        //this.refresh();
         var chng = changes["numRows"];
         var cur = JSON.stringify(chng.currentValue);
         var prev = JSON.stringify(chng.previousValue);
@@ -28,26 +30,31 @@ var PageNavigator = (function () {
         }
     };
     PageNavigator.prototype._goPage = function (pn) {
-        this.currentPage.num = pn;
+        this.currentPage = pn;
         this.onNavClick.emit(pn);
     };
     PageNavigator.prototype._goPrev = function () {
-        if (this.currentPage.num > 0)
-            this.currentPage.num -= 1;
-        this.onNavClick.emit(this.currentPage.num);
+        if (this.currentPage > 0)
+            this.currentPage -= 1;
+        this.onNavClick.emit(this.currentPage);
     };
     PageNavigator.prototype._goNext = function () {
-        if (this.currentPage.num < (this._numPages - 1))
-            this.currentPage.num += 1;
-        this.onNavClick.emit(this.currentPage.num);
+        if (this.currentPage < (this._numPages - 1))
+            this.currentPage += 1;
+        this.onNavClick.emit(this.currentPage);
     };
     PageNavigator.prototype.refresh = function () {
         if (this.numRows > 0 && this.pageSize > 0) {
             this._numPages = Math.ceil(this.numRows / this.pageSize);
             if (this._numPages > 0)
-                if (this.currentPage.num >= this._numPages) {
-                    this.currentPage.num = this._numPages = -1;
+                if (this.currentPage >= this._numPages) {
+                    this.currentPage = this._numPages - 1;
+                    this.currentPageChange.emit(this.currentPage);
                 }
+        }
+        else {
+            this.currentPage = 0;
+            this._numPages = 0;
         }
     };
     __decorate([
@@ -60,7 +67,7 @@ var PageNavigator = (function () {
     ], PageNavigator.prototype, "numRows", void 0);
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', Object)
+        __metadata('design:type', Number)
     ], PageNavigator.prototype, "currentPage", void 0);
     __decorate([
         core_1.Output(), 
@@ -70,10 +77,14 @@ var PageNavigator = (function () {
         core_1.Output(), 
         __metadata('design:type', Object)
     ], PageNavigator.prototype, "onResetCurrent", void 0);
+    __decorate([
+        core_1.Output(), 
+        __metadata('design:type', core_1.EventEmitter)
+    ], PageNavigator.prototype, "currentPageChange", void 0);
     PageNavigator = __decorate([
         core_1.Component({
             selector: 'tg-page-nav',
-            template: "\n\t\t<ul *ngIf=\"_numPages > 0\" class=\"pagination\" style=\"margin:0\">\n\t\t\t<li [class.disabled]=\"currentPage.num <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPage(0)\" aria-label=\"First\">\n\t\t\t\t<span aria-hidden=\"true\">&laquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage.num <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPrev()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&lsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li [class.disabled]=\"true\">\n\t\t\t\t<a href=\"javascript:void(0)\" aria-label=\"\">\n\t\t\t\t<span aria-hidden=\"true\">Page {{currentPage.num + 1}} of {{_numPages}}</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li></li>\n\n\t\t\t<li [class.disabled]=\"currentPage.num >= _numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goNext()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&rsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage.num >= _numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPage(_numPages - 1)\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&raquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t</ul>\n    "
+            template: "\n\t\t<ul *ngIf=\"_numPages > 0\" class=\"pagination\" style=\"margin:0\">\n\t\t\t<li [class.disabled]=\"currentPage <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPage(0)\" aria-label=\"First\">\n\t\t\t\t<span aria-hidden=\"true\">&laquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage <= 0\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPrev()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&lsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li [class.disabled]=\"true\">\n\t\t\t\t<a href=\"javascript:void(0)\" aria-label=\"\">\n\t\t\t\t<span aria-hidden=\"true\">Page {{currentPage + 1}} of {{_numPages}}</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\n\t\t\t<li></li>\n\n\t\t\t<li [class.disabled]=\"currentPage >= _numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goNext()\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&rsaquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t\t<li [class.disabled]=\"currentPage >= _numPages - 1\">\n\t\t\t\t<a href=\"javascript:void(0)\" (click)=\"_goPage(_numPages - 1)\" aria-label=\"Previous\">\n\t\t\t\t<span aria-hidden=\"true\">&raquo;</span>\n\t\t\t\t</a>\n\t\t\t</li>\n\t\t</ul>\n    "
         }), 
         __metadata('design:paramtypes', [])
     ], PageNavigator);

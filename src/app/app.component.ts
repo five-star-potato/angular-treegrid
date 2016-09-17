@@ -29,7 +29,7 @@ import { Component, Directive, OnInit, ViewChild } from "@angular/core";
             <p></p>
             <h4>API</h4>
             <ul class="nav nav-pills nav-stacked">
-                <li class="presentation"><a href="#" class="btn btn-default">Reference</a></li>
+                <li class="presentation"><a href="/doc/index.html" class="btn btn-default">Reference</a></li>
             </ul>
 		</div>
         <div class="col-md-10">
