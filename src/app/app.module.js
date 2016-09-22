@@ -23,6 +23,7 @@ var pipes_demo_component_1 = require('./demo/pipes/pipes-demo.component');
 var custom_render_demo_component_1 = require('./demo/custom-render/custom-render-demo.component');
 var modal_editor_demo_component_1 = require('./demo/modal-editor/modal-editor-demo.component');
 var searching_server_side_demo_component_1 = require('./demo/searching-server-side/searching-server-side-demo.component');
+var grouping_demo_component_1 = require('./demo/grouping/grouping-demo.component');
 var app_routing_1 = require('./app.routing');
 var AppModule = (function () {
     function AppModule() {
@@ -30,7 +31,7 @@ var AppModule = (function () {
     AppModule = __decorate([
         core_1.NgModule({
             imports: [platform_browser_1.BrowserModule, forms_1.FormsModule, http_1.HttpModule, app_routing_1.routing, forms_2.ReactiveFormsModule],
-            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent, modal_editor_demo_component_1.ModalEditorDemoComponent, searching_server_side_demo_component_1.SearchingServerSideDemoComponent],
+            declarations: [app_component_1.AppComponent, home_component_1.HomeComponent, basic_demo_component_1.BasicDemoComponent, ajax_load_demo_component_1.AjaxLoadDemoComponent, lazy_load_demo_component_1.LazyLoadDemoComponent, pipes_demo_component_1.PipesDemoComponent, custom_render_demo_component_1.CustomRenderDemoComponent, modal_editor_demo_component_1.ModalEditorDemoComponent, searching_server_side_demo_component_1.SearchingServerSideDemoComponent, grouping_demo_component_1.GroupingDemoComponent],
             providers: [http_2.JSONP_PROVIDERS],
             bootstrap: [app_component_1.AppComponent]
         }), 

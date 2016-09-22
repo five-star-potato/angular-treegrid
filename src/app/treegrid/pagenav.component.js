@@ -23,24 +23,29 @@ var PageNavigator = (function () {
     PageNavigator.prototype.ngOnChanges = function (changes) {
         //this.refresh();
         var chng = changes["numRows"];
-        var cur = JSON.stringify(chng.currentValue);
-        var prev = JSON.stringify(chng.previousValue);
-        if (cur !== prev) {
-            this.refresh();
+        if (chng) {
+            var cur = JSON.stringify(chng.currentValue);
+            var prev = JSON.stringify(chng.previousValue);
+            if (cur !== prev) {
+                this.refresh();
+            }
         }
     };
     PageNavigator.prototype._goPage = function (pn) {
         this.currentPage = pn;
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(pn);
     };
     PageNavigator.prototype._goPrev = function () {
         if (this.currentPage > 0)
             this.currentPage -= 1;
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(this.currentPage);
     };
     PageNavigator.prototype._goNext = function () {
         if (this.currentPage < (this._numPages - 1))
             this.currentPage += 1;
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(this.currentPage);
     };
     PageNavigator.prototype.refresh = function () {

@@ -51,14 +51,20 @@ export interface ColumnDef {
     width?: string;
     className?: string;
     sortable?: boolean;
-    searchable?: boolean;
+    filterable?: boolean;
     sortDirection?: SortDirection;
     render?: (data: any, row: any, index: number) => SafeHtml;
     transforms?: ColumnTransform[];
 }
-export interface SearchConfig {
+export interface FilterConfig {
     url: string;
     method?: string;    // POST or GET
+}
+// since GroupingConfig uses column(s) to create tree-like structure, this feature cannot coexists with TreeHierarchy. 
+export interface GroupConfig {
+    groupByColumns: ColumnOrder[];
+    aggregateColumns?: number[];
+    requireSort?: boolean;
 }
 export class TreeGridDef  {
     className: string;
@@ -69,8 +75,9 @@ export class TreeGridDef  {
     pageSize: number = 25; /* make it small for debugging */
     //currentPage: number = 0;
     defaultOrder: ColumnOrder[] = [];
-    hierachy: TreeHierarchy = null;
-    ajax: AjaxConfig = null;
-    editor: EditorConfig = null;
-    search: boolean | SearchConfig = false; 
+    hierachy: TreeHierarchy;
+    ajax: AjaxConfig;
+    editor: EditorConfig;
+    filter: boolean | FilterConfig = false; 
+    grouping: GroupConfig;
 }

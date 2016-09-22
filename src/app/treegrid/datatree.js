@@ -1,26 +1,27 @@
 "use strict";
 var treedef_1 = require("./treedef");
 var DataTree = (function () {
-    function DataTree(inputData, pk, fk, setIsLoaded) {
+    function DataTree(inputData, options, treeGridDef) {
         var _this = this;
-        if (setIsLoaded === void 0) { setIsLoaded = true; }
         this.inputData = inputData;
-        this.pk = pk;
-        this.fk = fk;
-        this.setIsLoaded = setIsLoaded;
+        this.options = options;
+        this.treeGridDef = treeGridDef;
+        //private pk?: string, private fk?: string, private setIsLoaded:boolean = true) {
         this.rootNode = { childNodes: [], level: -1, displayCount: 0, parent: null, isOpen: true };
         this.cnt = inputData.length;
-        if (pk && fk) {
+        if (options.primaryKey && options.foreignKey) {
+            // if grouping by pk and fk, ...
             for (var i = 0; i < this.cnt; i++) {
-                if (inputData[i][fk] == undefined) {
+                // load up the "root" nodes first
+                if (inputData[i][options.foreignKey] == undefined) {
                     this._createNewNode(inputData[i], i, this.rootNode);
                 }
             }
             // also need to load children (fk) with missing parents (pk)
             var _loop_1 = function(i) {
-                var keyVal = inputData[i][fk];
+                var keyVal = inputData[i][options.foreignKey];
                 if (keyVal != undefined) {
-                    if (inputData.findIndex(function (x) { return (x[pk] == keyVal); }) < 0) {
+                    if (inputData.findIndex(function (x) { return (x[options.foreignKey] == keyVal); }) < 0) {
                         // this entry has fk value, but element of the same pk is not found
                         this_1._createNewNode(inputData[i], i, this_1.rootNode);
                     }
@@ -32,6 +33,36 @@ var DataTree = (function () {
             }
             this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
             this.rootNode.childNodes.forEach(function (n) { return _this._processNode(n); });
+        }
+        else if (options.grouping) {
+            this._sortForGrouping(inputData);
+            var grps_1 = [];
+            // collect the dataField name for the groupings
+            options.grouping.groupByColumns.forEach(function (c) {
+                grps_1.push({ colName: _this.treeGridDef.columns[c.columnIndex].dataField });
+            });
+            var grpLvl = grps_1.length;
+            for (var i = 0; i < this.cnt; i++) {
+                var parentNode = void 0;
+                for (var j = 0; j < grpLvl; j++) {
+                    var col = grps_1[j].colName;
+                    if (inputData[i][col] != grps_1[j].value) {
+                        // Now create a break;
+                        parentNode = (j == 0 ? this.rootNode : grps_1[j - 1].node);
+                        grps_1[j].value = inputData[i][col];
+                        var row = {};
+                        row[col] = inputData[i][col];
+                        grps_1[j].node = this._createNewNode(row, -1, parentNode, j);
+                        // once a new level node is created, all the levels underneath it should be cleared
+                        if (j < grpLvl - 1) {
+                            grps_1[j + 1].value = undefined;
+                            grps_1[j + 1].node = undefined;
+                        }
+                    }
+                }
+                this._createNewNode(inputData[i], i, grps_1[grps_1.length - 1].node, grpLvl);
+            }
+            this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         }
         else {
             for (var i = 0; i < this.cnt; i++) {
@@ -49,15 +80,50 @@ var DataTree = (function () {
             displayCount: 0,
             childNodes: [],
             parent: parentNode,
-            isLoaded: this.setIsLoaded
+            isLoaded: this.options.setIsLoaded
         };
         r.__node = n;
         parentNode.childNodes.push(n);
+        return n;
+    };
+    DataTree.prototype._sortForGrouping = function (data) {
+        // if grouping is defined (say, c1,c2,c3), we need to sort the data accordingly, using the logic: f(a[c1], b[c1]) || f(a[c2], b[c2]) || f(a[c3], b[c3]) 
+        // Probably should implement thenBy ...
+        // 1st, collecting the functoids
+        var farr = [];
+        var len = this.options.grouping.groupByColumns.length;
+        var _loop_2 = function(i) {
+            var colOrd = this_2.options.grouping.groupByColumns[i];
+            var field = this_2.treeGridDef.columns[colOrd.columnIndex].dataField;
+            var dir = colOrd.sortDirection;
+            var v = function (a, b) {
+                if (colOrd.sortDirection == treedef_1.SortDirection.ASC)
+                    return (a[field] < b[field] ? -1 : a[field] > b[field] ? 1 : 0);
+                else
+                    return (a[field] > b[field] ? -1 : a[field] < b[field] ? 1 : 0);
+            };
+            farr.push(v);
+        };
+        var this_2 = this;
+        for (var i = 0; i < len; i++) {
+            _loop_2(i);
+        }
+        // 2nd the actual comparison is the aggregation result of the functoids
+        var func = function (a, b) {
+            var res = 0;
+            var len = farr.length;
+            for (var i = 0; i < len; i++) {
+                var f = farr[i];
+                res = res || f(a, b);
+            }
+            return res;
+        };
+        return data.sort(func);
     };
     DataTree.prototype._processNode = function (node) {
         var _this = this;
         for (var i = 0; i < this.cnt; i++) {
-            if (this.inputData[i][this.fk] == node.row[this.pk]) {
+            if (this.inputData[i][this.options.foreignKey] == node.row[this.options.primaryKey]) {
                 this._createNewNode(this.inputData[i], i, node, node.level + 1);
             }
         }
@@ -85,7 +151,7 @@ var DataTree = (function () {
     // This is a depth-first traversal to return all rows
     DataTree.prototype._traverseAll = function (node) {
         var _this = this;
-        this.returnRowsIndices.push(node.index);
+        this.returnRowsIndices.push(node.row);
         if (node.isOpen)
             node.childNodes.forEach(function (n) { return _this._traverseAll(n); });
     };
@@ -94,7 +160,7 @@ var DataTree = (function () {
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
-            this.returnRowsIndices.push(node.index);
+            this.returnRowsIndices.push(node.row);
         }
         this.rowCounter++;
         if (node.isOpen)

@@ -66,9 +66,8 @@ export class BasicDemoComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
         hljs.highlightBlock(this.codeElement.nativeElement);
     }
-
     ngOnInit() {
-        this.treeDef.search = true;
+        this.treeDef.filter = true;
 
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },

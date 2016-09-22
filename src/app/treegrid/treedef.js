@@ -18,10 +18,7 @@ var TreeGridDef = (function () {
         this.pageSize = 25; /* make it small for debugging */
         //currentPage: number = 0;
         this.defaultOrder = [];
-        this.hierachy = null;
-        this.ajax = null;
-        this.editor = null;
-        this.search = false;
+        this.filter = false;
     }
     return TreeGridDef;
 }());

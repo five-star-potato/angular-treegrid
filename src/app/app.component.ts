@@ -25,6 +25,7 @@ import { Component, Directive, OnInit, ViewChild } from "@angular/core";
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo5" class="btn btn-default">Custom Column Rendering</a></li>
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo6" class="btn btn-default">Modal Dialog Editor</a></li>
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo7" class="btn btn-default">Server-side Searching</a></li>
+                <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo8" class="btn btn-default">Grouping By Column</a></li>
         	</ul>
             <p></p>
             <h4>API</h4>

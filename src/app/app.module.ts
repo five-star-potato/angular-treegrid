@@ -14,12 +14,13 @@ import { PipesDemoComponent }   	from './demo/pipes/pipes-demo.component';
 import { CustomRenderDemoComponent }from './demo/custom-render/custom-render-demo.component';
 import { ModalEditorDemoComponent }		from './demo/modal-editor/modal-editor-demo.component';
 import { SearchingServerSideDemoComponent }	from './demo/searching-server-side/searching-server-side-demo.component';
+import { GroupingDemoComponent }	from './demo/grouping/grouping-demo.component';
 
 import { routing } from './app.routing';
 
 @NgModule({
   imports: [BrowserModule, FormsModule, HttpModule, routing, ReactiveFormsModule ],
-  declarations: [ AppComponent, HomeComponent, BasicDemoComponent, AjaxLoadDemoComponent, LazyLoadDemoComponent, PipesDemoComponent, CustomRenderDemoComponent, ModalEditorDemoComponent, SearchingServerSideDemoComponent ],
+  declarations: [ AppComponent, HomeComponent, BasicDemoComponent, AjaxLoadDemoComponent, LazyLoadDemoComponent, PipesDemoComponent, CustomRenderDemoComponent, ModalEditorDemoComponent, SearchingServerSideDemoComponent, GroupingDemoComponent ],
   providers:    [ JSONP_PROVIDERS ],
   bootstrap:    [ AppComponent ]
 })

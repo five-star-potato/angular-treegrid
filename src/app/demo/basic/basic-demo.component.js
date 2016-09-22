@@ -18,7 +18,7 @@ var BasicDemoComponent = (function () {
         hljs.highlightBlock(this.codeElement.nativeElement);
     };
     BasicDemoComponent.prototype.ngOnInit = function () {
-        this.treeDef.search = true;
+        this.treeDef.filter = true;
         this.treeDef.columns = [
             { labelHtml: "Employee ID", dataField: "emp_id" },
             { labelHtml: "Given name", dataField: "firstname" },

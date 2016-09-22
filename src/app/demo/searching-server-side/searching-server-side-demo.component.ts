@@ -52,7 +52,7 @@ export class SearchingServerSideDemoComponent implements OnInit, AfterViewInit {
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
-        this.treeDef.search = {
+        this.treeDef.filter = {
             url: "http://treegriddemoservice.azurewebsites.net/api/values/Search",
             method: "POST"
         }
@@ -63,7 +63,7 @@ export class SearchingServerSideDemoComponent implements OnInit, AfterViewInit {
             childrenIndicatorField: 'hasChildren'
         };
         this.treeDef.columns = [
-            { labelHtml: "Employee ID", dataField: "emp_id", searchable: false },
+            { labelHtml: "Employee ID", dataField: "emp_id", filterable: false },
             { labelHtml: "Given name", dataField: "firstname" },
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Origin", dataField: "origin" }];

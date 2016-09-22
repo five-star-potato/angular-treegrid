@@ -102,23 +102,20 @@ var TreeGrid = (function () {
         this.utils = utils;
         this.debugVar = 0;
         this.onRowDblClick = new core_2.EventEmitter();
+        this.onRowClick = new core_2.EventEmitter();
+        this.ANY_SEARCH_COLUMN = "[any]";
+        this.DEFAULT_CLASS = "table table-hover table-striped table-bordered";
         this._currentPage = 0; // PageNumber = { num: 0 };
         this._isLoading = false; // show loading icon
-        this.DEFAULT_CLASS = "table table-hover table-striped table-bordered";
-        this._searchField = this.ANY_SEARCH_COLUMN;
-        this._searchLabel = "Any column";
-        this._setIsLoaded = false; // need to know whether to set each node to be "loaded"; in the case of a search result, I always set it to loaded, to avoid duplicate rows
-        this.term = new forms_1.FormControl();
+        this._filterField = this.ANY_SEARCH_COLUMN;
+        this._filterLabel = "Any column";
+        this._setIsLoaded = false; // need to know whether to set each node to be "loaded"; in the case of a filter result, I always set it to loaded, to avoid duplicate rows
+        this._term = new forms_1.FormControl();
         this.self = this; // copy of context
         this.isDataTreeConstructed = false;
         this.sortDirType = treedef_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
         this._currentPage = 0;
     }
-    Object.defineProperty(TreeGrid.prototype, "ANY_SEARCH_COLUMN", {
-        get: function () { return "[any]"; },
-        enumerable: true,
-        configurable: true
-    });
     TreeGrid.prototype.ngAfterViewInit = function () {
         // Initialize resizable columns after everything is rendered
         var y;
@@ -129,14 +126,17 @@ var TreeGrid = (function () {
     };
     TreeGrid.prototype.ngOnInit = function () {
         var _this = this;
+        if (this.treeGridDef.grouping && this.treeGridDef.hierachy) {
+            throw new Error("GroupConfig and TreeHierarchy cannot be both assigned");
+        }
         this.treeGridDef.columns.forEach(function (item) {
             // can't find good ways to initialize interface
             if (item.className == undefined)
                 item.className = ""; // got class="undefined tg-sortable" ... if I don't give it an empty string
             if (item.sortable == undefined)
                 item.sortable = true;
-            if (item.searchable == undefined)
-                item.searchable = true;
+            if (item.filterable == undefined)
+                item.filterable = true;
         });
         var ajax = this.treeGridDef.ajax;
         if (ajax) {
@@ -158,11 +158,11 @@ var TreeGrid = (function () {
         if (!this.treeGridDef.className)
             this.treeGridDef.className = this.DEFAULT_CLASS;
         // Based on the blog: http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html
-        if (this.treeGridDef.search) {
-            this.term.valueChanges
+        if (this.treeGridDef.filter) {
+            this._term.valueChanges
                 .debounceTime(400)
                 .distinctUntilChanged()
-                .switchMap(function (term) { return _this._searchOrReloadObservable(term, _this._searchField); })
+                .switchMap(function (term) { return _this._filterOrReloadObservable(term, _this._filterField); })
                 .subscribe(function (ret) { _this._reloadData(ret); }, function (err) { console.log(err); });
         }
     };
@@ -178,6 +178,7 @@ var TreeGrid = (function () {
         this._sortDirection = event.sortDirection;
         this._dataTree.sortByColumn(this._sortColumnField, this._sortDirection);
         this.refresh();
+        this._goPage(this._currentPage);
     };
     // Calculate how much indentation we need per level; notice that the open/close icon are not of the same width
     TreeGrid.prototype._calcIndent = function (row) {
@@ -214,17 +215,15 @@ var TreeGrid = (function () {
     };
     // Handling Pagination logic
     TreeGrid.prototype._goPage = function (pn) {
-        var _this = this;
         var sz = this.treeGridDef.pageSize;
-        var rowInds; // indices of the paged data rows
+        var pageRows; // indices of the paged data rows
         if (this.treeGridDef.paging)
-            rowInds = this._dataTree.getPageData(pn, sz);
+            pageRows = this._dataTree.getPageData(pn, sz);
         else
-            rowInds = this._dataTree.getPageData(0, -1);
+            pageRows = this._dataTree.getPageData(0, -1);
         this._dataView = [];
-        rowInds.forEach(function (i) {
-            return _this._dataView.push(_this.treeGridDef.data[i]);
-        });
+        (_a = this._dataView).push.apply(_a, pageRows);
+        var _a;
     };
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
     TreeGrid.prototype._toggleTreeNode = function (node) {
@@ -273,21 +272,21 @@ var TreeGrid = (function () {
         this._isLoading = false;
         this._goPage(this._currentPage);
     };
-    // I tried to push the decision to whether search or reload the data (two different Urls) to the last minute
-    TreeGrid.prototype._searchOrReloadObservable = function (term, field) {
+    // I tried to push the decision to whether filter or reload the data (two different Urls) to the last minute
+    TreeGrid.prototype._filterOrReloadObservable = function (term, field) {
         if (term) {
             this._setIsLoaded = true;
-            if (this.treeGridDef.search) {
-                if (typeof this.treeGridDef.search === "object") {
-                    var cfg = this.treeGridDef.search;
+            if (this.treeGridDef.filter) {
+                if (typeof this.treeGridDef.filter === "object") {
+                    var cfg = this.treeGridDef.filter;
                     if (cfg && cfg.method && cfg.url)
                         return this.dataService.send(cfg.method, cfg.url + "?value=" + term + "&field=" + field);
                     else
-                        throw new Error("Search config missing");
+                        throw new Error("Filter config missing");
                 }
                 else {
-                    var searchResult = this._searchInExistingData(term, field);
-                    return Rx_1.Observable.from(searchResult).toArray();
+                    var filterResult = this._filterInExistingData(term, field);
+                    return Rx_1.Observable.from(filterResult).toArray();
                 }
             }
         }
@@ -305,26 +304,26 @@ var TreeGrid = (function () {
             }
         }
     };
-    // handles the search column dropdown change
-    TreeGrid.prototype._searchColumnChange = function (field, labelHTML) {
+    // handles the filter column dropdown change
+    TreeGrid.prototype._filterColumnChange = function (field, labelHTML) {
         var _this = this;
-        this._searchField = field;
-        this._searchLabel = labelHTML;
-        if (this.term.value) {
-            this._searchOrReloadObservable(this.term.value, this._searchField).subscribe(function (ret) {
+        this._filterField = field;
+        this._filterLabel = labelHTML;
+        if (this._term.value) {
+            this._filterOrReloadObservable(this._term.value, this._filterField).subscribe(function (ret) {
                 _this._reloadData(ret);
             }, function (err) { console.log(err); });
         }
     };
-    TreeGrid.prototype._searchInExistingData = function (term, field) {
-        var searchResult = new Set();
+    TreeGrid.prototype._filterInExistingData = function (term, field) {
+        var filterResult = new Set();
         if (field === this.ANY_SEARCH_COLUMN) {
-            // user may choose search any fields
+            // user may choose filter any fields
             var _loop_1 = function(dc) {
-                if (dc.searchable)
-                    // remember to search from the initial dataset; not withing the prev search result
+                if (dc.filterable)
+                    // remember to filter from the initial dataset; not withing the prev filter result
                     this_1._dataBackup.filter(function (row) { return row[dc.dataField].toString().toLowerCase().includes(term); })
-                        .forEach(function (x) { return searchResult.add(x); });
+                        .forEach(function (x) { return filterResult.add(x); });
             };
             var this_1 = this;
             for (var _i = 0, _a = this.treeGridDef.columns; _i < _a.length; _i++) {
@@ -333,9 +332,9 @@ var TreeGrid = (function () {
             }
         }
         else {
-            searchResult.add(this.treeGridDef.data.filter(function (row) { return row[field].toString().toLowerCase().includes(term); }));
+            filterResult.add(this.treeGridDef.data.filter(function (row) { return row[field].toString().toLowerCase().includes(term); }));
         }
-        return Array.from(searchResult);
+        return Array.from(filterResult);
     };
     TreeGrid.prototype._transformWithPipe = function (value, trans) {
         var v = value;
@@ -357,14 +356,20 @@ var TreeGrid = (function () {
             }, function (err) { console.log(err); });
         }
     };
-    // the setIsLoaded flag is to be used by Searching - searching may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
+    // the setIsLoaded flag is to be used by Filtering - filtering may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
     // otherwise the ajax call will create duplicate rows
     TreeGrid.prototype.refresh = function () {
         if (!this.isDataTreeConstructed) {
             if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, this.treeGridDef.hierachy.primaryKeyField, this.treeGridDef.hierachy.foreignKeyField, this._setIsLoaded);
+                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, { primaryKey: this.treeGridDef.hierachy.primaryKeyField,
+                    foreignKey: this.treeGridDef.hierachy.foreignKeyField,
+                    setIsLoaded: this._setIsLoaded });
+            else if (this.treeGridDef.grouping) {
+                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, { grouping: this.treeGridDef.grouping }, this.treeGridDef /* unfortunately, DataTree need to access the column names */);
+            }
             else
-                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data);
+                // data is just flat 2d table
+                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, {});
             this._numVisibleRows = this._dataTree.recountDisplayCount();
             this.isDataTreeConstructed = true;
         }
@@ -392,6 +397,10 @@ var TreeGrid = (function () {
         __metadata('design:type', Object)
     ], TreeGrid.prototype, "onRowDblClick", void 0);
     __decorate([
+        core_2.Output(), 
+        __metadata('design:type', Object)
+    ], TreeGrid.prototype, "onRowClick", void 0);
+    __decorate([
         core_2.ViewChild(pagenav_component_1.PageNavigator), 
         __metadata('design:type', pagenav_component_1.PageNavigator)
     ], TreeGrid.prototype, "pageNav", void 0);
@@ -399,8 +408,8 @@ var TreeGrid = (function () {
         core_1.Component({
             moduleId: module.id,
             selector: 'tg-treegrid',
-            template: "\n        <form class=\"form-inline\" style=\"margin:5px\" *ngIf=\"treeGridDef.search\">\n            <div class=\"form-group\">\n                <div class=\"dropdown\" style=\"display:inline\">\n                      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n                        {{ _searchLabel }}\n                        <span class=\"caret\"></span>\n                      </button>\n                      <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n                        <li (click)=\"_searchColumnChange(ANY_SEARCH_COLUMN, 'Any column')\"><a >Any column</a></li>\n                        <li role=\"separator\" class=\"divider\"></li>\n                        <template ngFor let-dc [ngForOf]=\"treeGridDef.columns\" >\n                            <li *ngIf=\"dc.searchable\"><a (click)=\"_searchColumnChange(dc.dataField, dc.labelHtml)\" [innerHTML]=\"utils.stripHTML(dc.labelHtml)\"></a></li>\n                        </template>\n                      </ul>\n                </div>\n            </div>\n            <div class=\"form-group\">\n                <input type=\"text\" [formControl]=\"term\" class=\"form-control\" id=\"searchText\" placeholder=\"Type to search\">\n            </div>\n        </form>\n\n        <table [class]=\"'treegrid-table ' + treeGridDef.className\" data-resizable-columns-id=\"resizable-table\">\n            <colgroup>\n                    <!-- providing closing tags broke NG template parsing -->    \n                    <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n            </colgroup>\n            <thead>\n                <tr>\n                    <th (onSort)=\"_sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                        tg-sortable-header [column-index]=\"x\" [sortable]=\"dc.sortable\" [innerHTML]=\"dc.labelHtml\" \n                            [class.tg-sortable]=\"treeGridDef.sortable && dc.sortable && dc._sortDirection != sortDirType.ASC && dc._sortDirection != sortDirType.DESC\"\n                            [class.tg-sort-asc]=\"treeGridDef.sortable && dc.sortable && dc._sortDirection == sortDirType.ASC\"\n                            [class.tg-sort-desc]=\"treeGridDef.sortable && dc.sortable && dc._sortDirection == sortDirType.DESC\" \n                            >\n                    </th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr *ngFor=\"let dr of _dataView; let x = index\" (dblclick)=\"_dblClickRow(dr)\">\n                    <td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? _calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\">\n                        <span class=\"tg-opened\" *ngIf=\"y == 0 && _showCollapseIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span class=\"tg-closed\" *ngIf=\"y == 0 && _showExpandIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n                        <span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        <span *ngIf=\"dc.transforms\" [innerHTML]=\"_transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n        <div class=\"row\">\n            <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"_isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n            <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"_numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"_goPage($event)\" *ngIf=\"treeGridDef.paging\" [(currentPage)]=\"_currentPage\"></tg-page-nav></div>\n        </div>\n            ",
-            styles: ["th {\n    color: brown;\n}\nth.tg-sortable:after { \n    font-family: \"FontAwesome\"; \n    opacity: .3;\n    float: right;\n    content: \"\\f0dc\";\n}\nth.tg-sort-asc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0de\";\n    float: right;\n}\nth.tg-sort-desc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0dd\";\n    float: right;\n}\nspan.tg-opened, span.tg-closed {\n    margin-right: 0px;\n    cursor: pointer;\n}\nspan.tg-opened:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f078\";\n}\nspan.tg-closed:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f054\";\n}\nth.tg-header-left { \n    text-align: left;\n}\nth.tg-header-right { \n    text-align: right;\n}\nth.tg-header-center { \n    text-align: center;\n}\ntd.tg-body-left { \n    text-align: left;\n}\ntd.tg-body-right { \n    text-align: right;\n}\ntd.tg-body-center { \n    text-align: center;\n}\n\ndiv.loading-icon  {\n    opacity: 0;\n    transition: opacity 2s;\n}\n\ndiv.loading-icon.active {\n    opacity: 100;\n    transition: opacity 0.1s;\n}\n\n.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {\n  background-color: #E8F8F5;\n}\n"],
+            template: "\n        <form class=\"form-inline\" style=\"margin:5px\" *ngIf=\"treeGridDef.filter\">\n            <div class=\"form-group\">\n                <div class=\"dropdown\" style=\"display:inline\">\n                      <button class=\"btn btn-default dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n                        {{ _filterLabel }}\n                        <span class=\"caret\"></span>\n                      </button>\n                      <ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenu1\">\n                        <li (click)=\"_filterColumnChange(ANY_SEARCH_COLUMN, 'Any column')\"><a >Any column</a></li>\n                        <li role=\"separator\" class=\"divider\"></li>\n                        <template ngFor let-dc [ngForOf]=\"treeGridDef.columns\" >\n                            <li *ngIf=\"dc.filterable\"><a (click)=\"_filterColumnChange(dc.dataField, dc.labelHtml)\" [innerHTML]=\"utils.stripHTML(dc.labelHtml)\"></a></li>\n                        </template>\n                      </ul>\n                </div>\n            </div>\n            <div class=\"form-group\">\n                <input type=\"text\" [formControl]=\"_term\" class=\"form-control\" id=\"filterText\" placeholder=\"Type to filter\">\n            </div>\n        </form>\n\n        <table [class]=\"'treegrid-table ' + treeGridDef.className\" data-resizable-columns-id=\"resizable-table\">\n            <colgroup>\n                    <!-- providing closing tags broke NG template parsing -->    \n                    <col *ngFor=\"let dc of treeGridDef.columns\" [class]=\"dc.className\"> \n            </colgroup>\n            <thead>\n                <tr>\n                    <th (onSort)=\"_sortColumnEvtHandler($event)\" *ngFor=\"let dc of treeGridDef.columns; let x = index\" data-resizable-column-id=\"#\" [style.width]=\"dc.width\" [class]=\"dc.className\"\n                        tg-sortable-header [column-index]=\"x\" [sortable]=\"dc.sortable\" [innerHTML]=\"dc.labelHtml\" \n                            [class.tg-sortable]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection != sortDirType.ASC && dc.sortDirection != sortDirType.DESC\"\n                            [class.tg-sort-asc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.ASC\"\n                            [class.tg-sort-desc]=\"treeGridDef.sortable && dc.sortable && dc.sortDirection == sortDirType.DESC\" \n                            >\n                    </th>\n                </tr>\n            </thead>\n            <tbody>\n                <tr *ngFor=\"let dr of _dataView; let x = index\" (dblclick)=\"_dblClickRow(dr)\" (click)=\"onRowClick.emit(dr)\">\n                    <td *ngFor=\"let dc of treeGridDef.columns; let y = index\" [style.padding-left]=\"y == 0 ? _calcIndent(dr).toString() + 'px' : ''\" [class]=\"dc.className\"\n                        [class.tg-group-level-0]=\"dr.__node.level == 0 && dr.__node.childNodes.length > 0\"\n                        [class.tg-group-level-1]=\"dr.__node.level == 1 && dr.__node.childNodes.length > 0\"\n                        [class.tg-group-level-2]=\"dr.__node.level == 2 && dr.__node.childNodes.length > 0\">\n                        <span title=\"close\" class=\"tg-opened\" *ngIf=\"y == 0 && _showCollapseIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span title=\"open\" class=\"tg-closed\" *ngIf=\"y == 0 && _showExpandIcon(dr)\" (click)=\"_toggleTreeEvtHandler(dr.__node)\">&nbsp;</span>\n                        <span *ngIf=\"!dc.render && !dc.transforms\">{{ dr[dc.dataField] }}</span>\n                        <span *ngIf=\"dc.render != null\" [innerHTML]=\"dc.render(dr[dc.dataField], dr, x)\"></span>\n                        <span *ngIf=\"dc.transforms\" [innerHTML]=\"_transformWithPipe(dr[dc.dataField], dc.transforms)\"></span>\n                    </td>\n\n                </tr>\n            </tbody>\n        </table>\n        <div class=\"row\">\n            <div class=\"loading-icon col-md-offset-4 col-md-4\" style=\"text-align:center\" [class.active]=\"_isLoading\"><i style=\"color:#DDD\" class=\"fa fa-cog fa-spin fa-3x fa-fw\"></i></div>\n            <div class=\"col-md-4\"><tg-page-nav style=\"float: right\" [numRows]=\"_numVisibleRows\" [pageSize]=\"treeGridDef.pageSize\" (onNavClick)=\"_goPage($event)\" *ngIf=\"treeGridDef.paging\" [(currentPage)]=\"_currentPage\"></tg-page-nav></div>\n        </div>\n            ",
+            styles: ["th {\n    color: brown;\n}\nth.tg-sortable:after { \n    font-family: \"FontAwesome\"; \n    opacity: .3;\n    float: right;\n    content: \"\\f0dc\";\n}\nth.tg-sort-asc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0de\";\n    float: right;\n}\nth.tg-sort-desc:after { \n    font-family: \"FontAwesome\";\n    content: \"\\f0dd\";\n    float: right;\n}\nspan.tg-opened, span.tg-closed {\n    margin-right: 0px;\n    cursor: pointer;\n}\nspan.tg-opened:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f078\";\n}\nspan.tg-closed:after {\n    font-family: \"FontAwesome\";\n    content: \"\\f054\";\n}\nth.tg-header-left { \n    text-align: left;\n}\nth.tg-header-right { \n    text-align: right;\n}\nth.tg-header-center { \n    text-align: center;\n}\ntd.tg-body-left { \n    text-align: left;\n}\ntd.tg-body-right { \n    text-align: right;\n}\ntd.tg-body-center { \n    text-align: center;\n}\n\ndiv.loading-icon  {\n    opacity: 0;\n    transition: opacity 2s;\n}\n\ndiv.loading-icon.active {\n    opacity: 100;\n    transition: opacity 0.1s;\n}\n\n.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {\n    background-color: #E8F8F5;\n}\n\n.tg-group-level-0 {\n    font-weight: bold;\n}\n.tg-group-level-1 {\n    font-weight: bold;\n}\n.tg-group-level-2 {\n    font-weight: bold;\n}\n\n"],
             directives: [SortableHeader, pagenav_component_1.PageNavigator],
             providers: [simpledata_service_1.SimpleDataService, utils_1.Utils]
         }), 

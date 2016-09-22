@@ -29,8 +29,15 @@ url (optional) | If provided, the url parameter will override the settings from 
 
 
 ### Events
+#### onRowClick
+Click event on a row. _selectedRow is not set.
+Event Parameter | Description
+------------ | -------------
+row | Clicked row
+
+
 #### onRowDblClick
-Double-click event on a row. Internally, _selectedRow set set.
+Double-click event on a row. Internally, _selectedRow is set.
 Event Parameter | Description
 ------------ | -------------
 row | Selected row

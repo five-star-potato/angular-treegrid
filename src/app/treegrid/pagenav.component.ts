@@ -53,25 +53,32 @@ export class PageNavigator implements OnChanges {
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {
         //this.refresh();
         let chng = changes["numRows"];
-        let cur = JSON.stringify(chng.currentValue);
-        let prev = JSON.stringify(chng.previousValue);
-        if (cur !== prev) {
-            this.refresh();
+        if (chng) { // only deal iwth numRows change for now
+            let cur = JSON.stringify(chng.currentValue);
+            let prev = JSON.stringify(chng.previousValue);
+            if (cur !== prev) {
+                this.refresh();
+            }
         }
     }
 
     private _goPage(pn: number) {
         this.currentPage = pn;
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(pn);
     }
     private _goPrev() {
         if (this.currentPage > 0)
             this.currentPage -= 1;
+
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(this.currentPage);
     }
     private _goNext() {
         if (this.currentPage < (this._numPages - 1))
             this.currentPage += 1;
+
+        this.currentPageChange.emit(this.currentPage);
         this.onNavClick.emit(this.currentPage);
     }
     refresh() {
