@@ -14,9 +14,6 @@ var BasicDemoComponent = (function () {
     function BasicDemoComponent() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
-    BasicDemoComponent.prototype.ngAfterViewInit = function () {
-        hljs.highlightBlock(this.codeElement.nativeElement);
-    };
     BasicDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.filter = true;
         this.treeDef.columns = [
@@ -45,14 +42,10 @@ var BasicDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], BasicDemoComponent.prototype, "treeGrid", void 0);
-    __decorate([
-        core_1.ViewChild('code'), 
-        __metadata('design:type', core_1.ElementRef)
-    ], BasicDemoComponent.prototype, "codeElement", void 0);
     BasicDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Simple Table Data</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Table data statically defined</li>\n        <li>Column Resizing</li>\n        <li>Sorting</li>\n        <li>Paging</li>\n    </ul>\n\n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n@ViewChild(TreeGrid)\ntreeGrid: TreeGrid;\ntreeDef: TreeGridDef = new TreeGridDef();\n\nngOnInit&#40;&#41;  &#123;\n    this.treeDef.columns = [\n        &#123; labelHtml: \"Employee ID\", dataField: \"emp_id\" &#125;,\n        &#123; labelHtml: \"Given name\", dataField: \"firstname\" &#125;,\n        &#123; labelHtml: \"Family name\", dataField: \"lastname\" &#125;\n    &#125;    \n    this.treeDef.data = [\n        &#123; emp_id: 101, firstname: \"Tommen\", lastname: \"Baratheon\" &#125;,\n        &#123; emp_id: 102, firstname: \"Eddard\", lastname: \"Stark\" &#125;,\n        /* ... */\n        &#123; emp_id: 67, firstname: \"Ramsay\", lastname: \"Bolton\" &#125;\n    ];\n    this.treeDef.pageSize = 10;\n&#125;;\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
+            template: "\n    <h2>Simple Table Data</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Table data statically defined</li>\n        <li>Column Resizing</li>\n        <li>Sorting</li>\n        <li>Paging</li>\n    </ul>\n\n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <iframe class=\"code-block\" src=\"/app/demo/basic/code.html\"></iframe>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
             directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])

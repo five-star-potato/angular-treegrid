@@ -19,7 +19,7 @@ export interface DataNode {
     isOpen?: boolean;	// is the current node open or closed?
     displayCount: number;	// how many nodes are visible under this node (including self)? (for calculating page count; some nodes maybe open; some maybe closed)
     parent: any;		// pointing parent node; need this to propagate the displayCount changes,
-    isLoaded?: boolean;  // I don't think this field is well-defined: if lazyLoad is true, I need to know if the node is loaded or not
+    allChildrenLoaded?: boolean;  // I don't think this field is well-defined: if lazyLoad is true, I need to know if the node is loaded or not
 }
 // temporary data structure for grouping
 interface GroupStruct {
@@ -31,7 +31,7 @@ export class DataTree {
     rootNode: DataNode;
     private cnt: number;						 // temp var
     private rowCounter: number;			 // temp var for counting rows
-    private returnRowsIndices: any[]; // store the row indices to the inputData array corresponding to a page
+    private returnRows: any[]; // store the row indices to the inputData array corresponding to a page
 
     private _createNewNode(r: any, i:number, parentNode: DataNode, lvl: number = 0):DataNode {
         var n:DataNode = {
@@ -41,7 +41,7 @@ export class DataTree {
             displayCount: 0, // assuming intially all the nodes are closed
             childNodes: [],
             parent: parentNode,
-            isLoaded: this.options.setIsLoaded
+            allChildrenLoaded: this.options.setIsLoaded
         };
         r.__node = n;
         parentNode.childNodes.push(n);
@@ -94,7 +94,7 @@ export class DataTree {
             for (let i = 0; i < this.cnt; i++) {
                 let keyVal:any = inputData[i][options.foreignKey];
                 if (keyVal != undefined) {
-                    if (inputData.findIndex((x:any) => { return (x[options.foreignKey] == keyVal); }) < 0) {
+                    if (inputData.findIndex((x:any) => { return (x[options.primaryKey] == keyVal); }) < 0) {
                         // this entry has fk value, but element of the same pk is not found
                         this._createNewNode(inputData[i], i, this.rootNode);
                     }
@@ -141,7 +141,7 @@ export class DataTree {
             this.rootNode.displayCount = this.rootNode.childNodes.length; // assuming initially only the root childs are displayed.
         }
     }
-    
+    // _processNode looks through the input data array to find children to be linked to this node
     private _processNode(node: DataNode) {
         for (let i = 0; i < this.cnt; i++) {
             if (this.inputData[i][this.options.foreignKey] == node.row[this.options.primaryKey]) {
@@ -171,7 +171,7 @@ export class DataTree {
     }
     // This is a depth-first traversal to return all rows
     private _traverseAll(node: DataNode) {
-        this.returnRowsIndices.push(node.row);
+        this.returnRows.push(node.row);
         if (node.isOpen)
             node.childNodes.forEach(n => this._traverseAll(n));
     }
@@ -179,15 +179,20 @@ export class DataTree {
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
-            this.returnRowsIndices.push(node.row);
+            this.returnRows.push(node.row);
         }
         this.rowCounter++;
         if (node.isOpen)
             node.childNodes.forEach(n => this._traverse(n, startRow, endRow));
     }
+    getDescendantNodes(node: DataNode): any[] {
+        this.returnRows = [];
+        this._traverseAll(node);
+        return this.returnRows;
+    }
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;
-        this.returnRowsIndices = [];
+        this.returnRows = [];
 
         if (pageSize < 0) {
             this.rootNode.childNodes.forEach(n => this._traverseAll(n));
@@ -195,7 +200,7 @@ export class DataTree {
         else {
             this.rootNode.childNodes.forEach(n => this._traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1));
         }
-        return this.returnRowsIndices;
+        return this.returnRows;
     }
     // propagate the increase of decrease of changes (deltaVal) up the ancestors path
     private _applyDeltaUpward(node: DataNode, deltaVal: number) {
@@ -257,5 +262,16 @@ export class DataTree {
             parentNode.childNodes.push(newNode);
             r.__node = newNode;
         }
+    }
+    private _deleteChildrenNodes(node: DataNode) {
+        for (let i = node.childNodes.length - 1; i >= 0; i--) {
+            this._deleteChildrenNodes(node.childNodes[i]);
+        }
+        let dataIndex: number = this.inputData.indexOf(node);
+        this.inputData.splice(dataIndex, 1);
+        node.childNodes = [];
+    }
+    deleteChildren(node: DataNode) {
+        this._deleteChildrenNodes(node);
     }
 }

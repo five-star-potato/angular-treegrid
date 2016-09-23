@@ -1,0 +1,39 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code id="code" class="typescript">
+export class GroupingDemoComponent implements OnInit {
+    @ViewChild(TreeGrid)
+    treeGrid: TreeGrid;
+    treeDef: TreeGridDef = new TreeGridDef();
+
+    ngOnInit() {
+        this.treeDef.grouping = {
+            groupByColumns: [ { columnIndex: 0, sortDirection: SortDirection.ASC }, { columnIndex: 1, sortDirection: SortDirection.ASC } ],
+            requireSort: true
+        };
+        this.treeDef.ajax = {
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
+            lazyLoad: false
+        };
+
+        this.treeDef.columns = [
+            { labelHtml: "Origin", dataField: "origin" },
+            { labelHtml: "Family name", dataField: "lastname" },
+            { labelHtml: "Given name", dataField: "firstname" },
+            { labelHtml: "Salary", dataField: "salary", transforms: [{ pipe: new CurrencyPipe() }] }
+        ];
+        this.treeDef.pageSize = 10;
+    }
+}
+        </code>
+     </pre>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

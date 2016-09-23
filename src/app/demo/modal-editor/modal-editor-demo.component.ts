@@ -68,65 +68,7 @@ class MyModalEditor {
 
 <div class="tab-content">
 <div role="tabpanel" class="tab-pane" id="srcTab">
-    <pre>
-        <code #code1 class="typescript">
-@Component(&#123;
-    selector: 'my-modal-editor',
-    template: &#96;
-&lt;div class="modal fade" id="modalEditor" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"&gt;
-  &lt;div class="modal-dialog" role="document"&gt;
-    &lt;div class="modal-content"&gt;
-      &lt;div class="modal-header"&gt;
-        &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;&lt;span aria-hidden="true"&gt;&times;&lt;/span&gt;&lt;/button&gt;
-        &lt;h4 class="modal-title"&gt;This is a sample modal editor&lt;/h4&gt;
-      &lt;/div&gt;
-      &lt;div class="modal-body" *ngIf="row != null"&gt;
-        &lt;div class="form-group"&gt;
-            &lt;label&gt;Given Name&lt;/label&gt;
-            &lt;input type="text" class="form-control" [(ngModel)]="row['firstname']"&gt;
-            &lt;label&gt;Family Name&lt;/label&gt;
-            &lt;input type="text" class="form-control" [(ngModel)]="row['lastname']"&gt;
-            &lt;label&gt;Origin&lt;/label&gt;
-            &lt;select class="form-control" [(ngModel)]="row['origin']"&gt;
-              &lt;option *ngFor="let region of regions" value="&#123;&#173;&#123;region&#125;&#173;&#125;"&gt;
-                &#123;&#173;&#123;region&#125;&#173;&#125;
-              &lt;/option&gt;
-            &lt;/select&gt;                
-        &lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class="modal-footer"&gt;
-        &lt;button type="button" class="btn btn-default" data-dismiss="modal"&gt;Close&lt;/button&gt;
-        &lt;button type="button" class="btn btn-primary" data-dismiss="modal" (click)="saveChanges()"&gt;Save changes&lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-&#96;
-&#125;)
-class MyModalEditor &#123;
-    @Input() regions: string[];
-    @Input() row: any;
-    @Output() onSave = new EventEmitter&lt;any&gt;();
-
-    show(row: any) &#123;
-        var copyRow = Object.assign(&#123;&#125;, row);
-        this.row = copyRow;
-        jQuery("#modalEditor").modal();
-    &#125;
-    saveChanges() &#123;
-        this.onSave.emit(this.row);    
-    &#125;
-&#125;
-        </code>
-    </pre>
-
-    <pre>
-        <code #code2 class="html">
-&lt;tg-treegrid [treeGridDef]="treeGridDef" (onRowDblClick)="modalEditor.show($event)"&gt;&lt;/tg-treegrid&gt;
-
-&lt;my-modal-editor [regions]="regions" #modalEditor (onSave)="treeGrid.saveSelectedRowchanges($event)"&gt;&lt;/my-modal-editor&gt;
-        </code>
-     </pre>
+    <iframe class="code-block" src="/app/demo/modal-editor/code.html"></iframe>
 </div>
 
 <div role="tabpanel" class="tab-pane active" id="demoTab">
@@ -143,11 +85,6 @@ export class ModalEditorDemoComponent implements OnInit, AfterViewInit {
     private treeGrid: TreeGrid;
     treeGridDef: TreeGridDef = new TreeGridDef();
 
-    @ViewChild('code1')
-    codeElement1: ElementRef;
-    @ViewChild('code2')
-    codeElement2: ElementRef;
-
     @ViewChild('modalEditor')
     private modalEditor: MyModalEditor;
 
@@ -160,8 +97,6 @@ export class ModalEditorDemoComponent implements OnInit, AfterViewInit {
         this.dataService.post("http://treegriddemoservice.azurewebsites.net/api/values/GetRegions").subscribe((ret: any) => {
                     this.modalEditor.regions = ret;
                 }, (err: any) => { console.log(err) });
-        hljs.highlightBlock(this.codeElement1.nativeElement);
-        hljs.highlightBlock(this.codeElement2.nativeElement);
     }
     ngOnInit() {
         this.treeGridDef.columns = [

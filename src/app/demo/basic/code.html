@@ -1,39 +1,12 @@
-import { Component, Directive, OnInit, ViewChild } from "@angular/core";
-import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
-
-declare var hljs: any;
-
-@Component({
-    moduleId: module.id,
-    template: `
-    <h2>Simple Table Data</h2>
-    <h3>Description</h3>
-    Features included:
-    <ul>
-        <li>Table data statically defined</li>
-        <li>Column Resizing</li>
-        <li>Sorting</li>
-        <li>Paging</li>
-    </ul>
-
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
-  <li><a data-toggle="tab" href="#srcTab">Code</a></li>
-</ul>    
-
-<div class="tab-content">
-<div role="tabpanel" class="tab-pane" id="srcTab">
-    <iframe class="code-block" src="/app/demo/basic/code.html"></iframe>
-</div>
-
-<div role="tabpanel" class="tab-pane active" id="demoTab">
-    <tg-treegrid [treeGridDef]="treeDef">
-    </tg-treegrid>
-</div>
-</div>
-    `,
-    directives: [TreeGrid]
-})
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code id="code" class="typescript">
 export class BasicDemoComponent implements OnInit {
     @ViewChild(TreeGrid)
     treeGrid: TreeGrid;
@@ -64,4 +37,9 @@ export class BasicDemoComponent implements OnInit {
         ];
         this.treeDef.pageSize = 10;
     }
-}
+}        </code>
+     </pre>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

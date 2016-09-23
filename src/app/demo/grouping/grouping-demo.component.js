@@ -15,9 +15,6 @@ var GroupingDemoComponent = (function () {
     function GroupingDemoComponent() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
-    GroupingDemoComponent.prototype.ngAfterViewInit = function () {
-        hljs.highlightBlock(this.codeElement.nativeElement);
-    };
     GroupingDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.grouping = {
             groupByColumns: [{ columnIndex: 0, sortDirection: treegrid_component_1.SortDirection.ASC }, { columnIndex: 1, sortDirection: treegrid_component_1.SortDirection.ASC }],
@@ -39,14 +36,10 @@ var GroupingDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], GroupingDemoComponent.prototype, "treeGrid", void 0);
-    __decorate([
-        core_1.ViewChild('code'), 
-        __metadata('design:type', core_1.ElementRef)
-    ], GroupingDemoComponent.prototype, "codeElement", void 0);
     GroupingDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Grouping by Columns</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Grouping</li>\n        <li>Aggregate</li>\n    </ul>\n\n    <ul class=\"nav nav-tabs\">\n      <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n      <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n    </ul>    \n\n    <div class=\"tab-content\">\n        <div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n            <pre>\n                <code #code class=\"typescript\">        \n                </code>\n            </pre>\n        </div>\n        <div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n            <tg-treegrid [treeGridDef]=\"treeDef\">\n            </tg-treegrid>\n        </div>\n    </div>\n    ",
+            template: "\n    <h2>Grouping by Columns</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Grouping</li>\n        <li>Aggregate</li>\n    </ul>\n\n    <ul class=\"nav nav-tabs\">\n      <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n      <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n    </ul>    \n\n    <div class=\"tab-content\">\n        <div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n            <iframe class=\"code-block\" src=\"/app/demo/grouping/code.html\"></iframe>\n        </div>\n        <div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n            <tg-treegrid [treeGridDef]=\"treeDef\">\n            </tg-treegrid>\n        </div>\n    </div>\n    ",
             directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])

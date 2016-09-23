@@ -222,10 +222,10 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
     private _term:FormControl = new FormControl();
 
     private _dataBackup: any[]; // used to restore the _dataview after filtering, if Ajax is not configured, i.e. the data is static
+    private _treeBackup: DataTree; // used to restore the _dataview after filtering, if Ajax is not configured, i.e. the data is static
 
     self = this; // copy of context
 
-    private isDataTreeConstructed: boolean = false;
     public sortDirType = SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
 
     constructor(private dataService: SimpleDataService, private elementRef: ElementRef, private utils: Utils) {
@@ -267,8 +267,10 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         }
         else if (this.treeGridDef.data.length > 0) {
             // Static data already loaded
+            this._setIsLoaded = true; // set all the node as isLoaded = true. So that no ajax called will be issued during treenode expansion
             this._dataBackup = this.treeGridDef.data;
-            this.refresh();
+            this._rebuildTree();
+            this._treeBackup = this._dataTree;
             this._goPage(this._currentPage);
         }
         if (!this.treeGridDef.className)
@@ -295,7 +297,7 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         this._sortDirection = event.sortDirection;
         this._dataTree.sortByColumn(this._sortColumnField, this._sortDirection);
 
-        this.refresh();
+        this._rebuildTree();
         this._goPage(this._currentPage)
     }    
     // Calculate how much indentation we need per level; notice that the open/close icon are not of the same width
@@ -345,7 +347,16 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         this._dataView = [];
         this._dataView.push(... pageRows);
     }
-
+    private _loadChildrenForNode(node: DataNode) {
+        let ajax = this.treeGridDef.ajax;
+        this._isLoading = true;
+        this.dataService.send(ajax.method, ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
+            // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
+            this._addRowsToNode(node, ret);
+            this._toggleTreeNode(node);
+            this._isLoading = false;
+        }, (err: any) => { console.log(err) });
+    }
     // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
     private _toggleTreeNode(node: DataNode) {
         this._numVisibleRows = this._dataTree.toggleNode(node);
@@ -353,30 +364,34 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         if (this.treeGridDef.paging && this.pageNav) 
             this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
     }
-    private _toggleTreeEvtHandler(node: DataNode) {
-        let ajax = this.treeGridDef.ajax;
-        if (ajax) {
-            if (ajax.lazyLoad && !node.isLoaded) {
-                this._isLoading = true;
-                this.dataService.send(ajax.method, ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe((ret: any) => {
-                    // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
-                    node.isLoaded = true;
-                    if (ret.length > 0) {
-                        let startIndex = this.treeGridDef.data.length;
-                        let endIndex = startIndex + ret.length - 1;
-                        ret.forEach((r: any) => this.treeGridDef.data.push(r));
-                        this._dataTree.addRows(startIndex, endIndex, node);
-                        // The data has been sorted, the newly loaded data should be sorted as well.
-                        if (this._sortColumnField) {
-                            this._dataTree.sortNode(node, this._sortColumnField, this._sortDirection);
-                        }
-                    }
-                    this._toggleTreeNode(node);
-                    this._isLoading = false;
-                }, (err: any) => { console.log(err) });
+    // used by lazyLoad or client filter to add new rows to an existing node
+    private _addRowsToNode(node: DataNode, rows: any[]) {
+        if (rows.length > 0) {
+            let startIndex = this.treeGridDef.data.length;
+            let endIndex = startIndex + rows.length - 1;
+            rows.forEach((r: any) => this.treeGridDef.data.push(r));
+            this._dataTree.addRows(startIndex, endIndex, node);
+            // The data has been sorted, the newly loaded data should be sorted as well.
+            if (this._sortColumnField) {
+                this._dataTree.sortNode(node, this._sortColumnField, this._sortDirection);
             }
-            else
-                this._toggleTreeNode(node);
+        }
+    }
+    private _toggleTreeEvtHandler(node: DataNode) {
+        if (!node.allChildrenLoaded) {
+            this._dataTree.deleteChildren(node);
+
+            let ajax = this.treeGridDef.ajax;
+            if (ajax && ajax.lazyLoad) {
+                this._loadChildrenForNode(node);
+            }
+            else {
+                // perhaps client-side filtering is enabled, when the user click open a code
+                // clone the existing branch from backup and load into the search result
+                let childRows: any[] = this._treeBackup.getDescendantNodes(node);
+                this._addRowsToNode(node, childRows);
+            }
+            node.allChildrenLoaded = true;
         }
         else 
             this._toggleTreeNode(node);
@@ -386,16 +401,15 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         this.onRowDblClick.emit(row);
     }
     private _reloadData(data: any[]) {
-        this.isDataTreeConstructed = false;
         this.treeGridDef.data = data;
-        this.refresh();
+        this._rebuildTree();
         this._isLoading = false;
         this._goPage(this._currentPage);
     }
     // I tried to push the decision to whether filter or reload the data (two different Urls) to the last minute
     private _filterOrReloadObservable(term: string, field: string): Observable<any[]> {
         if (term) {
-            this._setIsLoaded = true;
+            this._setIsLoaded = false; // children nodes are filtered as well. So if the user click open a node, I have to assume the node is not loaded, i.e. the children list is incomplete. Then _toggleEvt will reload this node
             if (this.treeGridDef.filter) {
                 if (typeof this.treeGridDef.filter === "object") {
                     let cfg:FilterConfig = <FilterConfig> this.treeGridDef.filter;
@@ -434,15 +448,21 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
             }, (err: any) => { console.log(err) });
         }
     }
-    private _filterInExistingData(term:string, field:string):any[] {
+
+    private _filterInExistingData(term: string, field: string): any[] {
         let filterResult:Set<any> = new Set<any>();
         if (field === this.ANY_SEARCH_COLUMN) {
             // user may choose filter any fields
             for (let dc of this.treeGridDef.columns) {
                 if (dc.filterable) 
                     // remember to filter from the initial dataset; not withing the prev filter result
-                    this._dataBackup.filter((row:any) => { return row[dc.dataField].toString().toLowerCase().includes(term); })
-                        .forEach(x => filterResult.add(x));
+                    this._dataBackup.filter((row: any) => {
+                        if (row[dc.dataField])
+                            return row[dc.dataField].toString().toLowerCase().includes(term);
+                        else
+                            return false;
+                    })
+                    .forEach(x => filterResult.add(x));
             }
         }
         else { // use specifies one column to filter
@@ -461,48 +481,43 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         Object.assign(this._selectedRow, copyRow);
     }
     reloadAjax(url?: string) { // user can provide a different url to override the url in AjaxConfig
+        // if we are reloading a complete set of data,...
         let ajax = this.treeGridDef.ajax;
         if (ajax && (url || ajax.url)) {
+            this._setIsLoaded = !(ajax.lazyLoad); // if lazyLoad is enabled, I know the node's children are not loaded
             this._isLoading = true;
             this.dataService.send(ajax.method, url ? url : ajax.url).subscribe((ret: any) => {
                 this._reloadData(ret);
+                this._dataBackup = ret;
             }, (err: any) => { console.log(err) });
         }
     }
     // the setIsLoaded flag is to be used by Filtering - filtering may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
     // otherwise the ajax call will create duplicate rows
-    refresh() {
-        if (!this.isDataTreeConstructed) {
-            if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
-                this._dataTree = new DataTree(this.treeGridDef.data, {  primaryKey: this.treeGridDef.hierachy.primaryKeyField,
-                                                                        foreignKey: this.treeGridDef.hierachy.foreignKeyField, 
-                                                                        setIsLoaded: this._setIsLoaded });
-            else if (this.treeGridDef.grouping) {
-                this._dataTree = new DataTree(this.treeGridDef.data, { grouping: this.treeGridDef.grouping }, this.treeGridDef /* unfortunately, DataTree need to access the column names */);
-            }
-            else
-                // data is just flat 2d table
-                this._dataTree = new DataTree(this.treeGridDef.data, {});
-            this._numVisibleRows = this._dataTree.recountDisplayCount();
-            this.isDataTreeConstructed = true;
+    private _rebuildTree() {
+        // setIsLoaded is false if the user just performed a filtering
+        if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
+            this._dataTree = new DataTree(this.treeGridDef.data, {  primaryKey: this.treeGridDef.hierachy.primaryKeyField,
+                                                                    foreignKey: this.treeGridDef.hierachy.foreignKeyField, 
+                                                                    setIsLoaded: this._setIsLoaded });
+        else if (this.treeGridDef.grouping) {
+            this._dataTree = new DataTree(this.treeGridDef.data, {
+                grouping: this.treeGridDef.grouping,
+                setIsLoaded: this._setIsLoaded
+            }, this.treeGridDef /* unfortunately, DataTree need to access the column names */);
         }
-        else {
-        // changes in this._numVisibleRows should trigger pageNav refresh()
-        //if (this.treeGridDef.paging && this.pageNav) 
-        //      this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
-        //this._goPage(this._currentPage);
-        }
+        else
+            // data is just flat 2d table
+            this._dataTree = new DataTree(this.treeGridDef.data, {});
+
+        this._numVisibleRows = this._dataTree.recountDisplayCount();
     }
     ngOnChanges(changes: { [propertyName: string]: SimpleChange }) {
-        //this.refresh();
         console.log(changes);
         /*
         let chng = changes["numRows"];
         let cur = JSON.stringify(chng.currentValue);
         let prev = JSON.stringify(chng.previousValue);
-        if (cur !== prev) {
-            this.refresh();
-        }
         */    
     }
 

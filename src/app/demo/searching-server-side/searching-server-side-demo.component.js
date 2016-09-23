@@ -14,9 +14,6 @@ var SearchingServerSideDemoComponent = (function () {
     function SearchingServerSideDemoComponent() {
         this.treeDef = new treegrid_component_1.TreeGridDef();
     }
-    SearchingServerSideDemoComponent.prototype.ngAfterViewInit = function () {
-        hljs.highlightBlock(this.codeElement.nativeElement);
-    };
     SearchingServerSideDemoComponent.prototype.ngOnInit = function () {
         this.treeDef.pageSize = 10;
         this.treeDef.hierachy = {
@@ -42,14 +39,10 @@ var SearchingServerSideDemoComponent = (function () {
         core_1.ViewChild(treegrid_component_1.TreeGrid), 
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], SearchingServerSideDemoComponent.prototype, "treeGrid", void 0);
-    __decorate([
-        core_1.ViewChild('code'), 
-        __metadata('design:type', core_1.ElementRef)
-    ], SearchingServerSideDemoComponent.prototype, "codeElement", void 0);
     SearchingServerSideDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Server-side Search</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using server-side logic to filter data</li>\n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code class=\"typescript\">\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
+            template: "\n    <h2>Server-side Search</h2>\n    <h3>Description</h3>\n    Features included:\n    <ul>\n        <li>Using server-side logic to filter data</li>\n    </ul>\n    \n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <iframe class=\"code-block\" src=\"/app/demo/searching-server-side/code.html\"></iframe>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeDef\">\n    </tg-treegrid>\n</div>\n</div>\n    ",
             directives: [treegrid_component_1.TreeGrid]
         }), 
         __metadata('design:paramtypes', [])

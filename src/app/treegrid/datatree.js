@@ -21,7 +21,7 @@ var DataTree = (function () {
             var _loop_1 = function(i) {
                 var keyVal = inputData[i][options.foreignKey];
                 if (keyVal != undefined) {
-                    if (inputData.findIndex(function (x) { return (x[options.foreignKey] == keyVal); }) < 0) {
+                    if (inputData.findIndex(function (x) { return (x[options.primaryKey] == keyVal); }) < 0) {
                         // this entry has fk value, but element of the same pk is not found
                         this_1._createNewNode(inputData[i], i, this_1.rootNode);
                     }
@@ -80,7 +80,7 @@ var DataTree = (function () {
             displayCount: 0,
             childNodes: [],
             parent: parentNode,
-            isLoaded: this.options.setIsLoaded
+            allChildrenLoaded: this.options.setIsLoaded
         };
         r.__node = n;
         parentNode.childNodes.push(n);
@@ -120,6 +120,7 @@ var DataTree = (function () {
         };
         return data.sort(func);
     };
+    // _processNode looks through the input data array to find children to be linked to this node
     DataTree.prototype._processNode = function (node) {
         var _this = this;
         for (var i = 0; i < this.cnt; i++) {
@@ -151,7 +152,7 @@ var DataTree = (function () {
     // This is a depth-first traversal to return all rows
     DataTree.prototype._traverseAll = function (node) {
         var _this = this;
-        this.returnRowsIndices.push(node.row);
+        this.returnRows.push(node.row);
         if (node.isOpen)
             node.childNodes.forEach(function (n) { return _this._traverseAll(n); });
     };
@@ -160,23 +161,28 @@ var DataTree = (function () {
         if (this.rowCounter > endRow)
             return;
         if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
-            this.returnRowsIndices.push(node.row);
+            this.returnRows.push(node.row);
         }
         this.rowCounter++;
         if (node.isOpen)
             node.childNodes.forEach(function (n) { return _this._traverse(n, startRow, endRow); });
     };
+    DataTree.prototype.getDescendantNodes = function (node) {
+        this.returnRows = [];
+        this._traverseAll(node);
+        return this.returnRows;
+    };
     DataTree.prototype.getPageData = function (pageNum, pageSize) {
         var _this = this;
         this.rowCounter = 0;
-        this.returnRowsIndices = [];
+        this.returnRows = [];
         if (pageSize < 0) {
             this.rootNode.childNodes.forEach(function (n) { return _this._traverseAll(n); });
         }
         else {
             this.rootNode.childNodes.forEach(function (n) { return _this._traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1); });
         }
-        return this.returnRowsIndices;
+        return this.returnRows;
     };
     // propagate the increase of decrease of changes (deltaVal) up the ancestors path
     DataTree.prototype._applyDeltaUpward = function (node, deltaVal) {
@@ -239,6 +245,17 @@ var DataTree = (function () {
             parentNode.childNodes.push(newNode);
             r.__node = newNode;
         }
+    };
+    DataTree.prototype._deleteChildrenNodes = function (node) {
+        for (var i = node.childNodes.length - 1; i >= 0; i--) {
+            this._deleteChildrenNodes(node.childNodes[i]);
+        }
+        var dataIndex = this.inputData.indexOf(node);
+        this.inputData.splice(dataIndex, 1);
+        node.childNodes = [];
+    };
+    DataTree.prototype.deleteChildren = function (node) {
+        this._deleteChildrenNodes(node);
     };
     return DataTree;
 }());

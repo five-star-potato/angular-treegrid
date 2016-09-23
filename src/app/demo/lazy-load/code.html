@@ -1,0 +1,39 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code id="code" class="typescript">
+export class LazyLoadDemoComponent implements OnInit {
+    @ViewChild(TreeGrid)
+    private treeGrid: TreeGrid;
+    treeDef: TreeGridDef = new TreeGridDef();
+
+    ngOnInit() {
+        this.treeDef.hierachy = {
+            foreignKeyField: "report_to", primaryKeyField: "emp_id"
+        };
+        this.treeDef.ajax = {
+            url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
+            //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
+            lazyLoad: true,
+            childrenIndicatorField: 'hasChildren'
+        };
+        this.treeDef.pageSize = 30;
+        this.treeDef.columns = [
+            { labelHtml: "Given name", dataField: "firstname" },
+            { labelHtml: "Family name", dataField: "lastname", className: "tg-body-center tg-header-center" },
+            { labelHtml: "Date of Birth", dataField: "dob" },
+            { labelHtml: "Employee ID", dataField: "emp_id" },
+            { labelHtml: "Report To", dataField: "report_to" }];
+    }
+}
+        </code>
+     </pre>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

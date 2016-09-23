@@ -1,8 +1,6 @@
-import { Component, Directive, OnInit, ViewChild, AfterViewInit, ElementRef } from "@angular/core";
+import { Component, Directive, OnInit, ViewChild } from "@angular/core";
 import { CurrencyPipe } from '@angular/common';
 import { TreeGrid, TreeGridDef, GroupConfig,  ColumnOrder, SortDirection } from "../../treegrid/treegrid.component";
-
-declare var hljs: any;
 
 @Component({
     moduleId: module.id,
@@ -22,10 +20,7 @@ declare var hljs: any;
 
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane" id="srcTab">
-            <pre>
-                <code #code class="typescript">        
-                </code>
-            </pre>
+            <iframe class="code-block" src="/app/demo/grouping/code.html"></iframe>
         </div>
         <div role="tabpanel" class="tab-pane active" id="demoTab">
             <tg-treegrid [treeGridDef]="treeDef">
@@ -35,17 +30,11 @@ declare var hljs: any;
     `,
     directives: [TreeGrid]
 })
-export class GroupingDemoComponent implements OnInit, AfterViewInit {
+export class GroupingDemoComponent implements OnInit {
     @ViewChild(TreeGrid)
     treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
 
-    @ViewChild('code')
-    codeElement: ElementRef;
-
-    ngAfterViewInit() {
-        hljs.highlightBlock(this.codeElement.nativeElement);
-    }
     ngOnInit() {
         this.treeDef.grouping = {
             groupByColumns: [ { columnIndex: 0, sortDirection: SortDirection.ASC }, { columnIndex: 1, sortDirection: SortDirection.ASC } ],

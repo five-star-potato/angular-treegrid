@@ -1,47 +1,12 @@
-/// <reference path="../../../../typings/jquery/jquery.d.ts" />
-import { Component, Directive, OnInit,  ViewChild, AfterViewInit, ElementRef } from "@angular/core";
-import { BROWSER_SANITIZATION_PROVIDERS, SafeHtml, DomSanitizationService } from  '@angular/platform-browser';
-import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
-
-declare var hljs: any;
-
-/****************************************************************************************************************/
-/* Deomonstrate custom rendering                                                                                */
-/****************************************************************************************************************/
-@Component({
-    moduleId: module.id,
-    template: `
-    <h2>Custom Column Rendering</h2>
-    <h3>Description</h3>
-    Features included:
-    <ul>
-        <li>Using the <strong>render</strong> property to provide a function to draw the cell</li>
-    </ul>
-    
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
-  <li><a data-toggle="tab" href="#srcTab">Code</a></li>
-</ul>    
-
-<div class="tab-content">
-<div role="tabpanel" class="tab-pane" id="srcTab">
-    <iframe class="code-block" src="/app/demo/custom-render/code.html"></iframe>
-</div>
-
-<div role="tabpanel" class="tab-pane active" id="demoTab">    <tg-treegrid [treeGridDef]="treeDef">
-    </tg-treegrid>
-
-    <div id="debugMessage" style="width:500px; height:100px; border: 1px solid #ddd">
-    Debug Message
-    </div>
-</div>
- 
- </div>
-    
-    `,
-    directives: [TreeGrid],
-    providers: [DomSanitizationService, BROWSER_SANITIZATION_PROVIDERS]
-})
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code id="code" class="typescript">
 export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
@@ -64,9 +29,9 @@ export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Select", dataField: "lastname",
                 render: (data, row, index) => 
-                    {   return  this.sanitizer.bypassSecurityTrustHtml(`<input 
+                    {   return  this.sanitizer.bypassSecurityTrustHtml(`&lt;input 
                                 onclick="javascript: 
-                                $('#debugMessage').text('` + data + `');" type="checkbox" id="chk` + index.toString() + `"/>&nbsp` + data.toUpperCase()); }
+                                $('#debugMessage').text('` + data + `');" type="checkbox" id="chk` + index.toString() + `"/&gt;&nbsp` + data.toUpperCase()); }
                     }
         ];
         this.treeDef.data = [
@@ -86,4 +51,9 @@ export class CustomRenderDemoComponent implements OnInit, AfterViewInit {
         ];
         this.treeDef.pageSize = 10;
     }
-}
+}        </code>
+     </pre>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

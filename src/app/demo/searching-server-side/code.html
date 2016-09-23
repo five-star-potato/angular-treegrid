@@ -1,37 +1,12 @@
-import { Component, Directive, OnInit, ViewChild, Pipe, PipeTransform, } from "@angular/core";
-import { DatePipe, UpperCasePipe, LowerCasePipe } from '@angular/common';
-import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
-
-declare var hljs: any;
-
-@Component({
-    moduleId: module.id,
-    template: `
-    <h2>Server-side Search</h2>
-    <h3>Description</h3>
-    Features included:
-    <ul>
-        <li>Using server-side logic to filter data</li>
-    </ul>
-    
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#demoTab">Demo</a></li>
-  <li><a data-toggle="tab" href="#srcTab">Code</a></li>
-</ul>    
-
-<div class="tab-content">
-<div role="tabpanel" class="tab-pane" id="srcTab">
-    <iframe class="code-block" src="/app/demo/searching-server-side/code.html"></iframe>
-</div>
-
-<div role="tabpanel" class="tab-pane active" id="demoTab">
-    <tg-treegrid [treeGridDef]="treeDef">
-    </tg-treegrid>
-</div>
-</div>
-    `,
-    directives: [TreeGrid]
-})
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code class="typescript">
 export class SearchingServerSideDemoComponent implements OnInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
@@ -58,4 +33,9 @@ export class SearchingServerSideDemoComponent implements OnInit {
             { labelHtml: "Family name", dataField: "lastname" },
             { labelHtml: "Origin", dataField: "origin" }];
     }
-}
+}        </code>
+     </pre>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

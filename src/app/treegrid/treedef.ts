@@ -59,6 +59,7 @@ export interface ColumnDef {
 export interface FilterConfig {
     url: string;
     method?: string;    // POST or GET
+    reloadOnExpand?: boolean; // reloading the children when expanding a node, i.e. don't filter the child nodes when the user expands a tree node.
 }
 // since GroupingConfig uses column(s) to create tree-like structure, this feature cannot coexists with TreeHierarchy. 
 export interface GroupConfig {

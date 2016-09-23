@@ -78,9 +78,14 @@ import { ROUTER_DIRECTIVES } from '@angular/router';
                                 Using server-side method to perform the searching.
                             </td>
                         </tr>
-
-
-
+                        <tr>
+                            <td>
+                                <a routerLink="/demo8">Grouping by Column(s)</a>
+                            </td>
+                            <td>
+                                A different way of organizing data into tree structures. In this example, the data are grouped by "Origin" and "Family Name" columns.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -1,0 +1,78 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles//atelier-dune-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/typescript.min.js"></script>
+</head>
+<body>
+    <pre>
+        <code class="typescript">
+class MyModalEditor {
+    @Input() regions: string[];
+    @Input() row: any;
+    @Output() onSave = new EventEmitter<any>();
+
+    show(row: any) {
+        var copyRow = Object.assign({}, row);
+        this.row = copyRow;
+        jQuery("#modalEditor").modal();
+    }
+    saveChanges() {
+        this.onSave.emit(this.row);    
+    }
+}
+        </code>
+     </pre>
+     <p/>
+
+<pre>
+<code class="typescript">
+export class ModalEditorDemoComponent implements OnInit, AfterViewInit {
+    @ViewChild(TreeGrid)
+    private treeGrid: TreeGrid;
+
+    @ViewChild('modalEditor')
+    private modalEditor: MyModalEditor;
+
+    regions: string[] = [];
+
+    constructor(private dataService: SimpleDataService) {
+    }
+
+    ngAfterViewInit() {
+        this.dataService.post("http://treegriddemoservice.azurewebsites.net/api/values/GetRegions").subscribe((ret: any) => {
+                    this.modalEditor.regions = ret;
+                }, (err: any) => { console.log(err) });
+    }
+    ngOnInit() {
+        this.treeGridDef.columns = [
+            { labelHtml: "Employee ID", dataField: "emp_id" },
+            { labelHtml: "Given name", dataField: "firstname" },
+            { labelHtml: "Family name", dataField: "lastname" },
+            { labelHtml: "Origin", dataField: "origin" }
+        ];
+        this.treeGridDef.data = [
+            { emp_id: 101, firstname: "Tommen", lastname: "Baratheon", origin: "King's Landing" },
+            { emp_id: 102, firstname: "Eddard", lastname: "Stark", origin: "Winterfell" },
+            { emp_id: 37, firstname: "Ros", lastname: "", origin: "King's Landing" },
+            { emp_id: 42, firstname: "Bowen", lastname: "Marsh", origin: "Castle Black"},
+            { emp_id: 44, firstname: "Melisandre", lastname: "", origin: "Unknown" },
+            { emp_id: 45, firstname: "Pypar", lastname: "", origin: "Castle Black" },
+            { emp_id: 48, firstname: "Samwell", lastname: "Tarly", origin: "Horn Hill" },
+            { emp_id: 51, firstname: "Kevan", lastname: "Lannister", origin: "Casterly Rock" },
+            { emp_id: 54, firstname: "Jeor", lastname: "Mormont", origin: "Bear Island" },
+            { emp_id: 55, firstname: "Jorah", lastname: "Mormont", origin: "Bear Island"  },
+            { emp_id: 63, firstname: "Robb", lastname: "Stark", origin: "Winterfell" },
+            { emp_id: 66, firstname: "Margaery", lastname: "Tyrell", origin: "The Reach" },
+            { emp_id: 67, firstname: "Ramsay", lastname: "Bolton", origin: "Dreadfort" }
+        ];
+        this.treeGridDef.pageSize = 10;
+        this.treeGridDef.editor = { editorType: EditorType.MODAL };
+    }
+}
+</code>
+</pre>     
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

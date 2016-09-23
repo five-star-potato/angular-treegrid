@@ -58,8 +58,6 @@ var ModalEditorDemoComponent = (function () {
         this.dataService.post("http://treegriddemoservice.azurewebsites.net/api/values/GetRegions").subscribe(function (ret) {
             _this.modalEditor.regions = ret;
         }, function (err) { console.log(err); });
-        hljs.highlightBlock(this.codeElement1.nativeElement);
-        hljs.highlightBlock(this.codeElement2.nativeElement);
     };
     ModalEditorDemoComponent.prototype.ngOnInit = function () {
         this.treeGridDef.columns = [
@@ -91,21 +89,13 @@ var ModalEditorDemoComponent = (function () {
         __metadata('design:type', treegrid_component_1.TreeGrid)
     ], ModalEditorDemoComponent.prototype, "treeGrid", void 0);
     __decorate([
-        core_1.ViewChild('code1'), 
-        __metadata('design:type', core_1.ElementRef)
-    ], ModalEditorDemoComponent.prototype, "codeElement1", void 0);
-    __decorate([
-        core_1.ViewChild('code2'), 
-        __metadata('design:type', core_1.ElementRef)
-    ], ModalEditorDemoComponent.prototype, "codeElement2", void 0);
-    __decorate([
         core_1.ViewChild('modalEditor'), 
         __metadata('design:type', MyModalEditor)
     ], ModalEditorDemoComponent.prototype, "modalEditor", void 0);
     ModalEditorDemoComponent = __decorate([
         core_1.Component({
             moduleId: module.id,
-            template: "\n    <h2>Modal Dialog Editor</h2>\n    <h3>Description</h3>\n    <p>The TreeGrid library does not come with any pre-built modal dialog editor. Instead, this example provides you a way to build one yourself. The TreeGrid and the modal dialog component are decoupled. They communicate through custom events.</p>    \n\n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <pre>\n        <code #code1 class=\"typescript\">\n@Component(&#123;\n    selector: 'my-modal-editor',\n    template: &#96;\n&lt;div class=\"modal fade\" id=\"modalEditor\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\"&gt;\n  &lt;div class=\"modal-dialog\" role=\"document\"&gt;\n    &lt;div class=\"modal-content\"&gt;\n      &lt;div class=\"modal-header\"&gt;\n        &lt;button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"&gt;&lt;span aria-hidden=\"true\"&gt;&times;&lt;/span&gt;&lt;/button&gt;\n        &lt;h4 class=\"modal-title\"&gt;This is a sample modal editor&lt;/h4&gt;\n      &lt;/div&gt;\n      &lt;div class=\"modal-body\" *ngIf=\"row != null\"&gt;\n        &lt;div class=\"form-group\"&gt;\n            &lt;label&gt;Given Name&lt;/label&gt;\n            &lt;input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['firstname']\"&gt;\n            &lt;label&gt;Family Name&lt;/label&gt;\n            &lt;input type=\"text\" class=\"form-control\" [(ngModel)]=\"row['lastname']\"&gt;\n            &lt;label&gt;Origin&lt;/label&gt;\n            &lt;select class=\"form-control\" [(ngModel)]=\"row['origin']\"&gt;\n              &lt;option *ngFor=\"let region of regions\" value=\"&#123;&#173;&#123;region&#125;&#173;&#125;\"&gt;\n                &#123;&#173;&#123;region&#125;&#173;&#125;\n              &lt;/option&gt;\n            &lt;/select&gt;                \n        &lt;/div&gt;\n      &lt;/div&gt;\n      &lt;div class=\"modal-footer\"&gt;\n        &lt;button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\"&gt;Close&lt;/button&gt;\n        &lt;button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" (click)=\"saveChanges()\"&gt;Save changes&lt;/button&gt;\n      &lt;/div&gt;\n    &lt;/div&gt;\n  &lt;/div&gt;\n&lt;/div&gt;\n&#96;\n&#125;)\nclass MyModalEditor &#123;\n    @Input() regions: string[];\n    @Input() row: any;\n    @Output() onSave = new EventEmitter&lt;any&gt;();\n\n    show(row: any) &#123;\n        var copyRow = Object.assign(&#123;&#125;, row);\n        this.row = copyRow;\n        jQuery(\"#modalEditor\").modal();\n    &#125;\n    saveChanges() &#123;\n        this.onSave.emit(this.row);    \n    &#125;\n&#125;\n        </code>\n    </pre>\n\n    <pre>\n        <code #code2 class=\"html\">\n&lt;tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\"&gt;&lt;/tg-treegrid&gt;\n\n&lt;my-modal-editor [regions]=\"regions\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"&gt;&lt;/my-modal-editor&gt;\n        </code>\n     </pre>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\"></tg-treegrid>\n    <my-modal-editor [regions]=\"regions\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n</div>\n</div>\n    ",
+            template: "\n    <h2>Modal Dialog Editor</h2>\n    <h3>Description</h3>\n    <p>The TreeGrid library does not come with any pre-built modal dialog editor. Instead, this example provides you a way to build one yourself. The TreeGrid and the modal dialog component are decoupled. They communicate through custom events.</p>    \n\n<ul class=\"nav nav-tabs\">\n  <li class=\"active\"><a data-toggle=\"tab\" href=\"#demoTab\">Demo</a></li>\n  <li><a data-toggle=\"tab\" href=\"#srcTab\">Code</a></li>\n</ul>    \n\n<div class=\"tab-content\">\n<div role=\"tabpanel\" class=\"tab-pane\" id=\"srcTab\">\n    <iframe class=\"code-block\" src=\"/app/demo/modal-editor/code.html\"></iframe>\n</div>\n\n<div role=\"tabpanel\" class=\"tab-pane active\" id=\"demoTab\">\n    <tg-treegrid [treeGridDef]=\"treeGridDef\" (onRowDblClick)=\"modalEditor.show($event)\"></tg-treegrid>\n    <my-modal-editor [regions]=\"regions\" #modalEditor (onSave)=\"treeGrid.saveSelectedRowchanges($event)\"></my-modal-editor>\n</div>\n</div>\n    ",
             directives: [treegrid_component_1.TreeGrid, MyModalEditor],
             providers: [simpledata_service_1.SimpleDataService]
         }), 

@@ -1,4 +1,4 @@
-import { Component, Directive, OnInit, ViewChild, Pipe, PipeTransform, AfterViewInit, ElementRef } from "@angular/core";
+import { Component, Directive, OnInit, ViewChild, Pipe, PipeTransform } from "@angular/core";
 import { DatePipe, UpperCasePipe, LowerCasePipe } from '@angular/common';
 import { TreeGrid, TreeGridDef } from "../../treegrid/treegrid.component";
 
@@ -31,29 +31,7 @@ export class MyPipe implements PipeTransform {
 
 <div class="tab-content">
 <div role="tabpanel" class="tab-pane" id="srcTab">
-    <pre>
-        <code #code class="typescript">
-/* we use this pipe to attch "- eh" at the end of <strong>value</strong> */
-@Pipe(&#123;name: 'MyPipe'&#125;)
-export class MyPipe implements PipeTransform &#123;
-  transform(value: string, param: string): string &#123;
-    return &#96;$&#123;value&#125; $&#123;param&#125;&#96;;
-  &#125;
-&#125;
-
-export class PipesDemoComponent implements OnInit &#123;
-    ngOnInit() &#123;
-        this.treeDef.columns = [
-            &#123; labelHtml: "Employee ID", dataField: "emp_id" &#125;,
-            &#123; labelHtml: "Given name", dataField: "firstname" &#125;,
-            &#123; labelHtml: "Family name", dataField: "lastname", transforms: [&#123; pipe: new LowerCasePipe() &#125;, &#123; pipe: new MyPipe(), param: " - eh"&#125;] &#125;,
-            &#123; labelHtml: "Birthdate", dataField: "dob", transforms: [&#123; pipe: new DatePipe(), param: "yMMMMd" &#125;, &#123; pipe: new UpperCasePipe() &#125;] &#125;
-        ];
-        /* ... */    
-    &#125;
-&#125;
-        </code>
-     </pre>
+    <iframe class="code-block" src="/app/demo/lazy-load/code.html"></iframe>
 </div>
 
 <div role="tabpanel" class="tab-pane active" id="demoTab">
@@ -64,17 +42,10 @@ export class PipesDemoComponent implements OnInit &#123;
     `,
     directives: [TreeGrid]
 })
-export class PipesDemoComponent implements OnInit, AfterViewInit {
+export class PipesDemoComponent implements OnInit {
     @ViewChild(TreeGrid)
     private treeGrid: TreeGrid;
     treeDef: TreeGridDef = new TreeGridDef();
-
-    @ViewChild('code')
-    codeElement: ElementRef;
-
-    ngAfterViewInit() {
-        hljs.highlightBlock(this.codeElement.nativeElement);
-    }
 
     ngOnInit() {
         this.treeDef.columns = [
