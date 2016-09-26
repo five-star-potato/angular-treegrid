@@ -167,11 +167,18 @@ var DataTree = (function () {
         if (node.isOpen)
             node.childNodes.forEach(function (n) { return _this._traverse(n, startRow, endRow); });
     };
-    DataTree.prototype.getDescendantNodes = function (node) {
-        this.returnRows = [];
-        this._traverseAll(node);
-        return this.returnRows;
-    };
+    /*    private _getDescendantRows(node: DataNode): any[] {
+            node.childNodes.forEach(n => {
+                this.returnRows.push(n.row);
+            });
+        }
+    
+        getDescendantRows(node: DataNode): any[] {
+            this.returnRows = [];
+            this._traverseAll(node);
+            return this.returnRows;
+        }
+    */
     DataTree.prototype.getPageData = function (pageNum, pageSize) {
         var _this = this;
         this.rowCounter = 0;

@@ -388,8 +388,8 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
             else {
                 // perhaps client-side filtering is enabled, when the user click open a code
                 // clone the existing branch from backup and load into the search result
-                let childRows: any[] = this._treeBackup.getDescendantNodes(node);
-                this._addRowsToNode(node, childRows);
+                //let childRows: any[] = this._treeBackup.getDescendantNodes(node);
+                //this._addRowsToNode(node, childRows);
             }
             node.allChildrenLoaded = true;
         }
@@ -426,7 +426,7 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
         }
         else { // if term is empty, reload 
             if (this.treeGridDef.ajax) {
-                this._setIsLoaded = false;
+                this._setIsLoaded = !(this.treeGridDef.ajax.lazyLoad); // if lazyLoad is enabled, I know the node's children are not loaded
                 let ajax = this.treeGridDef.ajax;
                 if (ajax && ajax.url) 
                     return this.dataService.send(ajax.method, ajax.url)
@@ -489,13 +489,15 @@ export class TreeGrid implements OnInit, AfterViewInit, OnChanges {
             this.dataService.send(ajax.method, url ? url : ajax.url).subscribe((ret: any) => {
                 this._reloadData(ret);
                 this._dataBackup = ret;
+                this._treeBackup = this._dataTree;
             }, (err: any) => { console.log(err) });
         }
     }
     // the setIsLoaded flag is to be used by Filtering - filtering may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
     // otherwise the ajax call will create duplicate rows
     private _rebuildTree() {
-        // setIsLoaded is false if the user just performed a filtering
+        // setIsLoaded is false if the user just performed a filtering; how do we handle if lazyLoad is not true?
+
         if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField)
             this._dataTree = new DataTree(this.treeGridDef.data, {  primaryKey: this.treeGridDef.hierachy.primaryKeyField,
                                                                     foreignKey: this.treeGridDef.hierachy.foreignKeyField, 

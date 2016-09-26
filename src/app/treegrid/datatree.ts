@@ -185,11 +185,18 @@ export class DataTree {
         if (node.isOpen)
             node.childNodes.forEach(n => this._traverse(n, startRow, endRow));
     }
-    getDescendantNodes(node: DataNode): any[] {
+/*    private _getDescendantRows(node: DataNode): any[] {
+        node.childNodes.forEach(n => {
+            this.returnRows.push(n.row);
+        });
+    }
+
+    getDescendantRows(node: DataNode): any[] {
         this.returnRows = [];
         this._traverseAll(node);
         return this.returnRows;
     }
+*/
     getPageData(pageNum: number, pageSize: number): any[] {
         this.rowCounter = 0;
         this.returnRows = [];

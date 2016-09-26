@@ -46,6 +46,7 @@ export class LazyLoadDemoComponent implements OnInit {
         this.treeDef.hierachy = {
             foreignKeyField: "report_to", primaryKeyField: "emp_id"
         };
+        this.treeDef.filter = true;
         this.treeDef.ajax = {
             url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
             //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
