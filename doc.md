@@ -116,35 +116,40 @@ editor | (not used)
 filter | Indicates whether and how filtering is supported. If set to _true_, filtering is performed on the client-side, i.e. it will not fetch additional data through ajax. If the value is set to FilterConfig, filtering is performed on the server-side.
 grouping | See section [Hierarchy](hierarchy)
 
+### TreeGrid
 
-
-### Methods
-#### reloadAjax
+#### Methods
+##### reloadAjax
 Reloading data from server-side method. Use either the url parameter provided or the settings in _AjaxConfig_
 Input Parameter | Description
 ------------ | -------------
 url (optional) | If provided, the url parameter will override the settings from _AjaxConfig_
 
-### Properties
-#### treeGridDef
+#### Properties
+##### treeGridDef
 
 
-### Events
-#### onRowClick
+#### Events
+##### onRowClick
 Click event on a row. _selectedRow is not set.
 Event Parameter | Description
 ------------ | -------------
 row | Clicked row
 
 
-#### onRowDblClick
+##### onRowDblClick
 Double-click event on a row. Internally, _selectedRow is set.
 Event Parameter | Description
 ------------ | -------------
 row | Selected row
 
-SortableHeader
---------------
+### SortableHeader
+
+#### Methods
+
+#### Properties
+
+#### Events
 
 
 
