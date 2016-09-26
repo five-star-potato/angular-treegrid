@@ -36,7 +36,7 @@ this.treeDef.ajax = {
 };
 
 ```
-
+<a name="hierarchy"></a>
 ### Hierachy Definition
 
 The TreeGrid displays the parent/child relationship within the data set. There are two ways to define the hierarchy:
@@ -93,7 +93,30 @@ sortDirection | [ASC](#sortdirection) or [DESC](#sortdirection)
 render | customized rendering function. Please see the demo [Custom Column Rendering](http://treegriddemo2016.azurewebsites.net)
 transforms | customize the column data using pipes. Please see the demo [Formatting with Pipes](http://treegriddemo2016.azurewebsites.net)
 
-### TreeGrid
+<a name="columntransform"></a>
+### ColumnTransform
+Property | Description
+------------ | -------------
+pipe | An object that implements the [PipeTransform](https://angular.io/docs/ts/latest/guide/pipes.html) interface; it could be from the built-in collection of Pipes or your own custom-built pipe
+param | Optional parameter that will be sent to the Transform
+
+### TreeGridDef
+Property | Description
+------------ | -------------
+className | CSS class name
+columns | A list of [ColumnDef](#columndef) declarations
+data | Optional - the actual array of data
+paging | Enable or disable paging. Default is _true_
+sortable | Enable or disable sorting. Default is _true_
+pageSize | Number of rows per page. Default is _25_
+defaultOrder | (not used)
+hierarchy (mispelled in code) | See section [Hierarchy](hierarchy)
+ajax | Ajax configuration. See [AjaxConfig](#ajaxconfig)
+editor | (not used)
+filter | Indicates whether and how filtering is supported. If set to _true_, filtering is performed on the client-side, i.e. it will not fetch additional data through ajax. If the value is set to FilterConfig, filtering is performed on the server-side.
+grouping | See section [Hierarchy](hierarchy)
+}
+
 
 
 ### Methods
