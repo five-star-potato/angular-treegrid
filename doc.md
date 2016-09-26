@@ -115,7 +115,6 @@ ajax | Ajax configuration. See [AjaxConfig](#ajaxconfig)
 editor | (not used)
 filter | Indicates whether and how filtering is supported. If set to _true_, filtering is performed on the client-side, i.e. it will not fetch additional data through ajax. If the value is set to FilterConfig, filtering is performed on the server-side.
 grouping | See section [Hierarchy](hierarchy)
-}
 
 
 
