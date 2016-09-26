@@ -41,7 +41,10 @@ this.treeDef.ajax = {
 
 The TreeGrid displays the parent/child relationship within the data set. There are two ways to define the hierarchy:
 
-The above two features are mutally exclusive
+The two features below are mutally exclusive
+
+* The relationship is defined through the use of [TreeGridDef.hierachy](#treehierarchy) 
+* The relationship is defined through the use of [TreeGridDef.grouping](#groupconfig). Note. Grouping feature is not compatible with Ajax lazy loading
 
 ``` javascript
 /* using Hierarchy */
