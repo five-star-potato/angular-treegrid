@@ -119,26 +119,28 @@ grouping | See section [Hierarchy](hierarchy)
 ### TreeGrid
 
 #### Methods
-* reloadAjax
+reloadAjax
 
 Reloading data from server-side method. Use either the url parameter provided or the settings in _AjaxConfig_
+
 Input Parameter | Description
 ------------ | -------------
 url (optional) | If provided, the url parameter will override the settings from _AjaxConfig_
 
 #### Properties
-* treeGridDef
+treeGridDef
 
 #### Events
-* onRowClick
+onRowClick
 Click event on a row. _selectedRow is not set.
+
 Event Parameter | Description
 ------------ | -------------
 row | Clicked row
 
-
-* onRowDblClick
+onRowDblClick
 Double-click event on a row. Internally, _selectedRow is set.
+
 Event Parameter | Description
 ------------ | -------------
 row | Selected row
