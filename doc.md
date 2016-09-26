@@ -41,7 +41,7 @@ this.treeDef.ajax = {
 
 The TreeGrid displays the parent/child relationship within the data set. There are two ways to define the hierarchy:
 
-* The relationship is defined through the use of [TreeGridDef.hierachy](#treehierarchy)
+* The relationship is defined through the use of [TreeGridDef.hierachy](#treehierarchy) 
 * The relationship is defined through the use of [TreeGridDef.grouping](#groupconfig)
 
 Interfaces, Classes, and Components
@@ -76,6 +76,22 @@ requireSort | Is the data sorted according to the _groupByColumns_? If no, set t
 ### ColumnOrder
 Property | Description
 ------------ | -------------
+columnIndex | Zero-based index of the group column in [TreeGridDef.columns](#columndef) collection
+sortDirection | [ASC](#sortdirection) or [DESC](#sortdirection)
+
+<a name="columnorder"></a>
+### ColumnDef
+Property | Description
+------------ | -------------
+labelHtml | Header label
+dataField | Name of the data field
+width | width of the column in pixels
+className | CSS class name
+sortable | Whether this column can be sorted or not by clicking the column header
+filterable | Whether this column will be used in filtering
+sortDirection | [ASC](#sortdirection) or [DESC](#sortdirection)
+render | customized rendering function. Please see the demo [Custom Column Rendering](http://treegriddemo2016.azurewebsites.net)
+transforms | customize the column data using pipes. Please see the demo [Formatting with Pipes](http://treegriddemo2016.azurewebsites.net)
 
 ### TreeGrid
 
