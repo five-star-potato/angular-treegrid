@@ -18,7 +18,7 @@ import { Component, Directive, OnInit, ViewChild } from "@angular/core";
             <h4>Demo</h4>
             <ul class="nav nav-pills nav-stacked">
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/home" class="btn btn-default">Home</a></li>
-        		<li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo1" class="btn btn-default">Simple Table Setup</a></li>
+        		<li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo1" class="btn btn-default">Simple Data Setup</a></li>
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo2" class="btn btn-default">Loading with Ajax</a></li>
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo3" class="btn btn-default">Lazy Loading with Ajax</a></li>
                 <li class="presentation" [routerLinkActive]="['active']"><a routerLink="/demo4" class="btn btn-default">Formatting with Pipes</a></li>

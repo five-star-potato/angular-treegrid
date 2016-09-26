@@ -6,7 +6,7 @@ declare var hljs: any;
 @Component({
     moduleId: module.id,
     template: `
-    <h2>Simple Table Data</h2>
+    <h2>Simple Data Setup</h2>
     <h3>Description</h3>
     Features included:
     <ul>

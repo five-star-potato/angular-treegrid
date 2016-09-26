@@ -19510,6 +19510,7 @@ $__System.registerDynamic("app/demo/ajax-load/ajax-load-demo.component.js", ["no
                 doNotLoad: false
             };
             this.treeDef.columns = [{ labelHtml: "Employee ID", dataField: "emp_id" }, { labelHtml: "Given<br/>name", dataField: "firstname" }, { labelHtml: "Family<br/>name", dataField: "lastname", className: "tg-body-center tg-header-center" }, { labelHtml: "Report To", dataField: "report_to" }];
+            this.treeDef.filter = true;
         };
         __decorate([core_1.ViewChild(treegrid_component_1.TreeGrid), __metadata('design:type', treegrid_component_1.TreeGrid)], AjaxLoadDemoComponent.prototype, "treeGrid", void 0);
         AjaxLoadDemoComponent = __decorate([core_1.Component({
@@ -19553,6 +19554,7 @@ $__System.registerDynamic("app/demo/lazy-load/lazy-load-demo.component.js", ["no
             this.treeDef.hierachy = {
                 foreignKeyField: "report_to", primaryKeyField: "emp_id"
             };
+            this.treeDef.filter = true;
             this.treeDef.ajax = {
                 url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetEmployees', method: "POST",
                 //url: 'http://localhost:7774/api/values/GetEmployees', method: "POST",
@@ -36600,7 +36602,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
                     var keyVal = inputData[i][options.foreignKey];
                     if (keyVal != undefined) {
                         if (inputData.findIndex(function (x) {
-                            return x[options.foreignKey] == keyVal;
+                            return x[options.primaryKey] == keyVal;
                         }) < 0) {
                             // this entry has fk value, but element of the same pk is not found
                             this_1._createNewNode(inputData[i], i, this_1.rootNode);
@@ -36662,7 +36664,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
                 displayCount: 0,
                 childNodes: [],
                 parent: parentNode,
-                isLoaded: this.options.setIsLoaded
+                allChildrenLoaded: this.options.setIsLoaded
             };
             r.__node = n;
             parentNode.childNodes.push(n);
@@ -36699,6 +36701,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
             };
             return data.sort(func);
         };
+        // _processNode looks through the input data array to find children to be linked to this node
         DataTree.prototype._processNode = function (node) {
             var _this = this;
             for (var i = 0; i < this.cnt; i++) {
@@ -36730,7 +36733,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
         // This is a depth-first traversal to return all rows
         DataTree.prototype._traverseAll = function (node) {
             var _this = this;
-            this.returnRowsIndices.push(node.row);
+            this.returnRows.push(node.row);
             if (node.isOpen) node.childNodes.forEach(function (n) {
                 return _this._traverseAll(n);
             });
@@ -36739,17 +36742,29 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
             var _this = this;
             if (this.rowCounter > endRow) return;
             if (this.rowCounter >= startRow && this.rowCounter <= endRow) {
-                this.returnRowsIndices.push(node.row);
+                this.returnRows.push(node.row);
             }
             this.rowCounter++;
             if (node.isOpen) node.childNodes.forEach(function (n) {
                 return _this._traverse(n, startRow, endRow);
             });
         };
+        /*    private _getDescendantRows(node: DataNode): any[] {
+                node.childNodes.forEach(n => {
+                    this.returnRows.push(n.row);
+                });
+            }
+        
+            getDescendantRows(node: DataNode): any[] {
+                this.returnRows = [];
+                this._traverseAll(node);
+                return this.returnRows;
+            }
+        */
         DataTree.prototype.getPageData = function (pageNum, pageSize) {
             var _this = this;
             this.rowCounter = 0;
-            this.returnRowsIndices = [];
+            this.returnRows = [];
             if (pageSize < 0) {
                 this.rootNode.childNodes.forEach(function (n) {
                     return _this._traverseAll(n);
@@ -36759,7 +36774,7 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
                     return _this._traverse(n, pageNum * pageSize, (pageNum + 1) * pageSize - 1);
                 });
             }
-            return this.returnRowsIndices;
+            return this.returnRows;
         };
         // propagate the increase of decrease of changes (deltaVal) up the ancestors path
         DataTree.prototype._applyDeltaUpward = function (node, deltaVal) {
@@ -36821,6 +36836,17 @@ $__System.registerDynamic("app/treegrid/datatree.js", ["app/treegrid/treedef.js"
                 parentNode.childNodes.push(newNode);
                 r.__node = newNode;
             }
+        };
+        DataTree.prototype._deleteChildrenNodes = function (node) {
+            for (var i = node.childNodes.length - 1; i >= 0; i--) {
+                this._deleteChildrenNodes(node.childNodes[i]);
+            }
+            var dataIndex = this.inputData.indexOf(node);
+            this.inputData.splice(dataIndex, 1);
+            node.childNodes = [];
+        };
+        DataTree.prototype.deleteChildren = function (node) {
+            this._deleteChildrenNodes(node);
         };
         return DataTree;
     }();
@@ -57014,7 +57040,6 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
             this._setIsLoaded = false; // need to know whether to set each node to be "loaded"; in the case of a filter result, I always set it to loaded, to avoid duplicate rows
             this._term = new forms_1.FormControl();
             this.self = this; // copy of context
-            this.isDataTreeConstructed = false;
             this.sortDirType = treedef_1.SortDirection; // workaround to NG2 issues #2885, i.e. you can't use Enum in template html as is.
             this._currentPage = 0;
         }
@@ -57047,8 +57072,10 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
                 }
             } else if (this.treeGridDef.data.length > 0) {
                 // Static data already loaded
+                this._setIsLoaded = true; // set all the node as isLoaded = true. So that no ajax called will be issued during treenode expansion
                 this._dataBackup = this.treeGridDef.data;
-                this.refresh();
+                this._rebuildTree();
+                this._treeBackup = this._dataTree;
                 this._goPage(this._currentPage);
             }
             if (!this.treeGridDef.className) this.treeGridDef.className = this.DEFAULT_CLASS;
@@ -57074,7 +57101,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
             this._sortColumnField = this.treeGridDef.columns[event.columnIndex].dataField;
             this._sortDirection = event.sortDirection;
             this._dataTree.sortByColumn(this._sortColumnField, this._sortDirection);
-            this.refresh();
+            this._rebuildTree();
             this._goPage(this._currentPage);
         };
         // Calculate how much indentation we need per level; notice that the open/close icon are not of the same width
@@ -57112,39 +57139,49 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
             (_a = this._dataView).push.apply(_a, pageRows);
             var _a;
         };
+        TreeGrid.prototype._loadChildrenForNode = function (node) {
+            var _this = this;
+            var ajax = this.treeGridDef.ajax;
+            this._isLoading = true;
+            this.dataService.send(ajax.method, ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function (ret) {
+                // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
+                _this._addRowsToNode(node, ret);
+                _this._toggleTreeNode(node);
+                _this._isLoading = false;
+            }, function (err) {
+                console.log(err);
+            });
+        };
         // These few statments are needed a few times in toggleTreeEvtHandler, so I grouped them together
         TreeGrid.prototype._toggleTreeNode = function (node) {
             this._numVisibleRows = this._dataTree.toggleNode(node);
             this._goPage(this._currentPage);
             if (this.treeGridDef.paging && this.pageNav) this.pageNav.refresh(); // the ngOnChanges on page nav component didn't capture changes to the data array (it seemes).
         };
-        TreeGrid.prototype._toggleTreeEvtHandler = function (node) {
+        // used by lazyLoad or client filter to add new rows to an existing node
+        TreeGrid.prototype._addRowsToNode = function (node, rows) {
             var _this = this;
-            var ajax = this.treeGridDef.ajax;
-            if (ajax) {
-                if (ajax.lazyLoad && !node.isLoaded) {
-                    this._isLoading = true;
-                    this.dataService.send(ajax.method, ajax.url + "?id=" + node.row[this.treeGridDef.hierachy.primaryKeyField]).subscribe(function (ret) {
-                        // the idea is to get the children rows from ajax (on demand), append the rows to the end of treeGridDef.data; and construct the tree branch based on these new data
-                        node.isLoaded = true;
-                        if (ret.length > 0) {
-                            var startIndex = _this.treeGridDef.data.length;
-                            var endIndex = startIndex + ret.length - 1;
-                            ret.forEach(function (r) {
-                                return _this.treeGridDef.data.push(r);
-                            });
-                            _this._dataTree.addRows(startIndex, endIndex, node);
-                            // The data has been sorted, the newly loaded data should be sorted as well.
-                            if (_this._sortColumnField) {
-                                _this._dataTree.sortNode(node, _this._sortColumnField, _this._sortDirection);
-                            }
-                        }
-                        _this._toggleTreeNode(node);
-                        _this._isLoading = false;
-                    }, function (err) {
-                        console.log(err);
-                    });
-                } else this._toggleTreeNode(node);
+            if (rows.length > 0) {
+                var startIndex = this.treeGridDef.data.length;
+                var endIndex = startIndex + rows.length - 1;
+                rows.forEach(function (r) {
+                    return _this.treeGridDef.data.push(r);
+                });
+                this._dataTree.addRows(startIndex, endIndex, node);
+                // The data has been sorted, the newly loaded data should be sorted as well.
+                if (this._sortColumnField) {
+                    this._dataTree.sortNode(node, this._sortColumnField, this._sortDirection);
+                }
+            }
+        };
+        TreeGrid.prototype._toggleTreeEvtHandler = function (node) {
+            if (!node.allChildrenLoaded) {
+                this._dataTree.deleteChildren(node);
+                var ajax = this.treeGridDef.ajax;
+                if (ajax && ajax.lazyLoad) {
+                    this._loadChildrenForNode(node);
+                } else {}
+                node.allChildrenLoaded = true;
             } else this._toggleTreeNode(node);
         };
         TreeGrid.prototype._dblClickRow = function (row) {
@@ -57152,16 +57189,15 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
             this.onRowDblClick.emit(row);
         };
         TreeGrid.prototype._reloadData = function (data) {
-            this.isDataTreeConstructed = false;
             this.treeGridDef.data = data;
-            this.refresh();
+            this._rebuildTree();
             this._isLoading = false;
             this._goPage(this._currentPage);
         };
         // I tried to push the decision to whether filter or reload the data (two different Urls) to the last minute
         TreeGrid.prototype._filterOrReloadObservable = function (term, field) {
             if (term) {
-                this._setIsLoaded = true;
+                this._setIsLoaded = false; // children nodes are filtered as well. So if the user click open a node, I have to assume the node is not loaded, i.e. the children list is incomplete. Then _toggleEvt will reload this node
                 if (this.treeGridDef.filter) {
                     if (typeof this.treeGridDef.filter === "object") {
                         var cfg = this.treeGridDef.filter;
@@ -57173,7 +57209,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
                 }
             } else {
                 if (this.treeGridDef.ajax) {
-                    this._setIsLoaded = false;
+                    this._setIsLoaded = !this.treeGridDef.ajax.lazyLoad; // if lazyLoad is enabled, I know the node's children are not loaded
                     var ajax = this.treeGridDef.ajax;
                     if (ajax && ajax.url) return this.dataService.send(ajax.method, ajax.url);else throw new Error("Ajax config missing");
                 } else {
@@ -57202,7 +57238,7 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
                     if (dc.filterable)
                         // remember to filter from the initial dataset; not withing the prev filter result
                         this_1._dataBackup.filter(function (row) {
-                            return row[dc.dataField].toString().toLowerCase().includes(term);
+                            if (row[dc.dataField]) return row[dc.dataField].toString().toLowerCase().includes(term);else return false;
                         }).forEach(function (x) {
                             return filterResult.add(x);
                         });
@@ -57231,11 +57267,15 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
         };
         TreeGrid.prototype.reloadAjax = function (url) {
             var _this = this;
+            // if we are reloading a complete set of data,...
             var ajax = this.treeGridDef.ajax;
             if (ajax && (url || ajax.url)) {
+                this._setIsLoaded = !ajax.lazyLoad; // if lazyLoad is enabled, I know the node's children are not loaded
                 this._isLoading = true;
                 this.dataService.send(ajax.method, url ? url : ajax.url).subscribe(function (ret) {
                     _this._reloadData(ret);
+                    _this._dataBackup = ret;
+                    _this._treeBackup = _this._dataTree;
                 }, function (err) {
                     console.log(err);
                 });
@@ -57243,29 +57283,26 @@ $__System.registerDynamic("app/treegrid/treegrid.component.js", ["node_modules/@
         };
         // the setIsLoaded flag is to be used by Filtering - filtering may return partial hierarhies. I would consider the node "isLoaded", therefore no more ajax call to reload the node.
         // otherwise the ajax call will create duplicate rows
-        TreeGrid.prototype.refresh = function () {
-            if (!this.isDataTreeConstructed) {
-                if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField) this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, { primaryKey: this.treeGridDef.hierachy.primaryKeyField,
-                    foreignKey: this.treeGridDef.hierachy.foreignKeyField,
-                    setIsLoaded: this._setIsLoaded });else if (this.treeGridDef.grouping) {
-                    this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, { grouping: this.treeGridDef.grouping }, this.treeGridDef /* unfortunately, DataTree need to access the column names */);
-                } else
-                    // data is just flat 2d table
-                    this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, {});
-                this._numVisibleRows = this._dataTree.recountDisplayCount();
-                this.isDataTreeConstructed = true;
-            } else {}
+        TreeGrid.prototype._rebuildTree = function () {
+            // setIsLoaded is false if the user just performed a filtering; how do we handle if lazyLoad is not true?
+            if (this.treeGridDef.hierachy && this.treeGridDef.hierachy.primaryKeyField && this.treeGridDef.hierachy.foreignKeyField) this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, { primaryKey: this.treeGridDef.hierachy.primaryKeyField,
+                foreignKey: this.treeGridDef.hierachy.foreignKeyField,
+                setIsLoaded: this._setIsLoaded });else if (this.treeGridDef.grouping) {
+                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, {
+                    grouping: this.treeGridDef.grouping,
+                    setIsLoaded: this._setIsLoaded
+                }, this.treeGridDef /* unfortunately, DataTree need to access the column names */);
+            } else
+                // data is just flat 2d table
+                this._dataTree = new datatree_1.DataTree(this.treeGridDef.data, {});
+            this._numVisibleRows = this._dataTree.recountDisplayCount();
         };
         TreeGrid.prototype.ngOnChanges = function (changes) {
-            //this.refresh();
             console.log(changes);
             /*
             let chng = changes["numRows"];
             let cur = JSON.stringify(chng.currentValue);
             let prev = JSON.stringify(chng.previousValue);
-            if (cur !== prev) {
-                this.refresh();
-            }
             */
         };
         __decorate([core_1.Input(), __metadata('design:type', treedef_1.TreeGridDef)], TreeGrid.prototype, "treeGridDef", void 0);
