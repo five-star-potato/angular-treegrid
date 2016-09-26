@@ -43,10 +43,30 @@ The TreeGrid displays the parent/child relationship within the data set. There a
 
 * The relationship is defined through the use of [TreeGridDef.hierachy](#treehierarchy) 
 * The relationship is defined through the use of [TreeGridDef.grouping](#groupconfig)
+** Grouping feature is not compatible with Ajax lazy loading
 
+The above two features are mutally exclusive
+
+``` javascript
+/* using Hierarchy */
+this.treeDef.hierachy = {
+	foreignKeyField: "report_to", primaryKeyField: "emp_id"
+};
+
+/* Using GroupConfig */
+this.treeDef.grouping = {
+	groupByColumns: [ { columnIndex: 0, sortDirection: SortDirection.ASC }, { columnIndex: 1, sortDirection: SortDirection.ASC } ],
+	requireSort: true
+};
+this.treeDef.ajax = {
+	url: 'http://treegriddemoservice.azurewebsites.net/api/values/GetAllEmployees', method: "POST",
+	lazyLoad: false
+};
+
+```	
+		
 Interfaces, Classes, and Components
 ===================================
-
 <a name="treehierarchy"></a>
 ### TreeHierarchy
 Property | Description
@@ -119,7 +139,7 @@ grouping | See section [Hierarchy](hierarchy)
 ### TreeGrid
 
 #### Methods
-reloadAjax
+* reloadAjax
 
 Reloading data from server-side method. Use either the url parameter provided or the settings in _AjaxConfig_
 
@@ -128,17 +148,18 @@ Input Parameter | Description
 url (optional) | If provided, the url parameter will override the settings from _AjaxConfig_
 
 #### Properties
-treeGridDef
+* treeGridDef
 
 #### Events
-onRowClick
+* onRowClick
 Click event on a row. _selectedRow is not set.
 
 Event Parameter | Description
 ------------ | -------------
 row | Clicked row
 
-onRowDblClick
+
+* onRowDblClick
 Double-click event on a row. Internally, _selectedRow is set.
 
 Event Parameter | Description
